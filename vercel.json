@@ -1,5 +1,8 @@
 {
-  "installCommand": "echo 'Skipping install'",
-  "buildCommand": "cd web && npm install && npm run build",
-  "outputDirectory": "web/.next"
+  "framework": "nextjs",
+  "installCommand": "cd web && npm install --legacy-peer-deps",
+  "buildCommand": "cd web && npm run build",
+  "outputDirectory": "web/.next",
+  "ignoreCommand": "echo 'Building'",
+  "devCommand": "cd web && npm run dev"
 }

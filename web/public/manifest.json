@@ -1,0 +1,80 @@
+{
+  "name": "Kuchisabishii - When Your Mouth is Lonely",
+  "short_name": "Kuchisabishii",
+  "description": "Food journaling app for emotional food experiences - Rate dishes, not just restaurants",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFF8F6",
+  "theme_color": "#FF69B4",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["food", "lifestyle", "social", "health"],
+  "icons": [
+    {
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Log Food Experience",
+      "short_name": "Log Food",
+      "description": "Quickly log a new food experience",
+      "url": "/log",
+      "icons": [{ "src": "/icons/shortcut-log.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Find Recommendations",
+      "short_name": "Discover",
+      "description": "Discover food based on your mood",
+      "url": "/discover",
+      "icons": [{ "src": "/icons/shortcut-discover.png", "sizes": "96x96" }]
+    }
+  ],
+  "prefer_related_applications": false
+}

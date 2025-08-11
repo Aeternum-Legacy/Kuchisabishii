@@ -1,0 +1,65 @@
+{
+  "env": {
+    "CLAUDE_FLOW_AUTO_COMMIT": "false",
+    "CLAUDE_FLOW_AUTO_PUSH": "false",
+    "CLAUDE_FLOW_HOOKS_ENABLED": "false",
+    "CLAUDE_FLOW_TELEMETRY_ENABLED": "false",
+    "CLAUDE_FLOW_REMOTE_EXECUTION": "false",
+    "CLAUDE_FLOW_GITHUB_INTEGRATION": "false",
+    "CLAUDE_FLOW_CHECKPOINTS_ENABLED": "false",
+    "CREATE_GH_RELEASE": "false"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(npx claude-flow *)",
+      "Bash(npm run lint)",
+      "Bash(npm run test:*)",
+      "Bash(npm test *)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push)",
+      "Bash(git config *)",
+      "Bash(git tag *)",
+      "Bash(git branch *)",
+      "Bash(git checkout *)",
+      "Bash(git stash *)",
+      "Bash(git reset *)",
+      "Bash(git rev-parse *)",
+      "Bash(git ls-files *)",
+      "Bash(gh *)",
+      "Bash(node *)",
+      "Bash(which *)",
+      "Bash(pwd)",
+      "Bash(ls *)",
+      "Bash(jq *)",
+      "Bash(test *)",
+      "Bash(find *)",
+      "Bash(grep *)",
+      "Bash(sed *)",
+      "Bash(awk *)",
+      "Bash(curl *)",
+      "Bash(mkdir *)",
+      "Bash(cd *)",
+      "Bash(cat *)",
+      "Bash(echo *)",
+      "Bash(npx claude-flow@alpha *)",
+      "Bash(./claude-flow *)",
+      "Bash(./.claude/helpers/*)"
+    ],
+    "deny": [
+      "Bash(rm -rf /)",
+      "Bash(curl * | bash)",
+      "Bash(wget * | sh)",
+      "Bash(eval *)"
+    ]
+  },
+  "disableAllHooks": true,
+  "includeCoAuthoredBy": true,
+  "enabledMcpjsonServers": [
+    "claude-flow",
+    "ruv-swarm"
+  ]
+}

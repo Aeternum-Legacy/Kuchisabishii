@@ -5,11 +5,16 @@
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FFF8F6",
-  "theme_color": "#FF69B4",
+  "theme_color": "#FFB6C1",
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "en",
-  "categories": ["food", "lifestyle", "social", "health"],
+  "categories": [
+    "food",
+    "lifestyle",
+    "social",
+    "health"
+  ],
   "icons": [
     {
       "src": "/icons/icon-72x72.png",
@@ -66,14 +71,24 @@
       "short_name": "Log Food",
       "description": "Quickly log a new food experience",
       "url": "/log",
-      "icons": [{ "src": "/icons/shortcut-log.png", "sizes": "96x96" }]
+      "icons": [
+        {
+          "src": "/icons/shortcut-log.png",
+          "sizes": "96x96"
+        }
+      ]
     },
     {
       "name": "Find Recommendations",
       "short_name": "Discover",
       "description": "Discover food based on your mood",
       "url": "/discover",
-      "icons": [{ "src": "/icons/shortcut-discover.png", "sizes": "96x96" }]
+      "icons": [
+        {
+          "src": "/icons/shortcut-discover.png",
+          "sizes": "96x96"
+        }
+      ]
     }
   ],
   "prefer_related_applications": false

@@ -11,6 +11,7 @@ import { mockFoodReviews, mockUserProfile, recommendedFoods, kuchisabishiFoods, 
 export default function KuchisabishiiPWA() {
   const [currentView, setCurrentView] = useState('login');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [user, setUser] = useState({
     id: '1',
     displayName: 'Food Lover',
@@ -973,6 +974,159 @@ export default function KuchisabishiiPWA() {
     );
   };
 
+  // Onboarding Screens - Introduce users to Kuchisabishii philosophy
+  const OnboardingScreens = () => {
+    const [currentStep, setCurrentStep] = useState(0);
+
+    const onboardingSteps = [
+      {
+        id: 1,
+        title: "Welcome to Kuchisabishii",
+        message: "Kuchisabishii is on a mission to redefine our relationship with food and emotions.",
+        emoji: "🍽️",
+        gradient: "from-orange-400 to-red-500"
+      },
+      {
+        id: 2,
+        title: "Explore with Joy",
+        message: "We approach eating with understanding, self-compassion, and an adventurous spirit to explore the great foods of the world!",
+        emoji: "🌍",
+        gradient: "from-pink-400 to-orange-500"
+      },
+      {
+        id: 3,
+        title: "Find Your Taste Buddies",
+        message: "By connecting with people of the same palate, we meet like minded taste buddies to share in the joy that Kuchisabishii brings!",
+        emoji: "👥",
+        gradient: "from-purple-400 to-pink-500"
+      }
+    ];
+
+    const currentStepData = onboardingSteps[currentStep];
+
+    const handleNext = () => {
+      if (currentStep < onboardingSteps.length - 1) {
+        setCurrentStep(currentStep + 1);
+      } else {
+        // Complete onboarding
+        setShowOnboarding(false);
+        setCurrentView('home');
+      }
+    };
+
+    const handleSkip = () => {
+      setShowOnboarding(false);
+      setCurrentView('home');
+    };
+
+    const handlePrevious = () => {
+      if (currentStep > 0) {
+        setCurrentStep(currentStep - 1);
+      }
+    };
+
+    return (
+      <div className="flex-1 bg-gray-50 min-h-screen">
+        {/* Header with progress */}
+        <div className="bg-white border-b border-gray-200 px-4 py-3">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-sm text-gray-500">
+              {currentStep + 1} of {onboardingSteps.length}
+            </div>
+            <button
+              onClick={handleSkip}
+              className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              Skip
+            </button>
+          </div>
+          
+          {/* Progress bar */}
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              className="bg-orange-500 h-2 rounded-full transition-all duration-300 ease-in-out"
+              style={{ width: `${((currentStep + 1) / onboardingSteps.length) * 100}%` }}
+            ></div>
+          </div>
+        </div>
+
+        {/* Main content */}
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="max-w-sm w-full text-center">
+            {/* Animated background circle */}
+            <div className={`mx-auto mb-8 w-32 h-32 rounded-full bg-gradient-to-br ${currentStepData.gradient} flex items-center justify-center shadow-2xl transform transition-all duration-500 ease-in-out`}>
+              <span className="text-6xl animate-pulse">
+                {currentStepData.emoji}
+              </span>
+            </div>
+
+            {/* Title */}
+            <h1 className="text-2xl font-bold text-gray-800 mb-6 animate-fade-in">
+              {currentStepData.title}
+            </h1>
+
+            {/* Message */}
+            <p className="text-gray-600 leading-relaxed mb-12 text-lg animate-fade-in">
+              {currentStepData.message}
+            </p>
+
+            {/* Navigation dots */}
+            <div className="flex justify-center space-x-2 mb-8">
+              {onboardingSteps.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentStep(index)}
+                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                    index === currentStep 
+                      ? 'bg-orange-500 scale-110' 
+                      : 'bg-gray-300 hover:bg-gray-400'
+                  }`}
+                />
+              ))}
+            </div>
+
+            {/* Navigation buttons */}
+            <div className="flex space-x-4">
+              {currentStep > 0 && (
+                <button
+                  onClick={handlePrevious}
+                  className="flex-1 bg-gray-200 text-gray-700 py-3 px-6 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+                >
+                  Previous
+                </button>
+              )}
+              
+              <button
+                onClick={handleNext}
+                className={`${currentStep === 0 ? 'w-full' : 'flex-1'} bg-gradient-to-r ${currentStepData.gradient} text-white py-3 px-6 rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-105`}
+              >
+                {currentStep === onboardingSteps.length - 1 ? "Let's Begin!" : "Next"}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom decoration */}
+        <div className="p-6">
+          <div className="text-center">
+            <p className="text-xs text-gray-400 mb-2">Welcome to your food journey</p>
+            <div className="flex justify-center space-x-1">
+              {['🍜', '🍕', '🍱', '🍰', '🍣'].map((emoji, index) => (
+                <span 
+                  key={index}
+                  className="text-lg animate-bounce"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  {emoji}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // My Foods Screen - Complete food journal with filtering and search
   const MyFoodsScreen = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -1304,10 +1458,11 @@ export default function KuchisabishiiPWA() {
     </div>
   );
 
-  // Set logged in and home view after login
+  // Set logged in and show onboarding after login
   const handleLogin = () => {
     setIsLoggedIn(true);
-    setCurrentView('home');
+    setShowOnboarding(true);
+    setCurrentView('onboarding');
   };
 
   // Main App Router
@@ -1317,12 +1472,13 @@ export default function KuchisabishiiPWA() {
 
   return (
     <div className="max-w-md mx-auto bg-white shadow-lg min-h-screen flex flex-col">
+      {currentView === 'onboarding' && <OnboardingScreens />}
       {currentView === 'home' && <HomeScreen />}
       {currentView === 'map' && <MapView />}
       {currentView === 'add' && <FoodReviewScreen />}
       {currentView === 'history' && <MyFoodsScreen />}
       {currentView === 'profile' && <PlaceholderScreen title="Profile" />}
-      <NavigationBar />
+      {currentView !== 'onboarding' && <NavigationBar />}
     </div>
   );
 }

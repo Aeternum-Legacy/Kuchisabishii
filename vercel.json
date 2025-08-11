@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "name": "kuchisabishii",
+  "builds": [
+    {
+      "src": "web/package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/web/$1"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "build": {
+    "env": {
+      "NEXT_TELEMETRY_DISABLED": "1"
+    }
+  },
+  "functions": {
+    "web/src/app/**": {
+      "maxDuration": 10
+    }
+  }
+}

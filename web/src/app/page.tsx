@@ -19,14 +19,14 @@ export default function KuchisabishiiPWA() {
   });
   
   // State for new food reviews - these will appear on home screen
-  const [userFoodReviews, setUserFoodReviews] = useState([]);
+  const [userFoodReviews, setUserFoodReviews] = useState<any[]>([]);
 
   // Enhanced Home Screen with Instagram Dark Mode Inspired Design
   const HomeScreen = () => {
     const [selectedFood, setSelectedFood] = useState(null);
     const [isReviewing, setIsReviewing] = useState(false);
     
-    const handleEatingAgain = (food) => {
+    const handleEatingAgain = (food: any) => {
       setSelectedFood(food);
       setIsReviewing(true);
       // This would transition to the food review screen with pre-filled data
@@ -58,7 +58,7 @@ export default function KuchisabishiiPWA() {
             <div className="text-center">
               <div className="text-lg font-bold text-gray-800">
                 {userFoodReviews.length > 0 
-                  ? ((mockUserProfile.averageRating * mockUserProfile.totalReviews + userFoodReviews.reduce((sum, food) => sum + food.kuchisabishiRating, 0)) / (mockUserProfile.totalReviews + userFoodReviews.length)).toFixed(1)
+                  ? ((mockUserProfile.averageRating * mockUserProfile.totalReviews + userFoodReviews.reduce((sum: number, food: any) => sum + food.kuchisabishiRating, 0)) / (mockUserProfile.totalReviews + userFoodReviews.length)).toFixed(1)
                   : mockUserProfile.averageRating.toFixed(1)
                 }
               </div>
@@ -66,7 +66,7 @@ export default function KuchisabishiiPWA() {
             </div>
             <div className="text-center">
               <div className="text-lg font-bold text-gray-800">
-                {mockUserProfile.kuchisabishiCount + userFoodReviews.filter(food => food.kuchisabishiRating === 5).length}
+                {mockUserProfile.kuchisabishiCount + userFoodReviews.filter((food: any) => food.kuchisabishiRating === 5).length}
               </div>
               <div className="text-xs text-gray-600">Kuchisabishii!</div>
             </div>
@@ -146,7 +146,7 @@ export default function KuchisabishiiPWA() {
             
             <div className="grid grid-cols-1 gap-3">
               {/* Show user's new food reviews first */}
-              {userFoodReviews.slice(0, 3).map((food) => (
+              {userFoodReviews.slice(0, 3).map((food: any) => (
                 <div key={food.id} className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 ring-2 ring-orange-200">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
@@ -184,7 +184,7 @@ export default function KuchisabishiiPWA() {
               ))}
               
               {/* Show mock data after user's reviews */}
-              {recentFoods.slice(0, Math.max(0, 3 - userFoodReviews.length)).map((food) => (
+              {recentFoods.slice(0, Math.max(0, 3 - userFoodReviews.length)).map((food: any) => (
                 <div key={food.id} className="bg-white rounded-lg p-3 shadow-sm border border-gray-100">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
@@ -766,9 +766,9 @@ export default function KuchisabishiiPWA() {
                         {[0, 1, 2, 3, 4, 5].map((level) => (
                           <button
                             key={level}
-                            onClick={() => setBasicTastes(prev => ({ ...prev, [taste.toLowerCase()]: level }))}
+                            onClick={() => setBasicTastes(prev => ({ ...prev, [taste.toLowerCase() as keyof typeof basicTastes]: level }))}
                             className={`w-8 h-8 rounded-full text-xs font-bold transition-colors ${
-                              basicTastes[taste.toLowerCase()] === level
+                              basicTastes[taste.toLowerCase() as keyof typeof basicTastes] === level
                                 ? 'bg-orange-500 text-white'
                                 : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
                             }`}
@@ -1157,7 +1157,7 @@ export default function KuchisabishiiPWA() {
       }
     });
 
-    const openFoodDetails = (food) => {
+    const openFoodDetails = (food: any) => {
       setSelectedFood(food);
       setShowDetailsModal(true);
     };
@@ -1242,7 +1242,7 @@ export default function KuchisabishiiPWA() {
                   key={food.id || index}
                   onClick={() => openFoodDetails(food)}
                   className={`bg-white rounded-lg p-4 shadow-sm border cursor-pointer hover:shadow-md transition-shadow ${
-                    userFoodReviews.some(userFood => userFood.id === food.id) ? 'border-orange-200 ring-1 ring-orange-100' : 'border-gray-100'
+                    userFoodReviews.some((userFood: any) => userFood.id === food.id) ? 'border-orange-200 ring-1 ring-orange-100' : 'border-gray-100'
                   }`}
                 >
                   <div className="flex items-start space-x-3">
@@ -1257,7 +1257,7 @@ export default function KuchisabishiiPWA() {
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center space-x-2">
                           <h3 className="font-semibold text-gray-800">{food.name}</h3>
-                          {userFoodReviews.some(userFood => userFood.id === food.id) && (
+                          {userFoodReviews.some((userFood: any) => userFood.id === food.id) && (
                             <span className="bg-orange-100 text-orange-800 text-xs px-2 py-0.5 rounded-full font-medium">MY ENTRY</span>
                           )}
                         </div>

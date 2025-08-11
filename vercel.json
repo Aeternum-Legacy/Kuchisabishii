@@ -1,0 +1,5 @@
+{
+  "installCommand": "echo 'Skipping install'",
+  "buildCommand": "cd web && npm install && npm run build",
+  "outputDirectory": "web/.next"
+}

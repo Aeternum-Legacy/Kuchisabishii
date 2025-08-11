@@ -20,10 +20,5 @@
     "env": {
       "NEXT_TELEMETRY_DISABLED": "1"
     }
-  },
-  "functions": {
-    "web/src/app/**": {
-      "maxDuration": 10
-    }
   }
 }

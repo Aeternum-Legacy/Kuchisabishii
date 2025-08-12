@@ -22,9 +22,7 @@ export default function AuthWrapper({ children, onAuthSuccess }: AuthWrapperProp
 
   // Handle auth success when user state changes from null to authenticated
   useEffect(() => {
-    console.log('AuthWrapper: user state changed', { previousUser: !!previousUser, currentUser: !!user })
     if (!previousUser && user && onAuthSuccess) {
-      console.log('AuthWrapper: calling onAuthSuccess')
       onAuthSuccess()
     }
     setPreviousUser(user)
@@ -32,7 +30,6 @@ export default function AuthWrapper({ children, onAuthSuccess }: AuthWrapperProp
 
   // Show loading state
   if (loading) {
-    console.log('AuthWrapper: showing loading state')
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center">
         <div className="text-center">
@@ -45,11 +42,8 @@ export default function AuthWrapper({ children, onAuthSuccess }: AuthWrapperProp
 
   // If user is authenticated, render children
   if (user) {
-    console.log('AuthWrapper: user authenticated, rendering children', user)
     return <>{children}</>
   }
-  
-  console.log('AuthWrapper: no user, showing auth forms')
 
   // Show authentication forms
   return (

@@ -81,7 +81,6 @@ export function useAuth() {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('useAuth: auth state change', { event, hasUser: !!session?.user })
         if (event === 'SIGNED_IN' && session?.user) {
           try {
             const response = await fetch('/api/auth/me')
@@ -116,10 +115,7 @@ export function useAuth() {
             })
           }
         } else if (event === 'SIGNED_OUT') {
-          console.log('useAuth: signed out')
           setAuthState({ user: null, loading: false, error: null })
-        } else {
-          console.log('useAuth: other auth event', event)
         }
       }
     )

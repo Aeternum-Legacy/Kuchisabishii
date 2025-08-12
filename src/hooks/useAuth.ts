@@ -145,6 +145,7 @@ export function useAuth() {
         throw new Error(data.error || 'Registration failed')
       }
 
+      setAuthState(prev => ({ ...prev, loading: false, error: null }))
       return { success: true, data }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Registration failed'
@@ -169,6 +170,7 @@ export function useAuth() {
         throw new Error(data.error || 'Login failed')
       }
 
+      setAuthState(prev => ({ ...prev, loading: false, error: null }))
       return { success: true, data }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Login failed'

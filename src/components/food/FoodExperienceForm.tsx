@@ -17,8 +17,8 @@ export default function FoodExperienceForm({ onClose, onSave, prefillData }: Foo
 
   const [formData, setFormData] = useState({
     foodName: prefillData?.name || '',
-    restaurantName: prefillData?.location || '',
-    location: '',
+    restaurantName: prefillData?.restaurant?.name || prefillData?.location || '',
+    location: prefillData?.restaurant?.address || prefillData?.restaurant?.name || '',
     cuisineType: prefillData?.cuisineType || '',
     foodType: '',
     mealTime: 'lunch',

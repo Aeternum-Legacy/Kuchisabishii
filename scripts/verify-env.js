@@ -31,6 +31,10 @@ const requiredVars = {
   'NEXTAUTH_SECRET': {
     pattern: /.{32,}/,
     description: 'NextAuth secret (min 32 chars)'
+  },
+  'NEXT_PUBLIC_GOOGLE_MAPS_API_KEY': {
+    pattern: /^AIza[0-9A-Za-z-_]{35}$/,
+    description: 'Google Maps API key (starts with AIza)'
   }
 };
 
@@ -66,10 +70,13 @@ Object.entries(requiredVars).forEach(([key, config]) => {
 
 if (hasErrors) {
   console.log('\n📝 To fix missing variables:');
-  console.log('1. Copy the anon/public key from Supabase Dashboard → Settings → API');
-  console.log('2. Add it to .env.local as NEXT_PUBLIC_SUPABASE_ANON_KEY=your-key');
-  console.log('3. Add the same to Vercel Environment Variables');
-  console.log('4. Redeploy your Vercel application');
+  console.log('1. Supabase: Copy anon/public key from Dashboard → Settings → API');
+  console.log('2. Google Maps: Get API key from Google Cloud Console');
+  console.log('   - Enable Maps JavaScript API, Places API, Geocoding API');
+  console.log('   - Create API key with proper restrictions');
+  console.log('3. Add all keys to .env.local');
+  console.log('4. Add the same to Vercel Environment Variables');
+  console.log('5. Redeploy your Vercel application');
 } else {
   console.log('\n✨ All environment variables are properly configured!');
   console.log('\n📋 Copy these exact values to Vercel Environment Variables:');

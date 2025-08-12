@@ -4,10 +4,10 @@ import React, { useState } from 'react';
 import { MapPin, Star, Search, Plus, User, Home, Map, List, ChefHat, TrendingUp, Clock } from 'lucide-react';
 import AuthWrapper from '../components/auth/AuthWrapper';
 import { useAuth } from '../hooks/useAuth';
-import MapView from '../components/MapView';
 import FoodImage from '../components/FoodImage';
 import MainApp from '../components/MainApp';
 import FoodExperienceForm from '../components/food/FoodExperienceForm';
+import MapView from '../components/map/MapView';
 import { getFoodEmoji } from '../utils/foodEmojis';
 import { mockFoodReviews, mockUserProfile, recommendedFoods, kuchisabishiFoods, recentFoods } from '../data/seed-data';
 
@@ -391,13 +391,32 @@ export default function KuchisabishiiPWA() {
 
 
   // Main App Content
-  const AppContent = () => (
-    <div className="max-w-md mx-auto bg-white shadow-lg min-h-screen flex flex-col">
-      {currentView === 'onboarding' && <OnboardingScreens />}
-      {currentView === 'enhanced-app' && <HomeScreen />}
-      {currentView === 'profile' && <PlaceholderScreen title="Profile" />}
-    </div>
-  );
+  const AppContent = () => {
+    if (currentView === 'map') {
+      return (
+        <MapView
+          onBack={() => setCurrentView('enhanced-app')}
+          onRestaurantSelect={(restaurant) => {
+            // When a restaurant is selected, prefill the food form with location
+            setPrefillData({
+              location: restaurant.name,
+              restaurant: restaurant
+            })
+            setShowFoodForm(true)
+            setCurrentView('enhanced-app')
+          }}
+        />
+      )
+    }
+
+    return (
+      <div className="max-w-md mx-auto bg-white shadow-lg min-h-screen flex flex-col">
+        {currentView === 'onboarding' && <OnboardingScreens />}
+        {currentView === 'enhanced-app' && <HomeScreen />}
+        {currentView === 'profile' && <PlaceholderScreen title="Profile" />}
+      </div>
+    )
+  };
 
   return (
     <AuthWrapper onAuthSuccess={handleAuthSuccess}>

@@ -30,6 +30,12 @@ export function useAuth() {
   })
 
   useEffect(() => {
+    // Skip initialization if supabase client is not available (during SSR/build)
+    if (!supabase) {
+      setAuthState({ user: null, loading: false, error: null })
+      return
+    }
+
     // Get initial session
     const getInitialSession = async () => {
       try {

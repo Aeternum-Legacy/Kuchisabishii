@@ -45,8 +45,7 @@ export default function AuthWrapper({ children, onAuthSuccess }: AuthWrapperProp
 
   // Show authentication forms
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center p-4">
         {authMode === 'login' && (
           <LoginForm
             onSuccess={onAuthSuccess}
@@ -82,7 +81,6 @@ export default function AuthWrapper({ children, onAuthSuccess }: AuthWrapperProp
             onBackToLogin={() => setAuthMode('login')}
           />
         )}
-      </div>
     </div>
   )
 }

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { ArrowLeft, Mail, Send } from 'lucide-react'
+import KuchisabishiiLogo from '../KuchisabishiiLogo'
 
 interface ForgotPasswordFormProps {
   onBackToLogin: () => void
@@ -42,9 +43,11 @@ export default function ForgotPasswordForm({ onBackToLogin }: ForgotPasswordForm
   }
 
   return (
-    <div className="w-full max-w-md mx-auto bg-white rounded-xl shadow-lg p-8">
+    <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
       <div className="text-center mb-6">
-        <div className="text-4xl mb-4">🍜</div>
+        <div className="mb-4">
+          <KuchisabishiiLogo size="lg" />
+        </div>
         <h1 className="text-2xl font-bold text-gray-800">Reset Password</h1>
         <p className="text-gray-600 mt-2">Enter your email to receive a reset link</p>
       </div>

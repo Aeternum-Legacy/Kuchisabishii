@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Eye, EyeOff, Mail, User, Lock } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import KuchisabishiiLogo from '../KuchisabishiiLogo'
 
 interface RegisterFormProps {
   onSuccess?: (email?: string) => void
@@ -73,11 +74,13 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
   }
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
       <div className="text-center mb-8">
-        <div className="text-6xl mb-4">🍜</div>
+        <div className="mb-4">
+          <KuchisabishiiLogo size="lg" />
+        </div>
         <h1 className="text-3xl font-bold text-gray-800">Join Kuchisabishii</h1>
-        <p className="text-gray-600 mt-2">Start your emotional food journey</p>
+        <p className="text-gray-600 mt-2">口寂しい - Start your emotional food journey</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import KuchisabishiiLogo from '../KuchisabishiiLogo'
 
 interface LoginFormProps {
   onSuccess?: () => void
@@ -56,11 +57,13 @@ export default function LoginForm({ onSuccess, onSwitchToRegister, onForgotPassw
   }
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
       <div className="text-center mb-8">
-        <div className="text-6xl mb-4">🍜</div>
-        <h1 className="text-3xl font-bold text-gray-800">Welcome Back</h1>
-        <p className="text-gray-600 mt-2">Continue your food journey</p>
+        <div className="mb-4">
+          <KuchisabishiiLogo size="lg" />
+        </div>
+        <h1 className="text-3xl font-bold text-gray-800">Kuchisabishii</h1>
+        <p className="text-gray-600 mt-2">口寂しい - Rate dishes, not just restaurants</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">

@@ -1,0 +1,76 @@
+name: 🚨 Hotfix Deployment
+
+on:
+  push:
+    branches: [ 'hotfix/**' ]
+    
+  workflow_dispatch:
+    inputs:
+      hotfix_branch:
+        description: 'Hotfix branch name'
+        required: true
+      urgency:
+        description: 'Urgency level'
+        required: true
+        default: 'high'
+        type: choice
+        options:
+          - 'critical'
+          - 'high'
+          - 'medium'
+
+jobs:
+  validate-hotfix:
+    name: 🔍 Validate Hotfix
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'web/package-lock.json'
+          
+      - name: 📥 Install dependencies
+        run: |
+          cd web
+          npm ci
+          
+      - name: 🔍 Quick Validation
+        run: |
+          cd web
+          echo "🚨 HOTFIX VALIDATION"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"
+          npm run lint
+          npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+          
+      - name: 🚀 Deploy Hotfix Preview
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.ORG_ID }}
+          vercel-project-id: ${{ secrets.PROJECT_ID }}
+          working-directory: ./web
+          alias: hotfix-${{ github.run_number }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.PROJECT_ID }}
+          
+      - name: 📝 Hotfix Summary
+        run: |
+          echo "🚨 HOTFIX DEPLOYMENT READY"
+          echo "🔗 Preview: https://hotfix-${{ github.run_number }}.vercel.app"
+          echo "⚡ Urgency: ${{ inputs.urgency || 'high' }}"
+          echo "📅 Time: $(date)"
+          echo ""
+          echo "📋 Next Steps:"
+          echo "1. Test the preview deployment"
+          echo "2. Create PR to main if validated"
+          echo "3. Approve production deployment"

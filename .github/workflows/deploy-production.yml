@@ -1,0 +1,85 @@
+name: 🎯 Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'web/**'
+      - 'shared/**'
+      
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for production deployment'
+        required: true
+        default: 'Manual production deployment'
+
+jobs:
+  deploy-production:
+    name: 🌟 Deploy to Production
+    runs-on: ubuntu-latest
+    environment: production
+    
+    # Require manual approval for production deployments
+    timeout-minutes: 30
+    
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'web/package-lock.json'
+          
+      - name: 📥 Install dependencies
+        run: |
+          cd web
+          npm ci
+          
+      - name: 🔍 Pre-deployment Checks
+        run: |
+          cd web
+          echo "🔍 Running pre-deployment validation..."
+          npm run lint
+          npm run type-check || echo "⚠️ Type check warnings - review before approval"
+          
+      - name: 🏗️ Production Build
+        run: |
+          cd web
+          echo "🏗️ Building for production..."
+          npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+          NODE_ENV: production
+          
+      - name: 🔐 Security Audit
+        run: |
+          cd web
+          echo "🛡️ Running security audit..."
+          npm audit --audit-level=moderate || echo "⚠️ Security warnings detected - review required"
+          
+      - name: 🚀 Deploy to Production
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.ORG_ID }}
+          vercel-project-id: ${{ secrets.PROJECT_ID }}
+          working-directory: ./web
+          vercel-args: '--prod'
+        env:
+          VERCEL_ORG_ID: ${{ secrets.ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.PROJECT_ID }}
+          
+      - name: 🎉 Production Deployment Success
+        run: |
+          echo "✅ Production deployment completed successfully!"
+          echo "🌐 Live at: https://kuchisabishii.io"
+          echo "🎯 Deployment completed at: $(date)"
+          
+      - name: 📧 Notify Team (Future)
+        run: |
+          echo "📧 TODO: Add Slack/Discord notification here"
+          echo "🔔 Team notification: Production deployment completed"

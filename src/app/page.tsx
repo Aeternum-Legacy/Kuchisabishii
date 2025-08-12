@@ -2,32 +2,48 @@
 
 import React, { useState } from 'react';
 import { MapPin, Star, Search, Plus, User, Home, Map, List, ChefHat, TrendingUp, Clock } from 'lucide-react';
+import AuthWrapper from '../components/auth/AuthWrapper';
+import { useAuth } from '../hooks/useAuth';
 import MapView from '../components/MapView';
 import FoodImage from '../components/FoodImage';
 import MainApp from '../components/MainApp';
+import FoodExperienceForm from '../components/food/FoodExperienceForm';
 import { getFoodEmoji } from '../utils/foodEmojis';
 import { mockFoodReviews, mockUserProfile, recommendedFoods, kuchisabishiFoods, recentFoods } from '../data/seed-data';
 
 // PWA App Component
 export default function KuchisabishiiPWA() {
-  const [currentView, setCurrentView] = useState('login');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const { user } = useAuth();
+  const [currentView, setCurrentView] = useState('onboarding');
+  const [showOnboarding, setShowOnboarding] = useState(true);
   const [useEnhancedApp, setUseEnhancedApp] = useState(true);
-  const [user, setUser] = useState({
-    id: '1',
-    displayName: 'Food Lover',
-    profileImage: undefined
-  });
   
   // State for new food reviews - these will appear on home screen
   const [userFoodReviews, setUserFoodReviews] = useState<any[]>([]);
+  const [showFoodForm, setShowFoodForm] = useState(false);
+  const [prefillData, setPrefillData] = useState<any>(null);
 
-  // Set logged in and show onboarding after login
-  const handleLogin = () => {
-    setIsLoggedIn(true);
+  // Handle authentication success
+  const handleAuthSuccess = () => {
     setShowOnboarding(true);
     setCurrentView('onboarding');
+  };
+
+  // Handle food form
+  const handleAddNewFood = () => {
+    setPrefillData(null);
+    setShowFoodForm(true);
+  };
+
+  const handleEatingAgain = (food: any) => {
+    setPrefillData(food);
+    setShowFoodForm(true);
+  };
+
+  const handleFoodSave = (newExperience: any) => {
+    // Add to user's food reviews at the top
+    setUserFoodReviews(prev => [newExperience, ...prev]);
+    setShowFoodForm(false);
   };
 
   // Onboarding completion handler
@@ -112,15 +128,6 @@ export default function KuchisabishiiPWA() {
 
   // Enhanced Home Screen with Beautiful Gradient Design
   const HomeScreen = () => {
-    const [selectedFood, setSelectedFood] = useState<any>(null);
-    const [isReviewing, setIsReviewing] = useState(false);
-    
-    const handleEatingAgain = (food: any) => {
-      setSelectedFood(food);
-      setIsReviewing(true);
-      // This would transition to the food review screen with pre-filled data
-      setCurrentView('add');
-    };
 
     return (
       <div className="flex-1 bg-gray-50 min-h-screen">
@@ -361,7 +368,7 @@ export default function KuchisabishiiPWA() {
             <h2 className="text-lg font-semibold text-gray-800 mb-3">Quick Actions</h2>
             <div className="grid grid-cols-2 gap-3">
               <button 
-                onClick={() => setCurrentView('add')}
+                onClick={handleAddNewFood}
                 className="bg-orange-500 hover:bg-orange-600 text-white p-4 rounded-lg transition-colors"
               >
                 <Plus className="w-6 h-6 mx-auto mb-2" />
@@ -382,41 +389,26 @@ export default function KuchisabishiiPWA() {
     );
   };
 
-  // Login Screen Component
-  const LoginScreen = ({ onLogin }: { onLogin: () => void }) => (
-    <div className="flex-1 bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center px-6">
-      <div className="text-center space-y-8 max-w-sm">
-        <div className="space-y-4">
-          <div className="text-6xl">🍜</div>
-          <h1 className="text-4xl font-bold text-gray-800">Kuchisabishii</h1>
-          <p className="text-lg text-gray-700">Your emotional food journey starts here</p>
-        </div>
-        
-        <div className="space-y-4">
-          <button
-            onClick={onLogin}
-            className="w-full bg-orange-500 text-white py-4 rounded-xl text-lg font-semibold hover:bg-orange-600 transition-colors"
-          >
-            Get Started
-          </button>
-          <p className="text-sm text-gray-600">
-            Track, discover, and share your food experiences
-          </p>
-        </div>
-      </div>
-    </div>
-  );
 
-  // Main App Router
-  if (!isLoggedIn) {
-    return <LoginScreen onLogin={handleLogin} />;
-  }
-
-  return (
+  // Main App Content
+  const AppContent = () => (
     <div className="max-w-md mx-auto bg-white shadow-lg min-h-screen flex flex-col">
       {currentView === 'onboarding' && <OnboardingScreens />}
       {currentView === 'enhanced-app' && <HomeScreen />}
       {currentView === 'profile' && <PlaceholderScreen title="Profile" />}
     </div>
+  );
+
+  return (
+    <AuthWrapper onAuthSuccess={handleAuthSuccess}>
+      <AppContent />
+      {showFoodForm && (
+        <FoodExperienceForm
+          onClose={() => setShowFoodForm(false)}
+          onSave={handleFoodSave}
+          prefillData={prefillData}
+        />
+      )}
+    </AuthWrapper>
   );
 }

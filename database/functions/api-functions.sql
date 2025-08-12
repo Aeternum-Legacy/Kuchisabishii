@@ -656,3 +656,212 @@ BEGIN
   RETURN stats;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Additional API Support Functions
+
+-- Function to increment analytics counters
+CREATE OR REPLACE FUNCTION increment_analytics(
+  p_user_id UUID,
+  p_date DATE,
+  p_field TEXT,
+  p_increment INTEGER DEFAULT 1
+) RETURNS VOID AS $$
+BEGIN
+  INSERT INTO user_analytics (user_id, date)
+  VALUES (p_user_id, p_date)
+  ON CONFLICT (user_id, date) DO NOTHING;
+  
+  CASE p_field
+    WHEN 'experiences_logged' THEN
+      UPDATE user_analytics 
+      SET experiences_logged = experiences_logged + p_increment
+      WHERE user_id = p_user_id AND date = p_date;
+    WHEN 'photos_uploaded' THEN
+      UPDATE user_analytics 
+      SET photos_uploaded = photos_uploaded + p_increment
+      WHERE user_id = p_user_id AND date = p_date;
+    WHEN 'restaurants_visited' THEN
+      UPDATE user_analytics 
+      SET restaurants_visited = restaurants_visited + p_increment
+      WHERE user_id = p_user_id AND date = p_date;
+    WHEN 'friends_shared_with' THEN
+      UPDATE user_analytics 
+      SET friends_shared_with = friends_shared_with + p_increment
+      WHERE user_id = p_user_id AND date = p_date;
+    WHEN 'app_opens' THEN
+      UPDATE user_analytics 
+      SET app_opens = app_opens + p_increment
+      WHERE user_id = p_user_id AND date = p_date;
+    WHEN 'taste_profile_updates' THEN
+      UPDATE user_analytics 
+      SET taste_profile_updates = taste_profile_updates + p_increment
+      WHERE user_id = p_user_id AND date = p_date;
+    WHEN 'new_cuisines_tried' THEN
+      UPDATE user_analytics 
+      SET new_cuisines_tried = new_cuisines_tried + p_increment
+      WHERE user_id = p_user_id AND date = p_date;
+  END CASE;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to track restaurant visits
+CREATE OR REPLACE FUNCTION track_restaurant_visit(
+  p_user_id UUID,
+  p_restaurant_id UUID
+) RETURNS VOID AS $$
+DECLARE
+  today DATE := CURRENT_DATE;
+  visit_exists BOOLEAN;
+BEGIN
+  -- Check if user has already visited this restaurant today
+  SELECT EXISTS(
+    SELECT 1 FROM food_experiences
+    WHERE user_id = p_user_id 
+    AND restaurant_id = p_restaurant_id
+    AND DATE(experienced_at) = today
+  ) INTO visit_exists;
+  
+  -- Only increment if this is a new restaurant visit today
+  IF NOT visit_exists THEN
+    PERFORM increment_analytics(p_user_id, today, 'restaurants_visited', 1);
+  END IF;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to update session duration
+CREATE OR REPLACE FUNCTION update_session_duration(
+  p_user_id UUID
+) RETURNS VOID AS $$
+DECLARE
+  today DATE := CURRENT_DATE;
+  session_minutes INTEGER;
+BEGIN
+  -- Default session duration (in a real implementation, track actual time)
+  session_minutes := 15;
+  
+  UPDATE user_analytics 
+  SET session_duration_minutes = session_duration_minutes + session_minutes
+  WHERE user_id = p_user_id AND date = today;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to search restaurants within distance
+CREATE OR REPLACE FUNCTION restaurants_within_distance(
+  center_lat DECIMAL,
+  center_lng DECIMAL,
+  distance_km INTEGER
+) RETURNS TABLE (
+  id UUID,
+  name TEXT,
+  slug TEXT,
+  description TEXT,
+  phone TEXT,
+  email TEXT,
+  website TEXT,
+  address TEXT,
+  city TEXT,
+  state TEXT,
+  country TEXT,
+  postal_code TEXT,
+  latitude DECIMAL,
+  longitude DECIMAL,
+  cuisine_types TEXT[],
+  price_range INTEGER,
+  hours JSONB,
+  features TEXT[],
+  dietary_options TEXT[],
+  verified BOOLEAN,
+  claimed_by UUID,
+  created_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ,
+  distance_km DECIMAL
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    r.id, r.name, r.slug, r.description, r.phone, r.email, r.website,
+    r.address, r.city, r.state, r.country, r.postal_code, r.latitude, r.longitude,
+    r.cuisine_types, r.price_range, r.hours, r.features, r.dietary_options,
+    r.verified, r.claimed_by, r.created_at, r.updated_at,
+    ROUND(
+      6371 * acos(
+        cos(radians(center_lat)) * 
+        cos(radians(r.latitude)) * 
+        cos(radians(r.longitude) - radians(center_lng)) + 
+        sin(radians(center_lat)) * 
+        sin(radians(r.latitude))
+      )::NUMERIC, 2
+    ) AS distance_km
+  FROM restaurants r
+  WHERE r.latitude IS NOT NULL 
+    AND r.longitude IS NOT NULL
+    AND (
+      6371 * acos(
+        cos(radians(center_lat)) * 
+        cos(radians(r.latitude)) * 
+        cos(radians(r.longitude) - radians(center_lng)) + 
+        sin(radians(center_lat)) * 
+        sin(radians(r.latitude))
+      )
+    ) <= distance_km
+  ORDER BY distance_km;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to calculate taste similarity between users
+CREATE OR REPLACE FUNCTION calculate_taste_similarity(
+  user1_id UUID,
+  user2_id UUID
+) RETURNS DECIMAL AS $$
+DECLARE
+  user1_profile taste_profiles%ROWTYPE;
+  user2_profile taste_profiles%ROWTYPE;
+  similarity_score DECIMAL := 0;
+  total_comparisons INTEGER := 0;
+BEGIN
+  -- Get taste profiles for both users
+  SELECT * INTO user1_profile FROM taste_profiles WHERE user_id = user1_id;
+  SELECT * INTO user2_profile FROM taste_profiles WHERE user_id = user2_id;
+  
+  -- If either user doesn't have a taste profile, return 0
+  IF user1_profile IS NULL OR user2_profile IS NULL THEN
+    RETURN 0;
+  END IF;
+  
+  -- Compare basic taste preferences (calculate similarity for each non-null pair)
+  IF user1_profile.salty_preference IS NOT NULL AND user2_profile.salty_preference IS NOT NULL THEN
+    similarity_score := similarity_score + (1.0 - ABS(user1_profile.salty_preference - user2_profile.salty_preference) / 9.0);
+    total_comparisons := total_comparisons + 1;
+  END IF;
+  
+  -- Similar comparisons for other taste dimensions...
+  IF user1_profile.sweet_preference IS NOT NULL AND user2_profile.sweet_preference IS NOT NULL THEN
+    similarity_score := similarity_score + (1.0 - ABS(user1_profile.sweet_preference - user2_profile.sweet_preference) / 9.0);
+    total_comparisons := total_comparisons + 1;
+  END IF;
+  
+  -- Calculate average similarity (0.0 to 1.0)
+  IF total_comparisons > 0 THEN
+    RETURN ROUND(similarity_score / total_comparisons, 2);
+  ELSE
+    RETURN 0;
+  END IF;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to update taste profile from experiences
+CREATE OR REPLACE FUNCTION update_taste_profile_from_experiences(
+  p_user_id UUID
+) RETURNS VOID AS $$
+BEGIN
+  -- This function would analyze user's food experiences and update their taste profile
+  -- Implementation would depend on specific business logic for taste evolution
+  -- For now, just ensure taste profile exists
+  INSERT INTO taste_profiles (user_id, created_at, updated_at)
+  VALUES (p_user_id, NOW(), NOW())
+  ON CONFLICT (user_id) DO UPDATE SET updated_at = NOW();
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Grant execute permissions to all additional functions
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO authenticated;

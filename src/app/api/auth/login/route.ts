@@ -1,0 +1,81 @@
+import { createClient } from '@/lib/supabase/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
+
+const loginSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(1, 'Password is required')
+})
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const validatedData = loginSchema.parse(body)
+    
+    const supabase = await createClient()
+    
+    // Sign in with Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email: validatedData.email,
+      password: validatedData.password
+    })
+
+    if (authError) {
+      return NextResponse.json(
+        { error: authError.message },
+        { status: 400 }
+      )
+    }
+
+    if (!authData.user || !authData.session) {
+      return NextResponse.json(
+        { error: 'Invalid credentials' },
+        { status: 401 }
+      )
+    }
+
+    // Get user profile
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', authData.user.id)
+      .single()
+
+    if (profileError) {
+      console.error('Profile fetch error:', profileError)
+      // Continue without profile data if fetch fails
+    }
+
+    return NextResponse.json({
+      message: 'Login successful',
+      user: {
+        id: authData.user.id,
+        email: authData.user.email,
+        displayName: profile?.display_name || authData.user.user_metadata?.display_name,
+        firstName: profile?.first_name || authData.user.user_metadata?.first_name,
+        lastName: profile?.last_name || authData.user.user_metadata?.last_name,
+        profileImage: profile?.profile_image_url
+      },
+      session: {
+        access_token: authData.session.access_token,
+        refresh_token: authData.session.refresh_token,
+        expires_at: authData.session.expires_at
+      }
+    })
+
+  } catch (error) {
+    console.error('Login error:', error)
+    
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid input data', details: error.errors },
+        { status: 400 }
+      )
+    }
+
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}

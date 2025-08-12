@@ -12,7 +12,19 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = loginSchema.parse(body)
     
-    const supabase = await createClient()
+    let supabase
+    try {
+      supabase = await createClient()
+    } catch (error) {
+      console.error('Failed to create Supabase client:', error)
+      return NextResponse.json(
+        { 
+          error: 'Authentication service unavailable. Please check environment configuration.',
+          details: error instanceof Error ? error.message : 'Unknown error'
+        },
+        { status: 503 }
+      )
+    }
     
     // Sign in with Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
@@ -74,7 +86,11 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { 
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : 'Unknown error',
+        hint: 'Check /api/health endpoint for configuration status'
+      },
       { status: 500 }
     )
   }

@@ -81,6 +81,7 @@ export function useAuth() {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('useAuth: auth state change', { event, hasUser: !!session?.user })
         if (event === 'SIGNED_IN' && session?.user) {
           try {
             const response = await fetch('/api/auth/me')
@@ -115,7 +116,10 @@ export function useAuth() {
             })
           }
         } else if (event === 'SIGNED_OUT') {
+          console.log('useAuth: signed out')
           setAuthState({ user: null, loading: false, error: null })
+        } else {
+          console.log('useAuth: other auth event', event)
         }
       }
     )
@@ -158,53 +162,38 @@ export function useAuth() {
     try {
       setAuthState(prev => ({ ...prev, loading: true, error: null }))
       
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+      // Use Supabase client directly for authentication
+      if (!supabase) {
+        throw new Error('Supabase client not available')
+      }
+
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password
       })
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        // Preserve additional error data for special cases like email verification
-        const error = new Error(data.error || 'Login failed')
-        ;(error as any).code = data.code
-        ;(error as any).email = data.email
-        ;(error as any).data = data
-        throw error
-      }
-
-      // Update the auth state with the user data from the response
-      if (data.user) {
-        setAuthState({
-          user: data.user,
-          loading: false,
-          error: null
-        })
-      } else {
-        // If no user data, wait for auth state change event
-        setAuthState(prev => ({ ...prev, loading: false, error: null }))
-      }
-      
-      // Force a session refresh if we have supabase client
-      if (supabase) {
-        const { data: { session } } = await supabase.auth.getSession()
-        if (session?.user) {
-          // Trigger auth state update
-          const response = await fetch('/api/auth/me')
-          if (response.ok) {
-            const userData = await response.json()
-            setAuthState({
-              user: userData.user,
-              loading: false,
-              error: null
-            })
-          }
+      if (authError) {
+        // Check if it's an email not confirmed error
+        if (authError.message.includes('Email not confirmed')) {
+          const error = new Error('Email not verified')
+          ;(error as any).code = 'EMAIL_NOT_VERIFIED'
+          ;(error as any).email = email
+          throw error
         }
+        throw new Error(authError.message)
       }
+
+      if (!authData.user || !authData.session) {
+        throw new Error('Invalid credentials')
+      }
+
+      // The auth state will be updated by the onAuthStateChange listener
+      // So we just need to wait a moment for it to trigger
+      setTimeout(() => {
+        setAuthState(prev => ({ ...prev, loading: false }))
+      }, 100)
       
-      return { success: true, data }
+      return { success: true, data: authData }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Login failed'
       setAuthState(prev => ({ ...prev, loading: false, error: errorMessage }))

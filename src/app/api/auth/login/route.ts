@@ -71,7 +71,8 @@ export async function POST(request: NextRequest) {
       // Continue without profile data if fetch fails
     }
 
-    return NextResponse.json({
+    // Create a response with Set-Cookie headers for the session
+    const response = NextResponse.json({
       message: 'Login successful',
       user: {
         id: authData.user.id,
@@ -87,6 +88,23 @@ export async function POST(request: NextRequest) {
         expires_at: authData.session.expires_at
       }
     })
+
+    // Set session cookies
+    response.cookies.set('sb-access-token', authData.session.access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: authData.session.expires_in
+    })
+    
+    response.cookies.set('sb-refresh-token', authData.session.refresh_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7 // 7 days
+    })
+
+    return response
 
   } catch (error) {
     console.error('Login error:', error)

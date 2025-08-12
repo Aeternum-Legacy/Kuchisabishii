@@ -6,6 +6,7 @@ import ProfileScreen from './ProfileScreen';
 import RecommendationScreen from './RecommendationScreen';
 import EatAgainModal from './EatAgainModal';
 import EnhancedFoodReviewScreen from './EnhancedFoodReviewScreen';
+import { HomeScreen } from './home/HomeScreen';
 
 interface FoodExperience {
   id: string;
@@ -70,78 +71,6 @@ const MainApp: React.FC = () => {
     setSelectedFood(null);
   };
 
-  // Home Tab Content
-  const HomeContent = () => (
-    <div className="flex-1 bg-gray-50 p-4">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Welcome back!</h1>
-        <p className="text-gray-600">Ready to discover your next Kuchisabishii moment?</p>
-      </div>
-
-      {/* Quick Stats */}
-      <div className="bg-white rounded-xl p-4 mb-6 shadow-sm">
-        <h2 className="text-lg font-semibold mb-3">Your Journey</h2>
-        <div className="grid grid-cols-3 gap-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-orange-500">{userFoodExperiences.length}</div>
-            <div className="text-sm text-gray-600">Foods Tried</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-green-500">
-              {userFoodExperiences.filter(f => f.rating >= 4).length}
-            </div>
-            <div className="text-sm text-gray-600">Favorites</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-purple-500">
-              {userFoodExperiences.reduce((sum, f) => sum + f.versions.length, 0)}
-            </div>
-            <div className="text-sm text-gray-600">Revisits</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Foods */}
-      <div className="bg-white rounded-xl p-4 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Recent Foods</h2>
-          <button className="text-orange-500 text-sm font-medium">View All</button>
-        </div>
-        
-        <div className="space-y-3">
-          {userFoodExperiences.map((food) => (
-            <div key={food.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <img 
-                  src={food.image} 
-                  alt={food.name}
-                  className="w-12 h-12 rounded-lg object-cover"
-                />
-                <div>
-                  <h3 className="font-medium text-gray-800">{food.name}</h3>
-                  <p className="text-sm text-gray-600">{food.restaurant}</p>
-                  <div className="flex items-center mt-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star 
-                        key={i} 
-                        className={`w-3 h-3 ${i < food.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={() => handleEatAgain(food)}
-                className="px-3 py-1 bg-orange-500 text-white rounded-full text-xs font-medium hover:bg-orange-600 transition-colors"
-              >
-                Eat Again?
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
 
   // Add placeholder content for other tabs
   const AddContent = () => (
@@ -188,7 +117,7 @@ const MainApp: React.FC = () => {
     <div className="flex flex-col h-screen bg-white">
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
-        {currentTab === 'home' && <HomeContent />}
+        {currentTab === 'home' && <HomeScreen onViewChange={setCurrentTab} />}
         {currentTab === 'discover' && <RecommendationScreen />}
         {currentTab === 'add' && <AddContent />}
         {currentTab === 'profile' && <ProfileScreen />}

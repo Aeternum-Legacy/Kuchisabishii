@@ -5,8 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { createServerClient, supabaseAdmin } from '@/lib/supabase/server'
-import { RestaurantInsert, PaginatedResponse, SearchFilters } from '@/lib/supabase/types'
+import { createClient, supabaseAdmin } from '@/lib/supabase/server'
 
 // Restaurant creation/update schema
 const restaurantSchema = z.object({
@@ -48,7 +47,7 @@ const searchSchema = z.object({
 // GET - Search and list restaurants
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServerClient()
+    const supabase = await createClient()
     
     const url = new URL(request.url)
     const queryParams = Object.fromEntries(url.searchParams.entries())
@@ -176,7 +175,7 @@ export async function GET(request: NextRequest) {
 // POST - Create new restaurant (requires authentication)
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServerClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {

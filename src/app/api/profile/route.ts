@@ -5,8 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { createServerClient } from '@/lib/supabase/server'
-import { UserProfileUpdate } from '@/lib/supabase/types'
+import { createClient } from '@/lib/supabase/server'
 
 // Profile update validation schema
 const profileUpdateSchema = z.object({
@@ -28,7 +27,7 @@ const profileUpdateSchema = z.object({
 // GET - Fetch user profile
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServerClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -73,7 +72,7 @@ export async function GET(request: NextRequest) {
 // PUT - Update user profile
 export async function PUT(request: NextRequest) {
   try {
-    const supabase = createServerClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {

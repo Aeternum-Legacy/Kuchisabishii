@@ -5,8 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { createServerClient } from '@/lib/supabase/server'
-import { FoodExperienceUpdate, TasteExperienceUpdate } from '@/lib/supabase/types'
+import { createClient } from '@/lib/supabase/server'
 
 // Update schema (partial of create schema)
 const foodExperienceUpdateSchema = z.object({
@@ -66,7 +65,7 @@ interface RouteParams {
 // GET - Fetch specific food experience
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const supabase = createServerClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -151,7 +150,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 // PUT - Update food experience
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const supabase = createServerClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -272,7 +271,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 // DELETE - Delete food experience
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    const supabase = createServerClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {

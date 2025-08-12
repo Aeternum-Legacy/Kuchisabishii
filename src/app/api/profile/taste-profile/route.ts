@@ -5,8 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { createServerClient } from '@/lib/supabase/server'
-import { TasteProfileInsert, TasteProfileUpdate } from '@/lib/supabase/types'
+import { createClient } from '@/lib/supabase/server'
 
 // Taste profile validation schema
 const tasteProfileSchema = z.object({
@@ -27,7 +26,7 @@ const tasteProfileSchema = z.object({
 // GET - Fetch taste profile
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServerClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -68,7 +67,7 @@ export async function GET(request: NextRequest) {
 // POST - Create taste profile
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServerClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -146,7 +145,7 @@ export async function POST(request: NextRequest) {
 // PUT - Update taste profile
 export async function PUT(request: NextRequest) {
   try {
-    const supabase = createServerClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {

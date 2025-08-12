@@ -5,8 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { createServerClient } from '@/lib/supabase/server'
-import { RestaurantUpdate } from '@/lib/supabase/types'
+import { createClient } from '@/lib/supabase/server'
 
 // Restaurant update schema
 const restaurantUpdateSchema = z.object({
@@ -38,7 +37,7 @@ interface RouteParams {
 // GET - Fetch specific restaurant with detailed information
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const supabase = createServerClient()
+    const supabase = await createClient()
     const { id } = params
 
     if (!id) {
@@ -134,7 +133,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 // PUT - Update restaurant (only by owner or admin)
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const supabase = createServerClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -231,7 +230,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 // DELETE - Delete restaurant (admin only or owner)
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    const supabase = createServerClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {

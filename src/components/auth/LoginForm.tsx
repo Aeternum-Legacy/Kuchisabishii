@@ -9,9 +9,10 @@ interface LoginFormProps {
   onSuccess?: () => void
   onSwitchToRegister?: () => void
   onForgotPassword?: () => void
+  onEmailNotVerified?: (email: string) => void
 }
 
-export default function LoginForm({ onSuccess, onSwitchToRegister, onForgotPassword }: LoginFormProps) {
+export default function LoginForm({ onSuccess, onSwitchToRegister, onForgotPassword, onEmailNotVerified }: LoginFormProps) {
   const { signIn, loading, error } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
@@ -46,6 +47,9 @@ export default function LoginForm({ onSuccess, onSwitchToRegister, onForgotPassw
     
     if (result.success) {
       onSuccess?.()
+    } else if (result.code === 'EMAIL_NOT_VERIFIED' && onEmailNotVerified) {
+      // Handle email not verified case
+      onEmailNotVerified(formData.email)
     }
   }
 

@@ -33,6 +33,19 @@ export async function POST(request: NextRequest) {
     })
 
     if (authError) {
+      // Check if it's an email not confirmed error
+      if (authError.message.includes('Email not confirmed')) {
+        return NextResponse.json(
+          { 
+            error: 'Email not verified',
+            code: 'EMAIL_NOT_VERIFIED',
+            email: validatedData.email,
+            message: 'Please check your email and click the confirmation link before signing in.'
+          },
+          { status: 403 }
+        )
+      }
+      
       return NextResponse.json(
         { error: authError.message },
         { status: 400 }

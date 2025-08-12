@@ -167,7 +167,12 @@ export function useAuth() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Login failed')
+        // Preserve additional error data for special cases like email verification
+        const error = new Error(data.error || 'Login failed')
+        ;(error as any).code = data.code
+        ;(error as any).email = data.email
+        ;(error as any).data = data
+        throw error
       }
 
       // Update the auth state with the user data from the response
@@ -203,7 +208,15 @@ export function useAuth() {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Login failed'
       setAuthState(prev => ({ ...prev, loading: false, error: errorMessage }))
-      return { success: false, error: errorMessage }
+      
+      // Return additional error data if available
+      return { 
+        success: false, 
+        error: errorMessage,
+        code: (error as any).code,
+        email: (error as any).email,
+        data: (error as any).data
+      }
     }
   }
 

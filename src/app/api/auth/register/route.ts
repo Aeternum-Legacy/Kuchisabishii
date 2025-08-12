@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
           first_name: validatedData.firstName,
           last_name: validatedData.lastName
         },
-        emailRedirectTo: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/auth/callback`
+        emailRedirectTo: `${process.env.NEXTAUTH_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')}/auth/callback`
       }
     })
 

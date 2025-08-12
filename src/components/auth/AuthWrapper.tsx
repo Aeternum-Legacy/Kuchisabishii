@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth'
 import LoginForm from './LoginForm'
 import RegisterForm from './RegisterForm'
 import ForgotPasswordForm from './ForgotPasswordForm'
+import EmailConfirmation from './EmailConfirmation'
 
 interface AuthWrapperProps {
   children: React.ReactNode
@@ -13,8 +14,9 @@ interface AuthWrapperProps {
 
 export default function AuthWrapper({ children, onAuthSuccess }: AuthWrapperProps) {
   const { user, loading } = useAuth()
-  const [authMode, setAuthMode] = useState<'login' | 'register' | 'forgot-password'>('login')
+  const [authMode, setAuthMode] = useState<'login' | 'register' | 'forgot-password' | 'email-confirmation'>('login')
   const [previousUser, setPreviousUser] = useState<typeof user>(null)
+  const [confirmationEmail, setConfirmationEmail] = useState<string>('')
 
   // Handle auth success when user state changes from null to authenticated
   useEffect(() => {
@@ -55,10 +57,14 @@ export default function AuthWrapper({ children, onAuthSuccess }: AuthWrapperProp
         
         {authMode === 'register' && (
           <RegisterForm
-            onSuccess={() => {
-              // After successful registration, show success message or redirect
-              setAuthMode('login')
-              onAuthSuccess?.()
+            onSuccess={(email?: string) => {
+              // After successful registration, show email confirmation
+              if (email) {
+                setConfirmationEmail(email)
+                setAuthMode('email-confirmation')
+              } else {
+                setAuthMode('login')
+              }
             }}
             onSwitchToLogin={() => setAuthMode('login')}
           />
@@ -66,6 +72,13 @@ export default function AuthWrapper({ children, onAuthSuccess }: AuthWrapperProp
         
         {authMode === 'forgot-password' && (
           <ForgotPasswordForm
+            onBackToLogin={() => setAuthMode('login')}
+          />
+        )}
+        
+        {authMode === 'email-confirmation' && (
+          <EmailConfirmation
+            email={confirmationEmail}
             onBackToLogin={() => setAuthMode('login')}
           />
         )}

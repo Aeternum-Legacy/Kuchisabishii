@@ -38,7 +38,8 @@ export async function POST(request: NextRequest) {
           display_name: validatedData.displayName,
           first_name: validatedData.firstName,
           last_name: validatedData.lastName
-        }
+        },
+        emailRedirectTo: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/auth/callback`
       }
     })
 

@@ -170,7 +170,35 @@ export function useAuth() {
         throw new Error(data.error || 'Login failed')
       }
 
-      setAuthState(prev => ({ ...prev, loading: false, error: null }))
+      // Update the auth state with the user data from the response
+      if (data.user) {
+        setAuthState({
+          user: data.user,
+          loading: false,
+          error: null
+        })
+      } else {
+        // If no user data, wait for auth state change event
+        setAuthState(prev => ({ ...prev, loading: false, error: null }))
+      }
+      
+      // Force a session refresh if we have supabase client
+      if (supabase) {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session?.user) {
+          // Trigger auth state update
+          const response = await fetch('/api/auth/me')
+          if (response.ok) {
+            const userData = await response.json()
+            setAuthState({
+              user: userData.user,
+              loading: false,
+              error: null
+            })
+          }
+        }
+      }
+      
       return { success: true, data }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Login failed'

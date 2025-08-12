@@ -5,7 +5,7 @@ import { Eye, EyeOff, Mail, User, Lock } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 
 interface RegisterFormProps {
-  onSuccess?: () => void
+  onSuccess?: (email?: string) => void
   onSwitchToLogin?: () => void
 }
 
@@ -60,7 +60,8 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
     const result = await signUp(formData)
     
     if (result.success) {
-      onSuccess?.()
+      // Pass the email to show confirmation message
+      onSuccess?.(formData.email)
     }
   }
 

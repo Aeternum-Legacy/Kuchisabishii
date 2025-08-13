@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { UserPlus, CheckCircle, XCircle, ArrowLeft } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 
-export default function AddFriendPage() {
+function AddFriendContent() {
   const { user } = useAuth()
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -194,5 +194,17 @@ export default function AddFriendPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function AddFriendPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+      </div>
+    }>
+      <AddFriendContent />
+    </Suspense>
   )
 }

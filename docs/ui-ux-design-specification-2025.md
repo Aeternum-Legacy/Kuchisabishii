@@ -1,161 +1,1033 @@
-# Kuchisabishii - UI/UX Design Specification 2025
+# Kuchisabishii - Mobile-First UI/UX Design System
 
 ## Executive Summary
 
-This design specification outlines the comprehensive UI/UX design system for Kuchisabishii, a food journaling and recommendation app. Based on extensive research of 2025 design trends, this specification provides a complete design framework that balances modern aesthetics with accessibility, creating a fun, cute, and highly functional user experience.
+This comprehensive design system specification outlines a mobile-first UI/UX framework for Kuchisabishii that combines Uber Eats-style navigation with Facebook-inspired social elements. The design prioritizes food-centric experiences, thumb-friendly interactions, and seamless social discovery while maintaining accessibility and cross-platform consistency.
 
-## 1. Color Palettes & Typography
+## 1. Design Philosophy & Core Principles
 
-### Primary Color Palette
+### Design Philosophy
+- **Food-First**: Every design decision prioritizes food content visibility and appetite appeal
+- **Mobile-Native**: Optimized for thumb-friendly interactions with gesture-based navigation
+- **Social by Design**: Seamless sharing and discovery of food experiences with friend connections
+- **Accessibility**: WCAG 2.1 AA compliant with inclusive design patterns for all users
 
-**Warm & Inviting Scheme (Food-Focused)**
-- **Primary Orange**: `#FF6B6B` (Coral Red) - Main brand color, appetite-stimulating
-- **Secondary Peach**: `#FFB74D` (Warm Peach) - Secondary actions, warm accent
-- **Tertiary Coral**: `#FF8A65` (Soft Coral) - Tertiary elements, gentle highlights
-- **Accent Yellow**: `#FFF176` (Butter Yellow) - Success states, positive feedback
+### Navigation Philosophy: Uber Eats + Facebook Hybrid
+**Bottom Tab Navigation (Uber Eats Style)**
+- 5 primary tabs: Home, Search, Add Food, Social, Profile
+- Card-based content presentation with large food imagery
+- Horizontal scrolling categories for food discovery
+- Sticky header with location selector and quick actions
 
-**Neutral Foundation**
-- **Background Light**: `#FAFAFA` (Warm White) - Main background
-- **Background Dark**: `#F5F5F5` (Light Gray) - Secondary background
-- **Surface**: `#FFFFFF` (Pure White) - Card surfaces, modals
-- **Surface Variant**: `#F8F8F8` (Off-White) - Input fields, subtle surfaces
+**Social Elements (Facebook Style)**
+- Activity feed showcasing friend food posts and reviews
+- Like, comment, share interactions on food entries
+- Friend suggestions based on taste similarity algorithms
+- Group dining events and collaborative food discovery
 
-**Text Hierarchy**
-- **Primary Text**: `#212121` (Dark Charcoal) - Main text content
-- **Secondary Text**: `#757575` (Medium Gray) - Supporting text
-- **Tertiary Text**: `#BDBDBD` (Light Gray) - Hints, placeholders
-- **Inverse Text**: `#FFFFFF` (White) - Text on colored backgrounds
+## 2. Color System (Food-Friendly Warm Palette)
 
-**Semantic Colors**
-- **Success**: `#4CAF50` (Fresh Green) - Positive actions, confirmations
-- **Warning**: `#FF9800` (Amber) - Cautions, important notices
-- **Error**: `#F44336` (Error Red) - Destructive actions, errors
-- **Info**: `#2196F3` (Info Blue) - Informational messages
-
-### Dark Mode Palette
-
-**Primary Dark Scheme**
-- **Background Dark**: `#121212` (Near Black) - Main background
-- **Surface Dark**: `#1E1E1E` (Dark Gray) - Card surfaces
-- **Primary Dark**: `#FF8A80` (Light Coral) - Primary actions in dark mode
-- **Secondary Dark**: `#FFD54F` (Light Yellow) - Secondary elements
-
-### Typography System
-
-**Primary Font: SF Pro (iOS) / Roboto (Android)**
-- Modern, readable, system-optimized
-- Excellent multi-language support
-- Optimized for mobile screens
-
-**Font Scale & Hierarchy**
+### Primary Colors
 ```css
-/* Display */
-.text-display-large { font-size: 57px; line-height: 64px; font-weight: 400; }
-.text-display-medium { font-size: 45px; line-height: 52px; font-weight: 400; }
-.text-display-small { font-size: 36px; line-height: 44px; font-weight: 400; }
-
-/* Headline */
-.text-headline-large { font-size: 32px; line-height: 40px; font-weight: 600; }
-.text-headline-medium { font-size: 28px; line-height: 36px; font-weight: 600; }
-.text-headline-small { font-size: 24px; line-height: 32px; font-weight: 600; }
-
-/* Title */
-.text-title-large { font-size: 22px; line-height: 28px; font-weight: 500; }
-.text-title-medium { font-size: 16px; line-height: 24px; font-weight: 500; }
-.text-title-small { font-size: 14px; line-height: 20px; font-weight: 500; }
-
-/* Body */
-.text-body-large { font-size: 16px; line-height: 24px; font-weight: 400; }
-.text-body-medium { font-size: 14px; line-height: 20px; font-weight: 400; }
-.text-body-small { font-size: 12px; line-height: 16px; font-weight: 400; }
-
-/* Label */
-.text-label-large { font-size: 14px; line-height: 20px; font-weight: 500; }
-.text-label-medium { font-size: 12px; line-height: 16px; font-weight: 500; }
-.text-label-small { font-size: 11px; line-height: 16px; font-weight: 500; }
+:root {
+  /* Brand Colors - Appetizing & Warm */
+  --primary-orange: #FF6B35;        /* Main brand - warm, food-focused */
+  --primary-orange-light: #FF8A60;  /* Hover states, lighter interactions */
+  --primary-orange-dark: #E55A2B;   /* Active states, pressed buttons */
+  
+  /* Secondary Colors */
+  --secondary-red: #E74C3C;         /* Accent - tomato red for favorites */
+  --secondary-yellow: #F39C12;      /* Warnings/highlights - golden turmeric */
+  --secondary-green: #27AE60;       /* Success states - fresh herb green */
+  
+  /* Food Category Colors */
+  --category-protein: #8D4E85;      /* Purple for meat/protein dishes */
+  --category-carbs: #D4A574;        /* Tan for grains/carbohydrates */
+  --category-vegetables: #5D8E3A;   /* Green for vegetables/salads */
+  --category-dairy: #4A90E2;        /* Blue for dairy products */
+  --category-dessert: #E17B9B;      /* Pink for desserts/sweets */
+  --category-beverages: #8E44AD;    /* Purple for drinks/beverages */
+}
 ```
 
-## 2. Interactive Elements
-
-### Button Design System
-
-**Primary Button (CTA)**
+### Neutral Foundation
 ```css
-.btn-primary {
-  background: linear-gradient(135deg, #FF6B6B 0%, #FF8A65 100%);
-  border-radius: 24px;
-  height: 48px;
-  min-width: 120px;
-  padding: 12px 24px;
-  font-size: 16px;
+:root {
+  /* Light Theme */
+  --neutral-100: #FAFAFA;           /* Background light */
+  --neutral-200: #F5F5F5;           /* Card backgrounds */
+  --neutral-300: #E0E0E0;           /* Borders and dividers */
+  --neutral-400: #BDBDBD;           /* Disabled text */
+  --neutral-500: #757575;           /* Secondary text */
+  --neutral-600: #424242;           /* Primary text */
+  --neutral-700: #212121;           /* Headers and emphasis */
+  --neutral-800: #1A1A1A;           /* Dark mode background */
+  --neutral-900: #000000;           /* Pure black accents */
+}
+```
+
+### Dark Mode Adaptations
+```css
+:root[data-theme="dark"] {
+  --primary-orange: #FF7A47;        /* Slightly brighter for dark backgrounds */
+  --neutral-100: #1A1A1A;           /* Dark background */
+  --neutral-200: #2D2D2D;           /* Dark card surfaces */
+  --neutral-300: #404040;           /* Dark borders */
+  --neutral-600: #E0E0E0;           /* Light text on dark */
+  --neutral-700: #FFFFFF;           /* White headers on dark */
+  
+  /* Social Interaction Colors (Dark Mode) */
+  --like-red: #FF5A6B;
+  --share-blue: #4A9EFF;
+  --comment-gray: #B3B3B3;
+}
+```
+
+### Semantic Colors
+```css
+:root {
+  /* Status Colors */
+  --success: #4CAF50;               /* Confirmations, positive feedback */
+  --warning: #FF9800;               /* Cautions, important notices */
+  --error: #F44336;                 /* Destructive actions, errors */
+  --info: #2196F3;                  /* Informational messages */
+  
+  /* Social Interaction Colors */
+  --like-red: #FF3040;              /* Heart/like button active state */
+  --share-blue: #1877F2;            /* Share button color */
+  --comment-gray: #65676B;          /* Comment icon neutral state */
+}
+```
+
+## 3. Typography System (Mobile-Optimized)
+
+### Font Stack
+```css
+:root {
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-secondary: 'Poppins', sans-serif; /* For headings and emphasis */
+  --font-mono: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+}
+```
+
+### Mobile-First Type Scale
+```css
+:root {
+  /* Display (Hero sections, splash screens) */
+  --text-display-large: 2.5rem;     /* 40px - App name, major headers */
+  --text-display-medium: 2rem;      /* 32px - Page headers */
+  --text-display-small: 1.75rem;    /* 28px - Section headers */
+  
+  /* Headings (Content hierarchy) */
+  --text-h1: 1.5rem;                /* 24px - Main titles, food names */
+  --text-h2: 1.25rem;               /* 20px - Card titles, restaurant names */
+  --text-h3: 1.125rem;              /* 18px - Subsections, categories */
+  --text-h4: 1rem;                  /* 16px - Small headers, labels */
+  
+  /* Body Text (Main content) */
+  --text-body-large: 1rem;          /* 16px - Primary content, descriptions */
+  --text-body-medium: 0.875rem;     /* 14px - Secondary content, metadata */
+  --text-body-small: 0.75rem;       /* 12px - Captions, timestamps */
+  
+  /* Interactive Elements */
+  --text-button-large: 1rem;        /* 16px - Primary buttons, CTAs */
+  --text-button-medium: 0.875rem;   /* 14px - Secondary buttons */
+  --text-button-small: 0.75rem;     /* 12px - Tertiary buttons, tags */
+  
+  /* Line Heights (Reading comfort) */
+  --line-height-tight: 1.2;         /* Headers, titles */
+  --line-height-normal: 1.4;        /* Body text, buttons */
+  --line-height-relaxed: 1.6;       /* Long-form content */
+  
+  /* Letter Spacing (Visual refinement) */
+  --letter-spacing-tight: -0.025em; /* Large headings */
+  --letter-spacing-normal: 0;       /* Body text */
+  --letter-spacing-wide: 0.025em;   /* Small text, buttons */
+}
+```
+
+### Typography Classes
+```css
+/* Food-Specific Typography */
+.food-title {
+  font-size: var(--text-h1);
+  font-weight: 700;
+  color: var(--neutral-700);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.restaurant-name {
+  font-size: var(--text-h2);
   font-weight: 600;
-  color: #FFFFFF;
-  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
-  transition: all 0.2s ease;
+  color: var(--neutral-600);
+  line-height: var(--line-height-normal);
 }
 
-.btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+.food-description {
+  font-size: var(--text-body-medium);
+  color: var(--neutral-500);
+  line-height: var(--line-height-relaxed);
 }
 
-.btn-primary:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 4px rgba(255, 107, 107, 0.3);
+.price-text {
+  font-size: var(--text-h3);
+  font-weight: 700;
+  color: var(--primary-orange);
+}
+
+.rating-text {
+  font-size: var(--text-body-small);
+  font-weight: 600;
+  color: var(--secondary-yellow);
 }
 ```
 
-**Secondary Button**
+## 4. Spacing System (8px Grid)
+
+### Base Spacing Scale
 ```css
-.btn-secondary {
-  background: transparent;
-  border: 2px solid #FF6B6B;
-  border-radius: 24px;
-  height: 48px;
-  min-width: 120px;
-  padding: 12px 24px;
-  font-size: 16px;
-  font-weight: 500;
-  color: #FF6B6B;
-  transition: all 0.2s ease;
-}
-
-.btn-secondary:hover {
-  background: #FF6B6B;
-  color: #FFFFFF;
+:root {
+  /* Base unit: 8px for consistent spacing */
+  --space-1: 0.25rem;    /* 4px */
+  --space-2: 0.5rem;     /* 8px */
+  --space-3: 0.75rem;    /* 12px */
+  --space-4: 1rem;       /* 16px */
+  --space-5: 1.25rem;    /* 20px */
+  --space-6: 1.5rem;     /* 24px */
+  --space-8: 2rem;       /* 32px */
+  --space-10: 2.5rem;    /* 40px */
+  --space-12: 3rem;      /* 48px */
+  --space-16: 4rem;      /* 64px */
+  --space-20: 5rem;      /* 80px */
+  
+  /* Component-specific spacing */
+  --padding-xs: var(--space-2);     /* 8px */
+  --padding-sm: var(--space-3);     /* 12px */
+  --padding-md: var(--space-4);     /* 16px */
+  --padding-lg: var(--space-6);     /* 24px */
+  --padding-xl: var(--space-8);     /* 32px */
+  
+  /* Touch target minimum sizes */
+  --touch-target: 44px;             /* iOS minimum */
+  --touch-target-android: 48px;     /* Android minimum */
 }
 ```
 
-**Floating Action Button (FAB)**
+## 5. Bottom Tab Navigation (Uber Eats Style)
+
+### Tab Structure
+```typescript
+interface TabConfig {
+  id: string;
+  icon: React.ComponentType;
+  iconActive: React.ComponentType;
+  label: string;
+  badge?: number;
+  color: string;
+}
+
+const tabs: TabConfig[] = [
+  {
+    id: 'home',
+    icon: HomeOutline,
+    iconActive: HomeFilled,
+    label: 'Home',
+    color: 'var(--primary-orange)'
+  },
+  {
+    id: 'search',
+    icon: SearchOutline,
+    iconActive: SearchFilled,
+    label: 'Search',
+    color: 'var(--secondary-green)'
+  },
+  {
+    id: 'addFood',
+    icon: PlusCircleOutline,
+    iconActive: PlusCircleFilled,
+    label: 'Add Food',
+    color: 'var(--primary-orange)'
+  },
+  {
+    id: 'social',
+    icon: UsersOutline,
+    iconActive: UsersFilled,
+    label: 'Social',
+    badge: 3, // Notification count
+    color: 'var(--like-red)'
+  },
+  {
+    id: 'profile',
+    icon: UserOutline,
+    iconActive: UserFilled,
+    label: 'Profile',
+    color: 'var(--neutral-600)'
+  }
+];
+```
+
+### Tab Navigation Styling
+```css
+.bottom-navigation {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--neutral-300);
+  display: flex;
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2);
+  position: relative;
+  min-height: var(--touch-target);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-icon {
+  width: 24px;
+  height: 24px;
+  margin-bottom: var(--space-1);
+  transition: transform 0.2s ease;
+}
+
+.tab-item.active .tab-icon {
+  transform: scale(1.1);
+}
+
+.tab-label {
+  font-size: var(--text-button-small);
+  font-weight: 500;
+  color: var(--neutral-400);
+  transition: color 0.2s ease;
+}
+
+.tab-item.active .tab-label {
+  color: var(--primary-orange);
+}
+
+.tab-badge {
+  position: absolute;
+  top: 8px;
+  right: 50%;
+  transform: translateX(12px);
+  background: var(--like-red);
+  color: white;
+  border-radius: 10px;
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+}
+```
+
+## 6. Food Entry Cards (Content-First Design)
+
+### Card Component Structure
+```typescript
+interface FoodEntryCardProps {
+  id: string;
+  imageUrl: string;
+  dishName: string;
+  restaurantName: string;
+  rating: number; // 1-5 scale
+  price?: string;
+  tags: string[];
+  timestamp: Date;
+  author: {
+    id: string;
+    name: string;
+    avatar: string;
+  };
+  socialStats: {
+    likes: number;
+    comments: number;
+    shares: number;
+    isLiked: boolean;
+  };
+  location?: {
+    name: string;
+    distance: string;
+  };
+  onLike: () => void;
+  onComment: () => void;
+  onShare: () => void;
+  onPress: () => void;
+}
+```
+
+### Card Styling
+```css
+.food-entry-card {
+  background: var(--neutral-100);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin: var(--space-3) var(--space-4);
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.food-entry-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card-image {
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  background: var(--neutral-200);
+}
+
+.card-content {
+  padding: var(--space-4);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-2);
+}
+
+.dish-name {
+  font-size: var(--text-h2);
+  font-weight: 700;
+  color: var(--neutral-700);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--space-1);
+}
+
+.restaurant-name {
+  font-size: var(--text-body-medium);
+  color: var(--neutral-500);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.location-distance {
+  font-size: var(--text-body-small);
+  color: var(--neutral-400);
+  background: var(--neutral-200);
+  padding: var(--space-1) var(--space-2);
+  border-radius: 8px;
+}
+
+.rating-display {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.star-rating {
+  display: flex;
+  gap: 2px;
+}
+
+.star {
+  width: 16px;
+  height: 16px;
+  color: var(--secondary-yellow);
+}
+
+.rating-text {
+  font-size: var(--text-body-small);
+  font-weight: 600;
+  color: var(--neutral-600);
+}
+
+.price-tag {
+  font-size: var(--text-h4);
+  font-weight: 700;
+  color: var(--primary-orange);
+}
+```
+
+### Social Action Bar (Facebook Style)
+```css
+.social-action-bar {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--neutral-300);
+  margin-top: var(--space-3);
+}
+
+.social-action {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border-radius: 8px;
+  min-height: var(--touch-target);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 60px;
+  justify-content: center;
+}
+
+.social-action:active {
+  transform: scale(0.95);
+}
+
+.like-action {
+  color: var(--neutral-500);
+}
+
+.like-action.active {
+  color: var(--like-red);
+  background: rgba(255, 48, 64, 0.1);
+}
+
+.like-action.active .heart-icon {
+  animation: heartBeat 0.3s ease;
+}
+
+@keyframes heartBeat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+}
+
+.comment-action {
+  color: var(--neutral-500);
+}
+
+.share-action {
+  color: var(--neutral-500);
+}
+
+.action-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.action-count {
+  font-size: var(--text-body-small);
+  font-weight: 600;
+  color: inherit;
+}
+```
+
+## 7. Category Horizontal Scroll (Discovery)
+
+### Category Chip Design
+```typescript
+interface CategoryChipProps {
+  id: string;
+  name: string;
+  icon: React.ComponentType;
+  color: string;
+  count?: number;
+  isSelected: boolean;
+  onPress: (id: string) => void;
+}
+```
+
+### Category Styling
+```css
+.category-scroll {
+  padding: var(--space-4) 0;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.category-scroll::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.category-list {
+  display: flex;
+  gap: var(--space-3);
+  padding: 0 var(--space-4);
+}
+
+.category-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-3);
+  min-width: 80px;
+  border-radius: 16px;
+  background: var(--neutral-200);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.category-chip.selected {
+  background: var(--primary-orange);
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+}
+
+.category-icon {
+  width: 32px;
+  height: 32px;
+  margin-bottom: var(--space-2);
+  color: var(--neutral-600);
+}
+
+.category-chip.selected .category-icon {
+  color: white;
+}
+
+.category-name {
+  font-size: var(--text-body-small);
+  font-weight: 600;
+  color: var(--neutral-600);
+  text-align: center;
+}
+
+.category-chip.selected .category-name {
+  color: white;
+}
+
+.category-count {
+  font-size: var(--text-body-small);
+  color: var(--neutral-400);
+  margin-top: var(--space-1);
+}
+
+.category-chip.selected .category-count {
+  color: rgba(255, 255, 255, 0.8);
+}
+```
+
+## 8. Sticky Header (Location & Search)
+
+### Header Component
+```typescript
+interface StickyHeaderProps {
+  title: string;
+  location?: {
+    name: string;
+    accuracy: 'precise' | 'approximate';
+  };
+  onLocationPress?: () => void;
+  onSearchPress?: () => void;
+  showBackButton?: boolean;
+  onBackPress?: () => void;
+  scrollOffset: number;
+}
+```
+
+### Header Styling
+```css
+.sticky-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(56px + env(safe-area-inset-top));
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid transparent;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 var(--space-4) var(--space-2);
+  z-index: 90;
+  transition: all 0.2s ease;
+}
+
+.sticky-header.scrolled {
+  background: rgba(255, 255, 255, 0.98);
+  border-bottom-color: var(--neutral-300);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+}
+
+.back-button {
+  width: var(--touch-target);
+  height: var(--touch-target);
+  border-radius: 22px;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.back-button:active {
+  background: var(--neutral-200);
+  transform: scale(0.9);
+}
+
+.location-selector {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border-radius: 20px;
+  background: var(--neutral-200);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.location-selector:active {
+  background: var(--neutral-300);
+  transform: scale(0.98);
+}
+
+.location-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--primary-orange);
+}
+
+.location-text {
+  font-size: var(--text-body-medium);
+  font-weight: 600;
+  color: var(--neutral-700);
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chevron-down {
+  width: 12px;
+  height: 12px;
+  color: var(--neutral-500);
+  transition: transform 0.2s ease;
+}
+
+.location-selector.open .chevron-down {
+  transform: rotate(180deg);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.search-button {
+  width: var(--touch-target);
+  height: var(--touch-target);
+  border-radius: 22px;
+  background: var(--primary-orange);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+}
+
+.search-button:active {
+  transform: scale(0.9);
+  box-shadow: 0 1px 4px rgba(255, 107, 53, 0.3);
+}
+
+.search-icon {
+  width: 20px;
+  height: 20px;
+  color: white;
+}
+```
+
+## 9. Floating Action Button (Quick Add)
+
+### FAB Component
+```typescript
+interface FABProps {
+  icon: React.ComponentType;
+  onPress: () => void;
+  position?: 'bottomRight' | 'bottomCenter';
+  extended?: boolean;
+  label?: string;
+  color?: 'primary' | 'secondary';
+  size?: 'small' | 'large';
+}
+```
+
+### FAB Styling
 ```css
 .fab {
+  position: fixed;
+  bottom: calc(80px + var(--space-4) + env(safe-area-inset-bottom)); /* Above bottom nav */
+  right: var(--space-4);
   width: 56px;
   height: 56px;
   border-radius: 28px;
-  background: linear-gradient(135deg, #FF6B6B 0%, #FF8A65 100%);
-  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 1000;
+  background: linear-gradient(135deg, var(--primary-orange) 0%, var(--primary-orange-light) 100%);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+  z-index: 110;
+  transition: all 0.2s ease;
+}
+
+.fab:active {
+  transform: scale(0.9);
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.4);
+}
+
+.fab-extended {
+  width: auto;
+  min-width: 120px;
+  padding: 0 var(--space-4);
+  border-radius: 28px;
+}
+
+.fab-icon {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+.fab-label {
+  font-size: var(--text-button-medium);
+  font-weight: 600;
+  color: white;
+  margin-left: var(--space-2);
+}
+
+.fab-small {
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+}
+
+.fab-small .fab-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Hide on scroll down, show on scroll up */
+.fab.hidden {
+  transform: translateY(calc(100% + var(--space-4)));
 }
 ```
 
-### Micro-Interactions
+## 10. Animation Patterns
 
-**Button Press Animation**
-- **Duration**: 200-300ms
-- **Easing**: `cubic-bezier(0.4, 0.0, 0.2, 1)`
-- **Scale**: 0.95x on press
-- **Ripple Effect**: Material Design ripple with primary color
-
-**Loading States**
+### Core Animation System
 ```css
-.loading-spinner {
-  width: 24px;
-  height: 24px;
-  border: 2px solid transparent;
-  border-top: 2px solid #FF6B6B;
+:root {
+  /* Timing Functions */
+  --ease-in-out: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --ease-out: cubic-bezier(0.0, 0.0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0.0, 1, 1);
+  --bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  
+  /* Duration Guidelines */
+  --duration-fast: 150ms;      /* Micro-interactions */
+  --duration-normal: 200ms;    /* Button presses */
+  --duration-slow: 300ms;      /* Page transitions */
+  --duration-slower: 400ms;    /* Complex animations */
+}
+```
+
+### Page Transitions
+```css
+/* Tab switching - instant */
+.tab-transition-enter {
+  opacity: 0;
+}
+
+.tab-transition-enter-active {
+  opacity: 1;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+/* Modal slide up */
+.modal-enter {
+  transform: translateY(100%);
+  opacity: 0;
+}
+
+.modal-enter-active {
+  transform: translateY(0);
+  opacity: 1;
+  transition: all var(--duration-slow) var(--ease-out);
+}
+
+.modal-exit {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.modal-exit-active {
+  transform: translateY(100%);
+  opacity: 0;
+  transition: all var(--duration-normal) var(--ease-in);
+}
+```
+
+### Micro-interactions
+```css
+/* Button press feedback */
+.button-press {
+  transform: scale(0.95);
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+/* Like button animation */
+.like-animation {
+  animation: likeHeartBeat var(--duration-slow) var(--bounce);
+}
+
+@keyframes likeHeartBeat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+}
+
+/* Card appearance animation */
+.card-appear {
+  animation: cardSlideUp var(--duration-normal) var(--ease-out);
+}
+
+@keyframes cardSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Staggered list animations */
+.list-item {
+  animation: listItemAppear var(--duration-normal) var(--ease-out);
+  animation-fill-mode: both;
+}
+
+.list-item:nth-child(1) { animation-delay: 0ms; }
+.list-item:nth-child(2) { animation-delay: 50ms; }
+.list-item:nth-child(3) { animation-delay: 100ms; }
+.list-item:nth-child(4) { animation-delay: 150ms; }
+
+@keyframes listItemAppear {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+```
+
+### Loading States
+```css
+/* Skeleton loading for cards */
+.skeleton {
+  background: linear-gradient(90deg, var(--neutral-200) 25%, var(--neutral-300) 50%, var(--neutral-200) 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+.skeleton-card {
+  background: var(--neutral-100);
+  border-radius: 16px;
+  padding: var(--space-4);
+  margin: var(--space-3) var(--space-4);
+}
+
+.skeleton-image {
+  width: 100%;
+  height: 200px;
+  margin-bottom: var(--space-3);
+}
+
+.skeleton-title {
+  width: 70%;
+  height: 20px;
+  margin-bottom: var(--space-2);
+}
+
+.skeleton-subtitle {
+  width: 50%;
+  height: 16px;
+  margin-bottom: var(--space-2);
+}
+
+.skeleton-text {
+  width: 100%;
+  height: 14px;
+  margin-bottom: var(--space-1);
+}
+
+.skeleton-text:last-child {
+  width: 75%;
+}
+
+/* Pull to refresh */
+.pull-to-refresh {
+  position: relative;
+  overflow: hidden;
+}
+
+.refresh-indicator {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  background: var(--primary-orange);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: top var(--duration-normal) var(--ease-out);
+}
+
+.pull-to-refresh.pulling .refresh-indicator {
+  top: 20px;
+}
+
+.refresh-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -166,264 +1038,232 @@ This design specification outlines the comprehensive UI/UX design system for Kuc
 }
 ```
 
-**Success Feedback**
-- **Checkmark Animation**: Scale from 0 to 1.2x then to 1x
-- **Color Transition**: Button background animates to success green
-- **Duration**: 500ms total
+## 11. Gesture Navigation Patterns
 
-### Navigation Patterns
-
-**Bottom Navigation (Primary)**
-```css
-.bottom-nav {
-  height: 80px;
-  background: #FFFFFF;
-  border-top: 1px solid #F0F0F0;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-}
-
-.nav-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 8px;
-  transition: all 0.2s ease;
-}
-
-.nav-item.active {
-  color: #FF6B6B;
-}
-
-.nav-icon {
-  width: 24px;
-  height: 24px;
-  margin-bottom: 4px;
-  transition: transform 0.2s ease;
-}
-
-.nav-item.active .nav-icon {
-  transform: scale(1.1);
+### Touch Gesture System
+```typescript
+interface GestureConfig {
+  // Card interactions
+  cardSwipe: {
+    leftAction: 'like' | 'save' | 'share';
+    rightAction: 'delete' | 'hide';
+    threshold: number; // 0-1, percentage of screen width
+    snapback: boolean;
+  };
+  
+  // Tab switching
+  tabSwipe: {
+    enabled: boolean;
+    sensitivity: number; // 0-1
+    bounceback: boolean;
+  };
+  
+  // Navigation
+  edgeSwipe: {
+    enabled: boolean;
+    edge: 'left' | 'right';
+    threshold: number; // pixels from edge
+    completion: number; // 0-1, swipe completion required
+  };
+  
+  // Modal dismissal
+  modalDismiss: {
+    direction: 'down' | 'up';
+    threshold: number; // 0-1
+    velocity: number; // pixels per second
+  };
 }
 ```
 
-**Gesture-Based Navigation**
-- **Swipe Right**: Back navigation
-- **Swipe Left**: Forward navigation (where applicable)
-- **Pull to Refresh**: 60px pull distance, spring animation
-- **Swipe to Delete**: Red background reveal with trash icon
-
-## 3. Layout & Components
-
-### Card Design System
-
-**Food Entry Card**
+### Swipe Actions
 ```css
-.food-card {
-  background: #FFFFFF;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  margin: 8px 16px;
-  overflow: hidden;
-  transition: all 0.2s ease;
-}
-
-.food-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-}
-
-.food-card-image {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  border-radius: 16px 16px 0 0;
-}
-
-.food-card-content {
-  padding: 16px;
-}
-
-.food-card-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #212121;
-  margin-bottom: 8px;
-}
-
-.food-card-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 12px;
-}
-
-.rating-stars {
-  display: flex;
-  gap: 2px;
-}
-
-.star {
-  width: 16px;
-  height: 16px;
-  color: #FFD54F;
-}
-```
-
-**Restaurant Card**
-```css
-.restaurant-card {
-  background: #FFFFFF;
-  border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  margin: 4px 16px;
-  padding: 16px;
-  border-left: 4px solid #FF6B6B;
-}
-
-.restaurant-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.restaurant-name {
-  font-size: 16px;
-  font-weight: 600;
-  color: #212121;
-}
-
-.restaurant-distance {
-  font-size: 12px;
-  color: #757575;
-  background: #F5F5F5;
-  padding: 4px 8px;
-  border-radius: 8px;
-}
-```
-
-### Form Components
-
-**Input Fields**
-```css
-.input-field {
-  width: 100%;
-  height: 48px;
-  padding: 12px 16px;
-  border: 2px solid #E0E0E0;
-  border-radius: 12px;
-  font-size: 16px;
-  background: #FAFAFA;
-  transition: all 0.2s ease;
-}
-
-.input-field:focus {
-  border-color: #FF6B6B;
-  background: #FFFFFF;
-  outline: none;
-  box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1);
-}
-
-.input-field::placeholder {
-  color: #BDBDBD;
-}
-
-.input-label {
-  font-size: 14px;
-  font-weight: 500;
-  color: #212121;
-  margin-bottom: 8px;
-  display: block;
-}
-```
-
-**Toggle Switches**
-```css
-.toggle-switch {
-  width: 48px;
-  height: 28px;
-  background: #E0E0E0;
-  border-radius: 14px;
+.swipeable-card {
   position: relative;
-  cursor: pointer;
-  transition: background 0.2s ease;
+  touch-action: pan-x;
+  transition: transform var(--duration-normal) var(--ease-out);
 }
 
-.toggle-switch.active {
-  background: #FF6B6B;
+.swipe-actions {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
 }
 
-.toggle-handle {
+.swipe-action-left {
+  left: 0;
+  background: linear-gradient(90deg, var(--success) 0%, #66BB6A 100%);
+}
+
+.swipe-action-right {
+  right: 0;
+  background: linear-gradient(90deg, var(--error) 0%, #EF5350 100%);
+}
+
+.swipe-action-icon {
   width: 24px;
   height: 24px;
-  background: #FFFFFF;
-  border-radius: 12px;
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  transition: transform 0.2s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-}
-
-.toggle-switch.active .toggle-handle {
-  transform: translateX(20px);
+  color: white;
 }
 ```
 
-### Modal & Overlay Components
+## 12. Responsive Design & Platform Adaptations
 
-**Modal Design**
+### Responsive Breakpoints
 ```css
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  z-index: 1000;
-  animation: fadeIn 0.2s ease;
+:root {
+  /* Mobile-first breakpoints */
+  --breakpoint-xs: 320px;    /* Small phones (iPhone SE) */
+  --breakpoint-sm: 375px;    /* Standard phones (iPhone 12) */
+  --breakpoint-md: 414px;    /* Large phones (iPhone Pro Max) */
+  --breakpoint-lg: 768px;    /* Tablets portrait */
+  --breakpoint-xl: 1024px;   /* Tablets landscape */
+  --breakpoint-2xl: 1440px;  /* Desktop */
 }
 
-.modal-content {
-  background: #FFFFFF;
-  border-radius: 24px 24px 0 0;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  max-height: 80vh;
-  padding: 24px;
-  animation: slideUp 0.3s ease;
+/* Small phone optimizations */
+@media (max-width: 374px) {
+  .tab-label {
+    display: none; /* Hide labels on very small screens */
+  }
+  
+  .food-entry-card {
+    margin: var(--space-2) var(--space-3); /* Reduced margins */
+  }
+  
+  .category-chip {
+    min-width: 70px; /* Smaller category chips */
+  }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+/* Large phone optimizations */
+@media (min-width: 414px) {
+  .container {
+    max-width: 414px;
+    margin: 0 auto;
+  }
 }
 
-@keyframes slideUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
-}
-
-.modal-handle {
-  width: 40px;
-  height: 4px;
-  background: #E0E0E0;
-  border-radius: 2px;
-  margin: 0 auto 20px;
+/* Tablet adaptations */
+@media (min-width: 768px) {
+  .bottom-navigation {
+    position: static;
+    width: 240px;
+    height: 100vh;
+    flex-direction: column;
+    border-top: none;
+    border-right: 1px solid var(--neutral-300);
+  }
+  
+  .tab-item {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: var(--space-4);
+  }
+  
+  .tab-icon {
+    margin-bottom: 0;
+    margin-right: var(--space-3);
+  }
+  
+  .tab-label {
+    display: block;
+  }
+  
+  .main-content {
+    margin-left: 240px;
+  }
+  
+  .food-entry-card {
+    max-width: 400px;
+    margin: var(--space-3) auto;
+  }
 }
 ```
 
-## 4. Accessibility & Inclusive Design
+### iOS Specific Adaptations
+```css
+/* iOS safe area handling */
+.ios-safe-area {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* iOS-specific styling */
+@supports (-webkit-touch-callout: none) {
+  .bottom-navigation {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+  }
+  
+  .sticky-header {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+  }
+  
+  /* iOS button styling */
+  .button {
+    border-radius: 8px; /* iOS prefers slightly less rounded */
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+```
+
+### Android Specific Adaptations
+```css
+/* Android material design adaptations */
+.android .button {
+  border-radius: 4px; /* Material design prefers less rounded */
+  elevation: 2dp;
+  transition: elevation var(--duration-normal) ease;
+}
+
+.android .button:hover {
+  elevation: 4dp;
+}
+
+.android .fab {
+  border-radius: 28px; /* Perfect circle for FAB */
+  elevation: 6dp;
+}
+
+.android .card {
+  elevation: 1dp;
+  border-radius: 4px;
+}
+
+/* Android ripple effect */
+.android .ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.android .ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 107, 53, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width var(--duration-normal) ease, height var(--duration-normal) ease;
+}
+
+.android .ripple:active::after {
+  width: 300px;
+  height: 300px;
+}
+```
+
+## 13. Accessibility & Inclusive Design
 
 ### WCAG 2.2 Compliance
 

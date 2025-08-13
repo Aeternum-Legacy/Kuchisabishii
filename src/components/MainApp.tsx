@@ -2,6 +2,9 @@
 
 import React, { useState } from 'react';
 import { Home, Search, Plus, User, Users, ChefHat, Star, MapPin, Clock } from 'lucide-react';
+import { BottomTabBar, defaultTabs } from './mobile/BottomTabBar';
+import { CategoryScroll, sampleCategories } from './mobile/CategoryScroll';
+import ActivityFeed from './social/ActivityFeed';
 import ProfileScreen from './ProfileScreen';
 import RecommendationScreen from './RecommendationScreen';
 import EatAgainModal from './EatAgainModal';
@@ -34,7 +37,8 @@ interface ExperienceVersion {
 }
 
 const MainApp: React.FC = () => {
-  const [currentTab, setCurrentTab] = useState<'home' | 'discover' | 'add' | 'profile'>('home');
+  const [currentTab, setCurrentTab] = useState<string>('home');
+  const [activeCategory, setActiveCategory] = useState('all');
   const [showEatAgainModal, setShowEatAgainModal] = useState(false);
   const [selectedFood, setSelectedFood] = useState<FoodExperience | null>(null);
   const [userFoodExperiences, setUserFoodExperiences] = useState<FoodExperience[]>([
@@ -71,6 +75,14 @@ const MainApp: React.FC = () => {
     setSelectedFood(null);
   };
 
+  const handleTabChange = (tabId: string) => {
+    setCurrentTab(tabId);
+  };
+
+  const handleCategorySelect = (categoryId: string) => {
+    setActiveCategory(categoryId);
+  };
+
 
   // Add placeholder content for other tabs
   const AddContent = () => (
@@ -86,45 +98,47 @@ const MainApp: React.FC = () => {
     </div>
   );
 
-  // Bottom Navigation
-  const BottomNav = () => (
-    <div className="bg-white border-t border-gray-200 px-6 py-2">
-      <div className="flex justify-around">
-        {[
-          { id: 'home', icon: Home, label: 'Home' },
-          { id: 'discover', icon: Search, label: 'Discover' },
-          { id: 'add', icon: Plus, label: 'Add' },
-          { id: 'profile', icon: User, label: 'Profile' }
-        ].map(({ id, icon: Icon, label }) => (
-          <button
-            key={id}
-            onClick={() => setCurrentTab(id as any)}
-            className={`flex flex-col items-center py-2 px-3 rounded-lg transition-colors ${
-              currentTab === id 
-                ? 'text-orange-500 bg-orange-50' 
-                : 'text-gray-600 hover:text-gray-800'
-            }`}
-          >
-            <Icon className="w-6 h-6 mb-1" />
-            <span className="text-xs font-medium">{label}</span>
-          </button>
-        ))}
+  // Social/Activity Content
+  const SocialContent = () => (
+    <ActivityFeed onBack={() => setCurrentTab('home')} />
+  );
+
+  // Search/Discover Content  
+  const DiscoverContent = () => (
+    <div className="flex-1 bg-gray-50 pb-20">
+      {/* Category Scroll */}
+      <div className="bg-white shadow-sm">
+        <CategoryScroll 
+          categories={sampleCategories}
+          activeCategory={activeCategory}
+          onCategorySelect={handleCategorySelect}
+        />
+      </div>
+      
+      {/* Search Results */}
+      <div className="p-4">
+        <RecommendationScreen />
       </div>
     </div>
   );
 
   return (
-    <div className="flex flex-col h-screen bg-white">
+    <div className="flex flex-col h-screen bg-white relative">
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
         {currentTab === 'home' && <HomeScreen onViewChange={setCurrentTab} />}
-        {currentTab === 'discover' && <RecommendationScreen />}
+        {currentTab === 'search' && <DiscoverContent />}
         {currentTab === 'add' && <AddContent />}
+        {currentTab === 'social' && <SocialContent />}
         {currentTab === 'profile' && <ProfileScreen />}
       </div>
 
       {/* Bottom Navigation */}
-      <BottomNav />
+      <BottomTabBar 
+        tabs={defaultTabs}
+        activeTab={currentTab}
+        onTabChange={handleTabChange}
+      />
 
       {/* Eat Again Modal */}
       {showEatAgainModal && selectedFood && (

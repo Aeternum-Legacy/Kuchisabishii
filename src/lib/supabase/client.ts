@@ -23,7 +23,9 @@ function getSupabaseClient() {
       // Configure OAuth flow for proper redirect handling
       flowType: 'pkce',
       // Set storage options for better session management
-      storage: typeof window !== 'undefined' ? window.localStorage : undefined
+      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+      // Google OAuth configuration
+      redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : undefined
     },
     // Enhanced global options
     global: {

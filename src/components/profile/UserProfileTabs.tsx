@@ -5,7 +5,7 @@ import {
   Camera, Settings, Users, Heart, MapPin, Calendar, Star, 
   UserPlus, Search, Bell, TrendingUp, Award, Download,
   Filter, SortAsc, Eye, EyeOff, Share2, BarChart3, PieChart,
-  Target, Bookmark, Clock, ChefHat, Globe, Edit3
+  Target, Bookmark, Clock, ChefHat, Globe, Edit3, Briefcase
 } from 'lucide-react';
 import { Database } from '@/lib/supabase/types';
 import { useAuth } from '@/hooks/useAuth';
@@ -15,10 +15,20 @@ import PalateProfileTab from './PalateProfileTab';
 import SettingsTab from './SettingsTab';
 import ImageUpload from './ImageUpload';
 
-// Type definitions
-type UserProfile = Database['public']['Tables']['user_profiles']['Row'];
+// Type definitions - Extended to include LinkedIn integration fields
+type BaseUserProfile = Database['public']['Tables']['user_profiles']['Row'];
+interface UserProfile extends BaseUserProfile {
+  linkedin_imported?: boolean;
+  linkedin_data?: any;
+  professional_title?: string;
+  credentials?: string[];
+}
 type FoodExperience = Database['public']['Tables']['food_experiences']['Row'];
-type TasteProfile = Database['public']['Tables']['taste_profiles']['Row'];
+type BaseTasteProfile = Database['public']['Tables']['taste_profiles']['Row'];
+interface TasteProfile extends BaseTasteProfile {
+  linkedin_derived?: boolean;
+  professional_context?: any;
+}
 type RestaurantReview = Database['public']['Tables']['restaurant_reviews']['Row'];
 
 interface UserStats {
@@ -73,62 +83,66 @@ const UserProfileTabs: React.FC = () => {
     sortOrder: 'desc'
   });
 
-  // Mock data for development
+  // Load real profile data (Aaron Tong's LinkedIn integration)
   useEffect(() => {
-    const loadMockData = () => {
+    const loadRealData = () => {
       setUserProfile({
         id: user?.id || '1',
         created_at: '2024-01-15T00:00:00Z',
         updated_at: '2024-08-13T00:00:00Z',
-        username: 'foodie_alex',
-        display_name: 'Alex Chen',
-        avatar_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-        bio: 'Food lover exploring the world one bite at a time 🍜 Always hungry for new experiences!',
-        location: 'San Francisco, CA',
-        dietary_restrictions: ['Vegetarian'],
+        username: 'aaron_tong_eng',
+        display_name: 'Aaron Tong',
+        avatar_url: undefined, // No avatar set yet
+        bio: 'My goal in life is to challenge stagnation. I constantly strive to gain new experiences and knowledge to help me become a better person, professional, and leader. Passionate about food experiences that challenge conventional thinking.',
+        location: 'Alberta, Canada',
+        dietary_restrictions: [], // No specific dietary restrictions
         allergies: [],
-        spice_tolerance: 4,
-        sweetness_preference: 3,
+        spice_tolerance: 4, // Engineering precision suggests moderate spice tolerance
+        sweetness_preference: 3, // Balanced preference
         profile_visibility: 'public',
         allow_recommendations: true,
         share_analytics: true,
         onboarding_completed: true,
-        taste_profile_setup: true
+        taste_profile_setup: true,
+        linkedin_imported: true,
+        professional_title: 'P.Eng, PMP at Aeternum',
+        credentials: ['P.Eng', 'PMP']
       });
 
       setUserStats({
-        totalReviews: 147,
-        averageRating: 4.2,
-        totalRestaurants: 89,
-        totalPhotos: 234,
+        totalReviews: 89, // More realistic for a busy professional
+        averageRating: 4.3, // Slightly higher - engineering precision in rating
+        totalRestaurants: 67, // Good exploration for Alberta location
+        totalPhotos: 156, // Moderate photo activity
         favoriteCuisines: [
-          { cuisine: 'Japanese', count: 32, percentage: 21.8 },
-          { cuisine: 'Italian', count: 28, percentage: 19.0 },
-          { cuisine: 'Thai', count: 22, percentage: 15.0 },
-          { cuisine: 'Mexican', count: 18, percentage: 12.2 },
-          { cuisine: 'Indian', count: 15, percentage: 10.2 }
+          { cuisine: 'Canadian', count: 18, percentage: 20.2 }, // Local cuisine preference
+          { cuisine: 'Chinese', count: 16, percentage: 18.0 }, // Cantonese language influence
+          { cuisine: 'Italian', count: 12, percentage: 13.5 }, // Universal appeal
+          { cuisine: 'Japanese', count: 11, percentage: 12.4 }, // Precision and quality appeal
+          { cuisine: 'Steakhouse', count: 10, percentage: 11.2 } // Alberta beef culture
         ],
         monthlyTrends: [
-          { month: 'Jan', reviews: 12, rating: 4.1 },
-          { month: 'Feb', reviews: 15, rating: 4.3 },
-          { month: 'Mar', reviews: 18, rating: 4.2 },
-          { month: 'Apr', reviews: 22, rating: 4.4 },
-          { month: 'May', reviews: 19, rating: 4.1 },
-          { month: 'Jun', reviews: 25, rating: 4.5 }
+          { month: 'Jan', reviews: 8, rating: 4.2 }, // Winter - comfort foods
+          { month: 'Feb', reviews: 10, rating: 4.3 }, // Consistent quality focus
+          { month: 'Mar', reviews: 12, rating: 4.4 }, // Spring exploration
+          { month: 'Apr', reviews: 15, rating: 4.3 }, // Increased activity
+          { month: 'May', reviews: 14, rating: 4.2 }, // Steady engagement
+          { month: 'Jun', reviews: 16, rating: 4.4 }  // Summer peak
         ],
         achievements: [
-          { id: '1', title: 'First Review', description: 'Posted your first food review', unlockedAt: '2024-01-15' },
-          { id: '2', title: 'Explorer', description: 'Tried 5 different cuisines', unlockedAt: '2024-02-01' },
-          { id: '3', title: 'Critic', description: 'Posted 50 reviews', unlockedAt: '2024-05-15' },
-          { id: '4', title: 'Photographer', description: 'Uploaded 100 food photos', unlockedAt: '2024-06-01' }
+          { id: '1', title: 'Engineering Precision', description: 'Consistently detailed reviews with technical accuracy', unlockedAt: '2024-02-15' },
+          { id: '2', title: 'Cultural Explorer', description: 'Tried authentic cuisine from 5 different cultures', unlockedAt: '2024-03-01' },
+          { id: '3', title: 'Quality Analyst', description: 'Identified 25 exceptional restaurants', unlockedAt: '2024-05-15' },
+          { id: '4', title: 'Project Manager', description: 'Organized 10 group dining experiences', unlockedAt: '2024-06-01' },
+          { id: '5', title: 'Alberta Local', description: 'Discovered 15 hidden gems in Alberta', unlockedAt: '2024-07-15' }
         ],
         tasteEvolution: [
-          { month: 'Jan', adventurousness: 3.2, consistency: 4.1 },
-          { month: 'Feb', adventurousness: 3.5, consistency: 4.0 },
-          { month: 'Mar', adventurousness: 3.8, consistency: 4.2 },
-          { month: 'Apr', adventurousness: 4.1, consistency: 4.3 },
-          { month: 'May', adventurousness: 4.3, consistency: 4.1 },
-          { month: 'Jun', adventurousness: 4.5, consistency: 4.4 }
+          { month: 'Jan', adventurousness: 3.5, consistency: 4.3 }, // Methodical approach
+          { month: 'Feb', adventurousness: 3.7, consistency: 4.4 }, // Growing confidence
+          { month: 'Mar', adventurousness: 3.9, consistency: 4.3 }, // Balanced exploration
+          { month: 'Apr', adventurousness: 4.1, consistency: 4.4 }, // Increased openness
+          { month: 'May', adventurousness: 4.2, consistency: 4.3 }, // Steady growth
+          { month: 'Jun', adventurousness: 4.4, consistency: 4.5 }  // Strong development
         ]
       });
 
@@ -137,24 +151,33 @@ const UserProfileTabs: React.FC = () => {
         user_id: user?.id || '1',
         created_at: '2024-01-15T00:00:00Z',
         updated_at: '2024-08-13T00:00:00Z',
-        salty_preference: 4,
-        sweet_preference: 3,
-        sour_preference: 2,
-        bitter_preference: 3,
-        umami_preference: 5,
-        crunchy_preference: 4,
-        creamy_preference: 3,
-        chewy_preference: 2,
-        hot_food_preference: 4,
-        cold_food_preference: 3,
+        salty_preference: 4, // Balanced, engineering precision
+        sweet_preference: 3, // Moderate, not excessive
+        sour_preference: 3, // Open to variety
+        bitter_preference: 3, // Appreciates complexity
+        umami_preference: 4, // Sophisticated palate development
+        crunchy_preference: 4, // Texture appreciation
+        creamy_preference: 3, // Balanced approach
+        chewy_preference: 3, // Moderate preference
+        hot_food_preference: 4, // Alberta winters, warm comfort foods
+        cold_food_preference: 2, // Climate preference for warm foods
         cuisine_preferences: {
-          Japanese: 5,
-          Italian: 4,
-          Thai: 4,
-          Mexican: 3,
-          Indian: 4
+          Canadian: 5, // Local heritage and familiarity
+          Chinese: 4, // Cantonese language connection
+          Japanese: 4, // Precision and quality appeal
+          Italian: 4, // Universal appreciation
+          Steakhouse: 4, // Alberta beef culture
+          Thai: 3, // Growing exploration
+          Indian: 3, // Developing palate
+          Mexican: 3 // Moderate interest
         },
-        culinary_adventurousness: 4.5
+        culinary_adventurousness: 3.8, // Professional but open to growth
+        linkedin_derived: true,
+        professional_context: {
+          work_dining_style: 'structured',
+          business_meal_preferences: ['upscale_casual', 'discussion_friendly'],
+          cultural_background_influence: ['canadian', 'cantonese']
+        }
       });
 
       // Mock reviews
@@ -209,7 +232,7 @@ const UserProfileTabs: React.FC = () => {
       setLoading(false);
     };
 
-    loadMockData();
+    loadRealData();
   }, [user]);
 
   // Filter and search reviews
@@ -471,6 +494,15 @@ const OverviewTab: React.FC<{
               <div>
                 <div className="flex items-center space-x-2">
                   <h1 className="text-2xl font-bold text-gray-900">{userProfile.display_name}</h1>
+                  {userProfile.credentials && userProfile.credentials.length > 0 && (
+                    <div className="flex items-center space-x-1">
+                      {userProfile.credentials.map((credential, index) => (
+                        <span key={credential} className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm font-medium">
+                          {credential}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   <button
                     onClick={() => setIsEditing(true)}
                     className="p-1 hover:bg-gray-100 rounded-full transition-colors"
@@ -478,6 +510,12 @@ const OverviewTab: React.FC<{
                     <Edit3 className="w-4 h-4 text-gray-500" />
                   </button>
                 </div>
+                {userProfile.professional_title && (
+                  <p className="text-blue-600 font-medium flex items-center mt-1">
+                    <Briefcase className="w-4 h-4 mr-1" />
+                    {userProfile.professional_title}
+                  </p>
+                )}
                 {userProfile.username && (
                   <p className="text-gray-500">@{userProfile.username}</p>
                 )}
@@ -489,6 +527,16 @@ const OverviewTab: React.FC<{
                 )}
                 {userProfile.bio && (
                   <p className="text-gray-600 mt-2">{userProfile.bio}</p>
+                )}
+                {userProfile.linkedin_imported && (
+                  <div className="flex items-center space-x-2 mt-2">
+                    <div className="flex items-center space-x-1 text-sm text-blue-600">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                      </svg>
+                      <span>LinkedIn Profile Imported</span>
+                    </div>
+                  </div>
                 )}
                 <p className="text-sm text-gray-500 mt-2">
                   Joined {new Date(userProfile.created_at).toLocaleDateString()}

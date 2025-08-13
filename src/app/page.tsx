@@ -1,37 +1,45 @@
 'use client';
 
 import React, { useState } from 'react';
-import { MapPin, Star, Search, Plus, User, Home, Map, List, ChefHat, TrendingUp, Clock, Users, Share2 } from 'lucide-react';
+import { MapPin, Star, Search, Plus, User, Home, Bell, Settings } from 'lucide-react';
 import AuthWrapper from '../components/auth/AuthWrapper';
 import { useAuth } from '../hooks/useAuth';
-import FoodImage from '../components/FoodImage';
-import MainApp from '../components/MainApp';
-import FoodExperienceForm from '../components/food/FoodExperienceForm';
-import MapView from '../components/map/MapView';
-import FriendsManager from '../components/social/FriendsManager';
+import { BottomTabBar, defaultTabs } from '../components/mobile/BottomTabBar';
+import { CategoryScroll, sampleCategories } from '../components/mobile/CategoryScroll';
 import ActivityFeed from '../components/social/ActivityFeed';
-import SocialShare from '../components/social/SocialShare';
+import FoodImage from '../components/FoodImage';
 import { getFoodEmoji } from '../utils/foodEmojis';
 import { mockFoodReviews, mockUserProfile, recommendedFoods, kuchisabishiFoods, recentFoods } from '../data/seed-data';
 
-// PWA App Component
+// Mobile-First PWA App Component
 export default function KuchisabishiiPWA() {
   const { user } = useAuth();
   const [currentView, setCurrentView] = useState('onboarding');
   const [showOnboarding, setShowOnboarding] = useState(true);
-  const [useEnhancedApp, setUseEnhancedApp] = useState(true);
+  const [activeTab, setActiveTab] = useState('home');
+  const [activeCategory, setActiveCategory] = useState('all');
   
   // State for new food reviews - these will appear on home screen
   const [userFoodReviews, setUserFoodReviews] = useState<any[]>([]);
   const [showFoodForm, setShowFoodForm] = useState(false);
   const [prefillData, setPrefillData] = useState<any>(null);
-  const [showSocialShare, setShowSocialShare] = useState(false);
-  const [shareReview, setShareReview] = useState<any>(null);
 
   // Handle authentication success
   const handleAuthSuccess = () => {
     setShowOnboarding(true);
     setCurrentView('onboarding');
+  };
+
+  // Handle navigation
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
+    if (tabId === 'add') {
+      setShowFoodForm(true);
+    }
+  };
+
+  const handleCategorySelect = (categoryId: string) => {
+    setActiveCategory(categoryId);
   };
 
   // Handle food form
@@ -49,16 +57,13 @@ export default function KuchisabishiiPWA() {
     // Add to user's food reviews at the top
     setUserFoodReviews(prev => [newExperience, ...prev]);
     setShowFoodForm(false);
+    setActiveTab('home'); // Return to home after adding
   };
 
   // Onboarding completion handler
   const handleOnboardingComplete = () => {
     setShowOnboarding(false);
-    if (useEnhancedApp) {
-      setCurrentView('enhanced-app');
-    } else {
-      setCurrentView('home');
-    }
+    setCurrentView('app');
   };
 
   // Onboarding Screens Component
@@ -121,107 +126,106 @@ export default function KuchisabishiiPWA() {
     );
   };
 
-  // Simple placeholder for non-enhanced features
-  const PlaceholderScreen = ({ title }: { title: string }) => (
-    <div className="flex-1 bg-gray-50 flex items-center justify-center">
-      <div className="text-center">
-        <div className="text-4xl mb-4">🚧</div>
-        <p className="text-gray-600">{title} coming soon</p>
-      </div>
-    </div>
-  );
-
-  // Enhanced Home Screen with Beautiful Gradient Design
-  const HomeScreen = () => {
-
+  // Mobile-First Home Screen with Uber Eats Style Design
+  const MobileHomeScreen = () => {
     return (
-      <div className="flex-1 bg-gray-50 min-h-screen">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-orange-400 to-red-500 text-white p-4 rounded-b-xl">
+      <div className="flex-1 bg-gray-50 min-h-screen pb-20">
+        {/* Mobile Header */}
+        <div className="bg-gradient-to-r from-orange-400 to-red-500 text-white p-4 pt-12">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                <User className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                <User className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold">Welcome back!</h1>
-                <p className="text-orange-100 text-sm">{mockUserProfile.name}</p>
+                <p className="text-sm text-orange-100">Welcome back</p>
+                <h1 className="text-lg font-bold">{mockUserProfile.name}</h1>
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-sm text-orange-100">Total Reviews</p>
-              <p className="text-2xl font-bold">{mockUserProfile.totalReviews + userFoodReviews.length}</p>
+            <div className="flex items-center space-x-3">
+              <button className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                <Bell className="w-4 h-4 text-white" />
+              </button>
+              <button className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                <Settings className="w-4 h-4 text-white" />
+              </button>
             </div>
           </div>
 
-          {/* Quick Stats */}
-          <div className="flex justify-between bg-white rounded-lg p-3 shadow-sm">
-            <div className="text-center">
-              <div className="text-lg font-bold text-gray-800">
-                {userFoodReviews.length > 0 
-                  ? ((mockUserProfile.averageRating * mockUserProfile.totalReviews + userFoodReviews.reduce((sum: number, food: any) => sum + food.kuchisabishiRating, 0)) / (mockUserProfile.totalReviews + userFoodReviews.length)).toFixed(1)
-                  : mockUserProfile.averageRating.toFixed(1)
-                }
-              </div>
-              <div className="text-xs text-gray-600">Avg Rating</div>
-            </div>
-            <div className="text-center">
-              <div className="text-lg font-bold text-gray-800">
-                {mockUserProfile.kuchisabishiCount + userFoodReviews.filter((food: any) => food.kuchisabishiRating === 5).length}
-              </div>
-              <div className="text-xs text-gray-600">Kuchisabishii!</div>
-            </div>
-            <div className="text-center">
-              <div className="text-lg font-bold text-gray-800">{mockUserProfile.achievements.length}</div>
-              <div className="text-xs text-gray-600">Achievements</div>
+          {/* Search Bar */}
+          <div className="relative">
+            <div className="bg-white rounded-xl p-3 shadow-sm flex items-center space-x-3">
+              <Search className="w-5 h-5 text-gray-400" />
+              <input 
+                type="text" 
+                placeholder="Search restaurants, dishes, cuisines..."
+                className="flex-1 text-gray-800 text-sm bg-transparent focus:outline-none"
+              />
             </div>
           </div>
         </div>
 
+        {/* Category Scroll */}
+        <div className="bg-white shadow-sm">
+          <CategoryScroll 
+            categories={sampleCategories}
+            activeCategory={activeCategory}
+            onCategorySelect={handleCategorySelect}
+          />
+        </div>
+
         {/* Content Sections */}
-        <div className="p-4 space-y-6">
+        <div className="p-4 space-y-4">
           
+          {/* Quick Actions */}
+          <section>
+            <div className="flex justify-between space-x-3">
+              <button 
+                onClick={() => setActiveTab('add')}
+                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white p-4 rounded-xl transition-colors flex items-center justify-center space-x-2"
+              >
+                <Plus className="w-5 h-5" />
+                <span className="font-medium">Log Food</span>
+              </button>
+              <button 
+                onClick={() => setActiveTab('search')}
+                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-xl transition-colors flex items-center justify-center space-x-2"
+              >
+                <MapPin className="w-5 h-5" />
+                <span className="font-medium">Find Places</span>
+              </button>
+            </div>
+          </section>
+
           {/* AI Recommendations */}
           <section>
             <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center space-x-2">
-                <TrendingUp className="w-5 h-5 text-orange-500" />
-                <h2 className="text-lg font-semibold text-gray-800">AI Recommendations</h2>
-              </div>
-              <span className="text-xs text-gray-500">Powered by your taste profile</span>
+              <h2 className="text-lg font-bold text-gray-800">For You</h2>
+              <span className="text-xs text-orange-500 font-medium">AI Powered</span>
             </div>
             
-            <div className="space-y-3">
-              {recommendedFoods.slice(0, 3).map((rec) => (
-                <div key={rec.id} className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
-                  <div className="flex items-start justify-between">
+            <div className="grid grid-cols-1 gap-3">
+              {recommendedFoods.slice(0, 2).map((rec) => (
+                <div key={rec.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center">
+                      <span className="text-2xl">{getFoodEmoji(rec.name, rec.cuisineType, '')}</span>
+                    </div>
                     <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <h3 className="font-medium text-gray-800">{rec.name}</h3>
-                        <span className={`text-xs px-2 py-1 rounded-full text-white font-medium ${
-                          rec.recommendation_type === 'ai_match' ? 'bg-blue-600' :
-                          rec.recommendation_type === 'trending' ? 'bg-green-600' : 'bg-purple-600'
-                        }`}>
-                          {rec.recommendation_type === 'ai_match' ? 'AI Match' :
-                           rec.recommendation_type === 'trending' ? 'Trending' : 'Friend Loved'}
+                      <div className="flex items-center space-x-2 mb-1">
+                        <h3 className="font-semibold text-gray-800">{rec.name}</h3>
+                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
+                          {rec.aiConfidence}% match
                         </span>
                       </div>
-                      <p className="text-sm text-gray-600 mb-2">{rec.restaurantName} • {rec.cuisineType}</p>
-                      <div className="flex items-center space-x-2 mb-2">
+                      <p className="text-sm text-gray-600 mb-1">{rec.restaurantName}</p>
+                      <div className="flex items-center space-x-2">
                         <div className="flex items-center">
                           {[...Array(5)].map((_, i) => (
                             <Star key={i} className={`w-3 h-3 ${i < rec.estimatedRating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
                           ))}
                         </div>
-                        <span className="text-sm text-gray-600">Est. {rec.estimatedRating}/5</span>
-                        <span className="text-xs text-green-600 font-medium">{rec.aiConfidence}% match</span>
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        <ul className="list-disc list-inside">
-                          {rec.reasoning.slice(0, 2).map((reason, i) => (
-                            <li key={i}>{reason}</li>
-                          ))}
-                        </ul>
+                        <span className="text-xs text-gray-500">{rec.estimatedRating}/5</span>
                       </div>
                     </div>
                   </div>
@@ -230,102 +234,84 @@ export default function KuchisabishiiPWA() {
             </div>
           </section>
 
-          {/* Recent Foods */}
+          {/* Recent Activity */}
           <section>
             <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center space-x-2">
-                <Clock className="w-5 h-5 text-gray-600" />
-                <h2 className="text-lg font-semibold text-gray-800">Recent Foods</h2>
-              </div>
-              <button 
-                onClick={() => setCurrentView('history')}
-                className="text-sm text-orange-500 hover:text-orange-600"
-              >
+              <h2 className="text-lg font-bold text-gray-800">Recent Activity</h2>
+              <button className="text-sm text-orange-500 hover:text-orange-600 font-medium">
                 View All
               </button>
             </div>
             
-            <div className="grid grid-cols-1 gap-3">
+            <div className="space-y-3">
               {/* Show user's new food reviews first */}
-              {userFoodReviews.slice(0, 3).map((food: any) => (
-                <div key={food.id} className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 ring-2 ring-orange-200">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
+              {userFoodReviews.slice(0, 2).map((food: any) => (
+                <div key={food.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 ring-2 ring-orange-200">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden">
                       <FoodImage 
                         src={food.image} 
                         alt={food.name}
                         fallbackEmoji={getFoodEmoji(food.name, food.cuisineType, food.foodType)}
                         size="md"
-                        className="flex-shrink-0"
+                        className="w-full h-full object-cover"
                       />
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <h3 className="font-medium text-gray-800">{food.name}</h3>
-                          <span className="bg-orange-100 text-orange-800 text-xs px-2 py-0.5 rounded-full font-medium">NEW</span>
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <h3 className="font-semibold text-gray-800">{food.name}</h3>
+                        <span className="bg-orange-100 text-orange-800 text-xs px-2 py-0.5 rounded-full font-medium">NEW</span>
+                      </div>
+                      <p className="text-sm text-gray-600">{food.location}</p>
+                      <div className="flex items-center mt-1">
+                        <div className="flex items-center">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className={`w-3 h-3 ${i < food.kuchisabishiRating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
+                          ))}
                         </div>
-                        <p className="text-sm text-gray-600">{food.location} • {food.dateEaten}</p>
-                        <div className="flex items-center mt-1">
-                          <div className="flex items-center">
-                            {[...Array(5)].map((_, i) => (
-                              <Star key={i} className={`w-3 h-3 ${i < food.kuchisabishiRating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
-                            ))}
-                          </div>
-                          <span className="text-xs text-gray-600 ml-1">{food.kuchisabishiRating}/5</span>
-                        </div>
+                        <span className="text-xs text-gray-500 ml-1">{food.kuchisabishiRating}/5</span>
                       </div>
                     </div>
-                    <div className="flex space-x-2">
-                      <button 
-                        onClick={() => {
-                          setShareReview(food)
-                          setShowSocialShare(true)
-                        }}
-                        className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-1 rounded-full transition-colors flex items-center space-x-1"
-                      >
-                        <Share2 className="w-3 h-3" />
-                        <span>Share</span>
-                      </button>
-                      <button 
-                        onClick={() => handleEatingAgain(food)}
-                        className="bg-orange-500 hover:bg-orange-600 text-white text-xs px-3 py-1 rounded-full transition-colors"
-                      >
-                        Eating Again?
-                      </button>
-                    </div>
+                    <button 
+                      onClick={() => handleEatingAgain(food)}
+                      className="bg-orange-500 hover:bg-orange-600 text-white text-xs px-3 py-2 rounded-full transition-colors"
+                    >
+                      Again?
+                    </button>
                   </div>
                 </div>
               ))}
               
               {/* Show mock data after user's reviews */}
-              {recentFoods.slice(0, Math.max(0, 3 - userFoodReviews.length)).map((food) => (
-                <div key={food.id} className="bg-white rounded-lg p-3 shadow-sm border border-gray-100">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
+              {recentFoods.slice(0, Math.max(0, 2 - userFoodReviews.length)).map((food) => (
+                <div key={food.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden">
                       <FoodImage 
                         src={food.image} 
                         alt={food.name}
                         fallbackEmoji={getFoodEmoji(food.name, food.cuisineType, food.foodType)}
                         size="md"
-                        className="flex-shrink-0"
+                        className="w-full h-full object-cover"
                       />
-                      <div>
-                        <h3 className="font-medium text-gray-800">{food.name}</h3>
-                        <p className="text-sm text-gray-600">{food.location} • {food.dateEaten}</p>
-                        <div className="flex items-center mt-1">
-                          <div className="flex items-center">
-                            {[...Array(5)].map((_, i) => (
-                              <Star key={i} className={`w-3 h-3 ${i < food.kuchisabishiRating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
-                            ))}
-                          </div>
-                          <span className="text-xs text-gray-600 ml-1">{food.kuchisabishiRating}/5</span>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-800">{food.name}</h3>
+                      <p className="text-sm text-gray-600">{food.location}</p>
+                      <div className="flex items-center mt-1">
+                        <div className="flex items-center">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className={`w-3 h-3 ${i < food.kuchisabishiRating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
+                          ))}
                         </div>
+                        <span className="text-xs text-gray-500 ml-1">{food.kuchisabishiRating}/5</span>
                       </div>
                     </div>
                     <button 
                       onClick={() => handleEatingAgain(food)}
-                      className="bg-orange-500 hover:bg-orange-600 text-white text-xs px-3 py-1 rounded-full transition-colors"
+                      className="bg-orange-500 hover:bg-orange-600 text-white text-xs px-3 py-2 rounded-full transition-colors"
                     >
-                      Eating Again?
+                      Again?
                     </button>
                   </div>
                 </div>
@@ -333,89 +319,38 @@ export default function KuchisabishiiPWA() {
             </div>
           </section>
 
-          {/* Kuchisabishii Hall of Fame */}
+          {/* Hall of Fame */}
           <section>
             <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center space-x-2">
-                <ChefHat className="w-5 h-5 text-purple-500" />
-                <h2 className="text-lg font-semibold text-gray-800">Kuchisabishii Hall of Fame</h2>
-                <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">5-Star Foods</span>
-              </div>
+              <h2 className="text-lg font-bold text-gray-800">Hall of Fame</h2>
+              <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-medium">5 Stars</span>
             </div>
             
-            <div className="grid grid-cols-1 gap-3">
-              {kuchisabishiFoods.slice(0, 3).map((food) => (
-                <div key={food.id} className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4 border border-purple-100">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <FoodImage 
-                        src={food.image} 
-                        alt={food.name}
-                        fallbackEmoji={getFoodEmoji(food.name, food.cuisineType, food.foodType)}
-                        size="lg"
-                        className="flex-shrink-0 ring-2 ring-yellow-400"
-                      />
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <h3 className="font-semibold text-gray-800">{food.name}</h3>
-                          <div className="flex items-center">
-                            {[...Array(5)].map((_, i) => (
-                              <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
-                            ))}
-                          </div>
-                        </div>
-                        <p className="text-sm text-purple-700 font-medium">{food.location}</p>
-                        <p className="text-xs text-gray-600 mt-1">"{food.experience.slice(0, 80)}..."</p>
+            <div className="overflow-x-auto">
+              <div className="flex space-x-3 pb-2">
+                {kuchisabishiFoods.slice(0, 5).map((food) => (
+                  <div key={food.id} className="flex-shrink-0 w-48 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-3 border border-purple-100">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center ring-2 ring-yellow-400">
+                        <span className="text-xl">{getFoodEmoji(food.name, food.cuisineType, food.foodType)}</span>
+                      </div>
+                      <div className="flex items-center">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="w-3 h-3 text-yellow-400 fill-current" />
+                        ))}
                       </div>
                     </div>
+                    <h3 className="font-semibold text-gray-800 text-sm mb-1">{food.name}</h3>
+                    <p className="text-xs text-purple-700 font-medium">{food.location}</p>
                     <button 
                       onClick={() => handleEatingAgain(food)}
-                      className="bg-purple-500 hover:bg-purple-600 text-white text-xs px-3 py-2 rounded-full transition-colors whitespace-nowrap"
+                      className="w-full bg-purple-500 hover:bg-purple-600 text-white text-xs py-2 rounded-lg transition-colors mt-2"
                     >
                       Eat Again!
                     </button>
                   </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Quick Actions */}
-          <section>
-            <h2 className="text-lg font-semibold text-gray-800 mb-3">Quick Actions</h2>
-            <div className="grid grid-cols-3 gap-3">
-              <button 
-                onClick={handleAddNewFood}
-                className="bg-orange-500 hover:bg-orange-600 text-white p-4 rounded-lg transition-colors"
-              >
-                <Plus className="w-6 h-6 mx-auto mb-2" />
-                <span className="text-sm font-medium">Log New Food</span>
-              </button>
-              <button 
-                onClick={() => setCurrentView('map')}
-                className="bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-lg transition-colors"
-              >
-                <MapPin className="w-6 h-6 mx-auto mb-2" />
-                <span className="text-sm font-medium">Find Places</span>
-              </button>
-              <button 
-                onClick={() => setCurrentView('friends')}
-                className="bg-green-500 hover:bg-green-600 text-white p-4 rounded-lg transition-colors"
-              >
-                <Users className="w-6 h-6 mx-auto mb-2" />
-                <span className="text-sm font-medium">Friends</span>
-              </button>
-            </div>
-            <div className="grid grid-cols-1 gap-3 mt-3">
-              <button 
-                onClick={() => setCurrentView('activity')}
-                className="bg-purple-500 hover:bg-purple-600 text-white p-4 rounded-lg transition-colors"
-              >
-                <div className="flex items-center justify-center space-x-2">
-                  <Share2 className="w-5 h-5" />
-                  <span className="text-sm font-medium">Friends' Activity</span>
-                </div>
-              </button>
+                ))}
+              </div>
             </div>
           </section>
 
@@ -424,47 +359,55 @@ export default function KuchisabishiiPWA() {
     );
   };
 
+  // Activity Feed Screen
+  const ActivityScreen = () => (
+    <ActivityFeed onBack={() => setActiveTab('home')} />
+  );
+
+  // Profile Screen Placeholder
+  const ProfileScreen = () => (
+    <div className="flex-1 bg-gray-50 flex items-center justify-center pb-20">
+      <div className="text-center">
+        <div className="text-4xl mb-4">👤</div>
+        <p className="text-gray-600">Profile coming soon</p>
+      </div>
+    </div>
+  );
+
+  // Search Screen Placeholder
+  const SearchScreen = () => (
+    <div className="flex-1 bg-gray-50 flex items-center justify-center pb-20">
+      <div className="text-center">
+        <div className="text-4xl mb-4">🔍</div>
+        <p className="text-gray-600">Search coming soon</p>
+      </div>
+    </div>
+  );
 
   // Main App Content
   const AppContent = () => {
-    if (currentView === 'map') {
-      return (
-        <MapView
-          onBack={() => setCurrentView('enhanced-app')}
-          onRestaurantSelect={(restaurant) => {
-            // When a restaurant is selected, prefill the food form with location
-            setPrefillData({
-              location: restaurant.name,
-              restaurant: restaurant
-            })
-            setShowFoodForm(true)
-            setCurrentView('enhanced-app')
-          }}
-        />
-      )
-    }
-
-    if (currentView === 'friends') {
-      return (
-        <FriendsManager 
-          onBack={() => setCurrentView('enhanced-app')}
-        />
-      )
-    }
-
-    if (currentView === 'activity') {
-      return (
-        <ActivityFeed 
-          onBack={() => setCurrentView('enhanced-app')}
-        />
-      )
-    }
-
     return (
-      <div className="max-w-md mx-auto bg-white shadow-lg min-h-screen flex flex-col">
+      <div className="min-h-screen bg-white flex flex-col relative">
         {currentView === 'onboarding' && <OnboardingScreens />}
-        {currentView === 'enhanced-app' && <HomeScreen />}
-        {currentView === 'profile' && <PlaceholderScreen title="Profile" />}
+        {currentView === 'app' && (
+          <>
+            {/* Tab Content */}
+            <div className="flex-1">
+              {activeTab === 'home' && <MobileHomeScreen />}
+              {activeTab === 'search' && <SearchScreen />}
+              {activeTab === 'add' && <MobileHomeScreen />} {/* Will trigger food form */}
+              {activeTab === 'social' && <ActivityScreen />}
+              {activeTab === 'profile' && <ProfileScreen />}
+            </div>
+            
+            {/* Bottom Navigation */}
+            <BottomTabBar 
+              tabs={defaultTabs}
+              activeTab={activeTab}
+              onTabChange={handleTabChange}
+            />
+          </>
+        )}
       </div>
     )
   };
@@ -473,21 +416,24 @@ export default function KuchisabishiiPWA() {
     <AuthWrapper onAuthSuccess={handleAuthSuccess}>
       <AppContent />
       {showFoodForm && (
-        <FoodExperienceForm
-          onClose={() => setShowFoodForm(false)}
-          onSave={handleFoodSave}
-          prefillData={prefillData}
-        />
-      )}
-      {showSocialShare && shareReview && (
-        <SocialShare
-          foodReview={shareReview}
-          showShareOptions={true}
-          onClose={() => {
-            setShowSocialShare(false)
-            setShareReview(null)
-          }}
-        />
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowFoodForm(false)} />
+          <div className="relative z-10 h-full">
+            {/* Food form will be implemented here */}
+            <div className="bg-white h-full flex items-center justify-center">
+              <div className="text-center">
+                <div className="text-4xl mb-4">📝</div>
+                <p className="text-gray-600 mb-4">Food logging form coming soon</p>
+                <button 
+                  onClick={() => setShowFoodForm(false)}
+                  className="bg-orange-500 text-white px-6 py-2 rounded-lg"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </AuthWrapper>
   );

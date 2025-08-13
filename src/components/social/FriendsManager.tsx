@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth'
 import QRCodeGenerator from './QRCodeGenerator'
 import QRScanner from './QRScanner'
 import FriendRecommendations from './FriendRecommendations'
+import UserSearch from '../search/UserSearch'
 
 interface Friend {
   friendshipId: string
@@ -50,9 +51,8 @@ export default function FriendsManager({ onBack }: FriendsManagerProps) {
   const [activeTab, setActiveTab] = useState<'friends' | 'requests' | 'search' | 'discover'>('friends')
   const [friends, setFriends] = useState<Friend[]>([])
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([])
-  const [searchResults, setSearchResults] = useState<User[]>([])
-  const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(false)
+  const [connectionSuccess, setConnectionSuccess] = useState<string | null>(null)
   const [showQRGenerator, setShowQRGenerator] = useState(false)
   const [showQRScanner, setShowQRScanner] = useState(false)
 
@@ -95,24 +95,9 @@ export default function FriendsManager({ onBack }: FriendsManagerProps) {
     }
   }
 
-  const searchUsers = async (query: string) => {
-    if (query.length < 2) {
-      setSearchResults([])
-      return
-    }
-
-    setLoading(true)
-    try {
-      const response = await fetch(`/api/users/search?q=${encodeURIComponent(query)}`)
-      if (response.ok) {
-        const data = await response.json()
-        setSearchResults(data.users || [])
-      }
-    } catch (error) {
-      console.error('Failed to search users:', error)
-    } finally {
-      setLoading(false)
-    }
+  const showConnectionSuccess = (message: string) => {
+    setConnectionSuccess(message)
+    setTimeout(() => setConnectionSuccess(null), 5000)
   }
 
   const sendFriendRequest = async (userId: string) => {
@@ -124,10 +109,13 @@ export default function FriendsManager({ onBack }: FriendsManagerProps) {
       })
       
       if (response.ok) {
-        // Update the user's friendship status in search results
-        setSearchResults(prev => prev.map(u => 
-          u.id === userId ? { ...u, friendshipStatus: 'pending' } : u
-        ))
+        showConnectionSuccess('Friend request sent successfully!')
+        // Refresh current tab data
+        if (activeTab === 'friends') {
+          loadFriends()
+        } else if (activeTab === 'requests') {
+          loadFriendRequests()
+        }
       } else {
         const error = await response.json()
         alert(error.error || 'Failed to send friend request')
@@ -176,13 +164,41 @@ export default function FriendsManager({ onBack }: FriendsManagerProps) {
 
   const handleQRScan = async (data: string) => {
     try {
-      // Extract user ID from QR code URL
+      // Extract user ID and token from QR code URL
       const url = new URL(data)
       const userId = url.searchParams.get('user')
+      const token = url.searchParams.get('token')
+      const type = url.searchParams.get('type')
       
       if (userId && userId !== user?.id) {
-        await sendFriendRequest(userId)
-        alert('Friend request sent!')
+        // Use the QR connect endpoint for better validation
+        const response = await fetch('/api/friends/qr-connect', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            userId, 
+            token, 
+            type: type || 'qr' 
+          })
+        })
+        
+        if (response.ok) {
+          const result = await response.json()
+          showConnectionSuccess(
+            result.connectionMethod === 'qr' 
+              ? 'QR code scanned! Friend request sent.' 
+              : 'Friend request sent successfully!'
+          )
+          // Refresh data
+          if (activeTab === 'friends') {
+            loadFriends()
+          } else if (activeTab === 'requests') {
+            loadFriendRequests()
+          }
+        } else {
+          const error = await response.json()
+          alert(error.error || 'Failed to send friend request')
+        }
       } else {
         alert('Invalid QR code or you cannot add yourself')
       }
@@ -202,20 +218,28 @@ export default function FriendsManager({ onBack }: FriendsManagerProps) {
           <div className="flex space-x-2">
             <button
               onClick={() => setShowQRGenerator(true)}
-              className="bg-orange-500 hover:bg-orange-600 text-white p-2 rounded-lg"
+              className="bg-orange-500 hover:bg-orange-600 text-white p-2 rounded-lg transition-colors"
               title="My QR Code"
             >
               <QrCode className="w-5 h-5" />
             </button>
             <button
               onClick={() => setShowQRScanner(true)}
-              className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-lg"
+              className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-lg transition-colors"
               title="Scan QR Code"
             >
               <Camera className="w-5 h-5" />
             </button>
           </div>
         </div>
+        
+        {/* Connection Success Message */}
+        {connectionSuccess && (
+          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4 flex items-center space-x-2">
+            <UserCheck className="w-4 h-4 flex-shrink-0" />
+            <p className="text-sm">{connectionSuccess}</p>
+          </div>
+        )}
 
         {/* Tabs */}
         <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
@@ -251,79 +275,14 @@ export default function FriendsManager({ onBack }: FriendsManagerProps) {
         {/* Search Tab */}
         {activeTab === 'search' && (
           <div>
-            <div className="relative mb-4">
-              <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value)
-                  searchUsers(e.target.value)
-                }}
-                placeholder="Search for friends by name or email..."
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              />
-            </div>
-
-            {loading && searchQuery.length >= 2 ? (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-2"></div>
-                <p className="text-gray-600">Searching...</p>
-              </div>
-            ) : searchResults.length > 0 ? (
-              <div className="space-y-3">
-                {searchResults.map(user => (
-                  <div key={user.id} className="bg-white rounded-lg p-4 shadow-sm">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-                          {user.profileImage ? (
-                            <img src={user.profileImage} alt={user.displayName} className="w-full h-full object-cover" />
-                          ) : (
-                            <span className="text-lg">👤</span>
-                          )}
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-800">{user.displayName}</h3>
-                          <p className="text-sm text-gray-600">{user.email}</p>
-                        </div>
-                      </div>
-                      
-                      {user.friendshipStatus === 'none' ? (
-                        <button
-                          onClick={() => sendFriendRequest(user.id)}
-                          className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm flex items-center space-x-1"
-                        >
-                          <UserPlus className="w-4 h-4" />
-                          <span>Add</span>
-                        </button>
-                      ) : user.friendshipStatus === 'pending' ? (
-                        <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm">
-                          Pending
-                        </span>
-                      ) : (
-                        <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm flex items-center space-x-1">
-                          <UserCheck className="w-4 h-4" />
-                          <span>Friends</span>
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : searchQuery.length >= 2 ? (
-              <div className="text-center py-8 text-gray-500">
-                <Users className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                <p>No users found</p>
-                <p className="text-sm">Try a different search term</p>
-              </div>
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                <Search className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                <p>Search for friends</p>
-                <p className="text-sm">Enter at least 2 characters</p>
-              </div>
-            )}
+            <UserSearch 
+              onUserSelect={(user) => {
+                // Handle user selection if needed
+                console.log('User selected:', user)
+              }}
+              showFilters={true}
+              limit={20}
+            />
           </div>
         )}
 
@@ -339,19 +298,36 @@ export default function FriendsManager({ onBack }: FriendsManagerProps) {
               <div className="space-y-3">
                 {friends.map(friendship => (
                   <div key={friendship.friendshipId} className="bg-white rounded-lg p-4 shadow-sm">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-                        {friendship.friend.profileImage ? (
-                          <img src={friendship.friend.profileImage} alt={friendship.friend.displayName} className="w-full h-full object-cover" />
-                        ) : (
-                          <span className="text-lg">👤</span>
-                        )}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+                          {friendship.friend.profileImage ? (
+                            <img src={friendship.friend.profileImage} alt={friendship.friend.displayName} className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="text-lg">👤</span>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-800">{friendship.friend.displayName}</h3>
+                          <p className="text-sm text-gray-600">
+                            Friends since {new Date(friendship.friendsSince).toLocaleDateString()}
+                          </p>
+                          {friendship.mutualFriends && friendship.mutualFriends > 0 && (
+                            <p className="text-xs text-gray-500 mt-1">
+                              {friendship.mutualFriends} mutual friend{friendship.mutualFriends !== 1 ? 's' : ''}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-800">{friendship.friend.displayName}</h3>
-                        <p className="text-sm text-gray-600">
-                          Friends since {new Date(friendship.friendsSince).toLocaleDateString()}
-                        </p>
+                      
+                      {/* Friend Actions */}
+                      <div className="flex items-center space-x-2">
+                        <button
+                          className="text-gray-400 hover:text-gray-600 p-1"
+                          title="View Profile"
+                        >
+                          <UserCheck className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
                   </div>

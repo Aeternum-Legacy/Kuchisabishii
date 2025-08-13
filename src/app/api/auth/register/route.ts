@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
+import { authRateLimit } from '@/lib/middleware/rateLimit'
 
 const registerSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -12,6 +13,25 @@ const registerSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Apply rate limiting
+    const rateLimitResult = authRateLimit(request)
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        { 
+          error: rateLimitResult.error,
+          retryAfter: Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000)
+        },
+        { 
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': '5',
+            'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+            'X-RateLimit-Reset': rateLimitResult.resetTime.toString()
+          }
+        }
+      )
+    }
+
     const body = await request.json()
     const validatedData = registerSchema.parse(body)
     
@@ -66,14 +86,29 @@ export async function POST(request: NextRequest) {
         display_name: validatedData.displayName,
         first_name: validatedData.firstName,
         last_name: validatedData.lastName,
+        privacy_level: 'friends', // Default privacy level
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
 
     if (profileError) {
       console.error('Profile creation error:', profileError)
-      // Don't fail the registration if profile creation fails
-      // The user can still use the app
+      console.error('Profile error details:', {
+        code: profileError.code,
+        message: profileError.message,
+        details: profileError.details,
+        hint: profileError.hint
+      })
+      
+      // If profile creation fails, we should actually fail the registration
+      // since the profile is essential for the app functionality
+      return NextResponse.json(
+        { 
+          error: 'Failed to create user profile. Please try again.',
+          details: 'Profile creation failed after successful authentication'
+        },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json({

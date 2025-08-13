@@ -19,7 +19,17 @@ function getSupabaseClient() {
     auth: {
       autoRefreshToken: true,
       persistSession: true,
-      detectSessionInUrl: true
+      detectSessionInUrl: true,
+      // Configure OAuth flow for proper redirect handling
+      flowType: 'pkce',
+      // Set storage options for better session management
+      storage: typeof window !== 'undefined' ? window.localStorage : undefined
+    },
+    // Enhanced global options
+    global: {
+      headers: {
+        'X-Client-Info': 'kuchisabishii-web@1.0.0'
+      }
     }
   })
 }

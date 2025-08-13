@@ -7,6 +7,7 @@ import RegisterForm from './RegisterForm'
 import ForgotPasswordForm from './ForgotPasswordForm'
 import EmailConfirmation from './EmailConfirmation'
 import EmailVerificationRequired from './EmailVerificationRequired'
+import AnimatedTransition, { AuthLoadingSpinner, AuthSuccessCheckmark, StaggeredFadeIn } from './AnimatedTransition'
 
 interface AuthWrapperProps {
   children: React.ReactNode
@@ -32,10 +33,11 @@ export default function AuthWrapper({ children, onAuthSuccess }: AuthWrapperProp
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center">
-        <div className="text-center">
+        <StaggeredFadeIn className="text-center">
           <div className="text-6xl mb-4 animate-bounce">🍜</div>
-          <p className="text-gray-600">Loading your food journey...</p>
-        </div>
+          <p className="text-gray-600 mb-4">Loading your food journey...</p>
+          <AuthLoadingSpinner size="lg" />
+        </StaggeredFadeIn>
       </div>
     )
   }
@@ -48,7 +50,8 @@ export default function AuthWrapper({ children, onAuthSuccess }: AuthWrapperProp
   // Show authentication forms
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center p-4">
-        {authMode === 'login' && (
+      <div className="relative w-full max-w-md">
+        <AnimatedTransition isVisible={authMode === 'login'} animationType="slide">
           <LoginForm
             onSuccess={onAuthSuccess}
             onSwitchToRegister={() => setAuthMode('register')}
@@ -58,9 +61,9 @@ export default function AuthWrapper({ children, onAuthSuccess }: AuthWrapperProp
               setAuthMode('email-verification-required')
             }}
           />
-        )}
+        </AnimatedTransition>
         
-        {authMode === 'register' && (
+        <AnimatedTransition isVisible={authMode === 'register'} animationType="slide">
           <RegisterForm
             onSuccess={(email?: string) => {
               // After successful registration, show email confirmation
@@ -73,27 +76,28 @@ export default function AuthWrapper({ children, onAuthSuccess }: AuthWrapperProp
             }}
             onSwitchToLogin={() => setAuthMode('login')}
           />
-        )}
+        </AnimatedTransition>
         
-        {authMode === 'forgot-password' && (
+        <AnimatedTransition isVisible={authMode === 'forgot-password'} animationType="slide">
           <ForgotPasswordForm
             onBackToLogin={() => setAuthMode('login')}
           />
-        )}
+        </AnimatedTransition>
         
-        {authMode === 'email-confirmation' && (
+        <AnimatedTransition isVisible={authMode === 'email-confirmation'} animationType="fade">
           <EmailConfirmation
             email={confirmationEmail}
             onBackToLogin={() => setAuthMode('login')}
           />
-        )}
+        </AnimatedTransition>
         
-        {authMode === 'email-verification-required' && (
+        <AnimatedTransition isVisible={authMode === 'email-verification-required'} animationType="fade">
           <EmailVerificationRequired
             email={verificationEmail}
             onBackToLogin={() => setAuthMode('login')}
           />
-        )}
+        </AnimatedTransition>
+      </div>
     </div>
   )
 }

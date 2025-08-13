@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { AlertCircle, RefreshCw, Mail } from 'lucide-react'
+import { useAuth } from '@/hooks/useAuth'
 import KuchisabishiiLogo from '../KuchisabishiiLogo'
 
 interface EmailVerificationRequiredProps {
@@ -10,34 +11,43 @@ interface EmailVerificationRequiredProps {
 }
 
 export default function EmailVerificationRequired({ email, onBackToLogin }: EmailVerificationRequiredProps) {
+  const { resendConfirmation } = useAuth()
   const [isResending, setIsResending] = useState(false)
   const [resendMessage, setResendMessage] = useState('')
   const [resendError, setResendError] = useState('')
+  const [resendCount, setResendCount] = useState(0)
+  const [lastResendTime, setLastResendTime] = useState<number | null>(null)
+
+  const canResend = () => {
+    if (!lastResendTime) return true
+    const timeSinceLastResend = Date.now() - lastResendTime
+    return timeSinceLastResend > 60000 // 1 minute cooldown
+  }
+
+  const getResendCooldown = () => {
+    if (!lastResendTime) return 0
+    const timeSinceLastResend = Date.now() - lastResendTime
+    return Math.max(0, 60 - Math.floor(timeSinceLastResend / 1000))
+  }
 
   const handleResendEmail = async () => {
+    if (!canResend()) return
+    
     setIsResending(true)
     setResendMessage('')
     setResendError('')
 
-    try {
-      const response = await fetch('/api/auth/resend-confirmation', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        setResendMessage(data.message)
-      } else {
-        setResendError(data.error || 'Failed to resend confirmation email')
-      }
-    } catch (error) {
-      setResendError('Network error. Please try again.')
-    } finally {
-      setIsResending(false)
+    const result = await resendConfirmation(email)
+    
+    if (result.success) {
+      setResendMessage('Verification email sent successfully! Please check your inbox.')
+      setResendCount(prev => prev + 1)
+      setLastResendTime(Date.now())
+    } else {
+      setResendError(result.error || 'Failed to resend confirmation email')
     }
+    
+    setIsResending(false)
   }
 
   return (
@@ -84,7 +94,7 @@ export default function EmailVerificationRequired({ email, onBackToLogin }: Emai
       <div className="space-y-3">
         <button
           onClick={handleResendEmail}
-          disabled={isResending}
+          disabled={isResending || !canResend()}
           className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
         >
           {isResending ? (
@@ -92,10 +102,15 @@ export default function EmailVerificationRequired({ email, onBackToLogin }: Emai
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               <span>Resending...</span>
             </>
+          ) : !canResend() ? (
+            <>
+              <RefreshCw className="w-4 h-4" />
+              <span>Resend in {getResendCooldown()}s</span>
+            </>
           ) : (
             <>
               <RefreshCw className="w-4 h-4" />
-              <span>Resend Verification Email</span>
+              <span>Resend Verification Email{resendCount > 0 ? ` (${resendCount})` : ''}</span>
             </>
           )}
         </button>
@@ -112,6 +127,11 @@ export default function EmailVerificationRequired({ email, onBackToLogin }: Emai
         <p className="text-xs text-gray-500">
           Check your spam folder if you don't see the email within a few minutes.
         </p>
+        {resendCount > 0 && (
+          <p className="text-xs text-gray-400 mt-2">
+            Still not receiving emails? Contact support for assistance.
+          </p>
+        )}
       </div>
     </div>
   )

@@ -453,3 +453,87 @@ END OF PROMPT COMPILATION
 Total Prompts: 51
 Session Duration: Full development and deployment cycle
 Final Status: Successfully deployed at https://kuchisabishii.io with local development server at http://localhost:3000
+
+New Prompt:
+
+ It's ok. we'll just have to do it this way: Initiate an auto-spawn hive through cloud-flow to achieve the following objectives:                  │
+│   1. Implement a landing page with full registeration, sign in, and forgot password functionalities - making sure to build the architecture and    │
+│   backend. If you run into any issues building this, please let me know. It needs to be a live site for public testing and user tenancy of data.   │
+│   2. Enable google and apple sign in service.                                                                                                      │
+│   3. Add imagery to the splash screens that fit the text content.                                                                                  │
+│   4. Add in navigationt to the shop page with google maps API integration. Pull the data for restaurants and cafes from google maps to seed our    │
+│   database and list them in the shop page.                                                                                                         │
+│   5. Pull data from the menus of these shops from google and seed them for the food page.                                                          │
+│   6. For the food reviews, ensure the user can record the food review with the following meta data:                                                │
+│   - image/video upload                                                                                                                             │
+│   - location (search function using google maps api with option to add restaurant if not found)                                                    │
+│   - cuisine                                                                                                                                        │
+│   - food type                                                                                                                                      │
+│   - Meal time (breakfast, brunch, lunch, dinner dessert, snack time)                                                                               │
+│   - Basic tast: sweet, savory, sour, spicy, umami, bitter                                                                                          │
+│   - date eaten                                                                                                                                     │
+│   - Is it home made, dine in, take out, or delivered?                                                                                              │
+│   - How much did you spend?                                                                                                                        │
+│   - What was your experience (text with max 4,096 characters)                                                                                      │
+│   - 5 experience selections: I wish I could eat it... next time, never again, occasionally, frequently, whenever my mouth is lonely                │
+│   (kuchisabishi!)                                                                                                                                  │
+│   7. Provide navigation to a list view of all food reviewed in the profile. Give the option, when adding a food review, to review a food that was  │
+│   eaten aleardy - "eat again" function. This allows the user to leave an updated review of a food that was previously reviewed without erasing     │
+│   the old review. All versions are saved by the system for the user to look back on. The latest version will be used. Allow the following meta     │
+│   data to be captured:                                                                                                                             │
+│   - image/video                                                                                                                                    │
+ date eaten                                                                                                                                     │
+│   - location this time (same functionality as above)                                                                                               │
+│   - mealtime same functionality as above)                                                                                                          │
+│   - home made, dine in, etc. (same functionality as above)                                                                                         │
+│   - how much did you spend?                                                                                                                        │
+│   - what was your experience this time?                                                                                                            │
+│   - 5 experience selections: i wish I could eat it... next time, never again, occasionally, frequently, whenever my mouth is lonely                │
+│     (kuchisabishi!)                                                                                                                                │
+│   8. Add function of connecting and managing friends on the profile page with an auto QR code generated for the user to share profile. Can also    │
+│   invite other friends to join/connect on the app.                                                                                                 │
+│   9. Add in navigation and page for the system to recommend foods either for self or group. For recommendations to self, users can choose          │
+│   parameters for the system to recommend foods based on other users of similar pallets as the user based on their Kuchisabishi! rated foods.       │
+│   These parameters include whether food or drink; the cuisine; food type; meal time; basic taste; home made, dine in, tak out, or deliver; and     │
+│   spend. For the group recommendation function, the user can create groups and add friends to the group. The admin can then initiate a food        │
+│   recommendation request and allow every other group member to enter their own parameters. The system will then recommend the food to the group    │
+│   based on matching pallet and parameters between the users in the group. The group can then choose first and second choices with results of the   │
+│   votes displayed for eveyrone to see what are the group's preferences.                                                                            │
+│   10. The shop page should display the name of the shop, the type of shop (retaurant, cafe, bar, convenience store, grocery store, and any other   │
+│   type of shop that is related to food and drinks), address, and contact info - all data pulled from google maps. Users can also create reviews    │
+│   for the restaurants recording data for:                                                                                                          │
+│   - 5 experience selections: i wish i could visit... next time, never again, occasionally, frequently, whenever my mouth is lonely                 │
+│   (kuchisabishii!)                                                                                                                                 │
+│   - Services rating (0-5 stars)                                                                                                                    │
+│   - Atmophere rating (0-5 stars)                                                                                                                   │
+│   - What was your experience? (text comment with character limit of 4,096)                                                                         │
+│   - Other thoughts on: Cleanliness, dietary options, parking, kid-friendliness, seating, accessibility, bathroom situation.      
+
+ok auto-spawn a hive with a queen to coordinate the condinuted development of the platform in the local drive (don't commit to git) and test in our local server. I want
+  the following developed:
+  -For food that a user has already recorded an experience in, alow the user to select the "eat again" option to upload new version of their experience record. All verseions
+  of their records are kept for the user to review. The "eat again" function will let users record:
+  i. image/videa
+  ii. date eaten
+  iii. location (same or choose new)
+  iv. the meal time: breakfast, brunch, lunch, dinner
+  v. did you eat at home/dine in/take out/ or get delivery?
+  vi. how much did it cost this time?
+  vii. what was your experience this time? (text input max character 4096)
+  viii. 5 experience selections: I wish i could eat it... never again, not as much anymore, just as much as before, more often than I had, whenever my mouth is lonely
+  (kuchisabishii!). If the previous selection was already Kuchisabishii!, then the "just as much as before" option will save it as the "Kuchisabishii!" experience.
+
+  - Then add the profile function allowing users to upload their photo, add/manage friends, see what other friends are eating based on their reviews, and other profile
+  related info that you think such an app should have.
+
+  - Then add the function to recommend foods for self or for group. The group function allows users to choose a friend and the system will determine the kind of pallet
+  between all users to recommend dishes. It also has the function for both the self recommended and group recommended function recommend specific food/drinks based on options
+   that the user can select: food or drink, type of shop, a specific shop(s), food type, restaurant type, cuisine, diatery restrictions, location, meal time, and whether
+  delivery/take out/dine in/home cooking. The group option should allow users to createa group and add friends. The group admin can trigger a food hunt request which everyone
+   can optionally enter all the different food preferences above in order to generate a recommendation to the admin. The admin can then select the food recommendation(s) and
+  then the group can vote on the choices.
+
+  Build all this and let me test it."
+
+
+Yes, add in phas 5 but also add in user profile and all the functions that a user will need on their profile inlcuding tabs to show the complete list of foods they had reviewed and can sort/filter them as they like. Also please add a user onboarding using AI LLM capabilities where the user is guided through a series of questions to build their pallet profile so the system can start recommending foods (questions could include: are you a sweet tooth? what cuisine do you like - top 5? do you like spicy food? how spicy would you say you can handle - none, mild, spicy, super spicy, and face melting level of spice? and come up with 2 more questions to test). Design the algorithm and create a log for potential patenting on what the algorithm is in: defining a user's pallet profile, how their ongoing food reviews will adjust the pallet profile, how we determine suitable foods to recommend based on their pallet profile, and how we use the pallet profile to match with other users of similar pallet profiles and recommend foods based on user reviews of foods from users that have at least 90% match in pallet profiles. Also, the sign up function seems to be broken and not allowing just anyone to sign up and authenticate using the email. Next please configure the google and apply sign in functions. Decide whether it makes sense to run an auto-swarm hive to perform parts of this prompt, all of this prompt, or use linear to do it all. Also, the UI/UX and color pallet is not very nice. Please put on the hat of a also initiate research on the best UI/US designs of 2025 that match a fun and cute user experience to redesign and implement on the app. Prompt me if you need further clarifications in every step.

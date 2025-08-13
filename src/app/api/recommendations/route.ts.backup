@@ -1,0 +1,323 @@
+/**
+ * Recommendations API Route
+ * Real-time recommendation generation endpoint
+ */
+
+import { NextRequest, NextResponse } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
+import { RecommendationEngine, RecommendationRequest } from '@/lib/algorithms/recommendation-engine'
+import { cookies } from 'next/headers'
+
+// Initialize algorithm instances lazily to avoid circular dependencies
+let recommendationEngineInstance: RecommendationEngine | null = null
+
+function getRecommendationEngine() {
+  if (!recommendationEngineInstance) {
+    recommendationEngineInstance = new RecommendationEngine()
+  }
+  return recommendationEngineInstance
+}
+
+// Rate limiting configuration
+const RATE_LIMIT = {
+  windowMs: 60 * 1000, // 1 minute
+  maxRequests: 20,
+  skipSuccessfulRequests: false
+}
+
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
+
+/**
+ * GET /api/recommendations
+ * Generate personalized food recommendations
+ */
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const cookieStore = cookies()
+    
+    // Create Supabase client
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value
+          },
+        },
+      }
+    )
+
+    // Get authenticated user
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Authentication required', code: 'AUTH_REQUIRED' },
+        { status: 401 }
+      )
+    }
+
+    // Rate limiting
+    const clientId = user.id
+    const now = Date.now()
+    const userLimit = rateLimitMap.get(clientId)
+    
+    if (userLimit && now < userLimit.resetTime) {
+      if (userLimit.count >= RATE_LIMIT.maxRequests) {
+        return NextResponse.json(
+          { 
+            error: 'Rate limit exceeded', 
+            code: 'RATE_LIMIT_EXCEEDED',
+            resetTime: userLimit.resetTime
+          },
+          { status: 429 }
+        )
+      }
+      userLimit.count++
+    } else {
+      rateLimitMap.set(clientId, {
+        count: 1,
+        resetTime: now + RATE_LIMIT.windowMs
+      })
+    }
+
+    // Parse request parameters
+    const recommendationRequest: RecommendationRequest = {
+      user_id: user.id,
+      context: {
+        time_of_day: (searchParams.get('time_of_day') as any) || 'lunch',
+        social_setting: (searchParams.get('social_setting') as any) || 'alone',
+        mood_before: (searchParams.get('mood_before') as any) || 'neutral',
+        weather: (searchParams.get('weather') as any) || 'mild',
+        location_type: (searchParams.get('location_type') as any) || 'restaurant'
+      },
+      preferences: {
+        max_recommendations: parseInt(searchParams.get('limit') || '10'),
+        include_novelty: searchParams.get('novelty') === 'true',
+        diversity_factor: parseFloat(searchParams.get('diversity') || '0.3'),
+        dietary_restrictions: searchParams.get('dietary_restrictions')?.split(',') || [],
+        exclude_cuisines: searchParams.get('exclude_cuisines')?.split(',') || [],
+        price_range: searchParams.get('price_range') ? 
+          searchParams.get('price_range')!.split(',').map(Number) as [number, number] : 
+          undefined,
+        location: searchParams.get('lat') && searchParams.get('lng') ? {
+          latitude: parseFloat(searchParams.get('lat')!),
+          longitude: parseFloat(searchParams.get('lng')!),
+          radius_km: parseFloat(searchParams.get('radius') || '5')
+        } : undefined
+      }
+    }
+
+    // Validate request parameters
+    const validationError = validateRecommendationRequest(recommendationRequest)
+    if (validationError) {
+      return NextResponse.json(
+        { error: validationError, code: 'INVALID_PARAMETERS' },
+        { status: 400 }
+      )
+    }
+
+    // Generate recommendations
+    const startTime = Date.now()
+    const recommendationResponse = await getRecommendationEngine().generateRecommendations(recommendationRequest)
+    const processingTime = Date.now() - startTime
+
+    // Return recommendations with metadata
+    return NextResponse.json({
+      success: true,
+      data: {
+        recommendations: recommendationResponse.recommendations,
+        metadata: {
+          total_recommendations: recommendationResponse.recommendations.length,
+          processing_time_ms: processingTime,
+          cache_hit: recommendationResponse.cache_hit,
+          fallback_used: recommendationResponse.fallback_used,
+          algorithm_version: 'palate_profile_v2.1',
+          confidence_distribution: recommendationResponse.metrics.confidence_distribution,
+          diversity_score: recommendationResponse.metrics.diversity_score,
+          novelty_score: recommendationResponse.metrics.novelty_score
+        },
+        explanations: Object.fromEntries(recommendationResponse.explanations),
+        context: recommendationRequest.context
+      }
+    })
+
+  } catch (error) {
+    console.error('Error generating recommendations:', error)
+    
+    return NextResponse.json(
+      { 
+        error: 'Failed to generate recommendations', 
+        code: 'GENERATION_ERROR',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    )
+  }
+}
+
+/**
+ * POST /api/recommendations/feedback
+ * Record user feedback on recommendations
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const cookieStore = cookies()
+    
+    // Create Supabase client
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value
+          },
+        },
+      }
+    )
+
+    // Get authenticated user
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Authentication required', code: 'AUTH_REQUIRED' },
+        { status: 401 }
+      )
+    }
+
+    const body = await request.json()
+    
+    // Validate feedback data
+    if (!body.recommendation_id || typeof body.rating !== 'number') {
+      return NextResponse.json(
+        { error: 'Invalid feedback data', code: 'INVALID_FEEDBACK' },
+        { status: 400 }
+      )
+    }
+
+    if (body.rating < 0 || body.rating > 10) {
+      return NextResponse.json(
+        { error: 'Rating must be between 0 and 10', code: 'INVALID_RATING' },
+        { status: 400 }
+      )
+    }
+
+    // Record feedback in database
+    const { error: feedbackError } = await supabase
+      .from('ml_feedback')
+      .insert([{
+        user_id: user.id,
+        recommendation_interaction_id: body.recommendation_id,
+        feedback_type: body.rating >= 7 ? 'like' : body.rating <= 3 ? 'dislike' : 'visited',
+        feedback_score: body.rating / 10, // Normalize to 0-1
+        feedback_context: {
+          interaction_type: body.interaction_type || 'rating',
+          visited: body.visited || false,
+          will_try_again: body.will_try_again,
+          notes: body.notes,
+          timestamp: new Date().toISOString()
+        }
+      }])
+
+    if (feedbackError) {
+      console.error('Error recording feedback:', feedbackError)
+      return NextResponse.json(
+        { error: 'Failed to record feedback', code: 'FEEDBACK_ERROR' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Feedback recorded successfully'
+    })
+
+  } catch (error) {
+    console.error('Error recording feedback:', error)
+    
+    return NextResponse.json(
+      { 
+        error: 'Failed to record feedback', 
+        code: 'FEEDBACK_ERROR',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    )
+  }
+}
+
+/**
+ * Validate recommendation request parameters
+ */
+function validateRecommendationRequest(request: RecommendationRequest): string | null {
+  if (!request.user_id) {
+    return 'User ID is required'
+  }
+
+  if (!request.context) {
+    return 'Context is required'
+  }
+
+  const validTimeOfDay = ['breakfast', 'brunch', 'lunch', 'dinner', 'snack', 'late_night']
+  if (request.context.time_of_day && !validTimeOfDay.includes(request.context.time_of_day)) {
+    return `Invalid time_of_day. Must be one of: ${validTimeOfDay.join(', ')}`
+  }
+
+  const validSocialSettings = ['alone', 'family', 'friends', 'date', 'business', 'celebration']
+  if (request.context.social_setting && !validSocialSettings.includes(request.context.social_setting)) {
+    return `Invalid social_setting. Must be one of: ${validSocialSettings.join(', ')}`
+  }
+
+  const validMoods = ['excited', 'neutral', 'tired', 'stressed', 'happy', 'sad']
+  if (request.context.mood_before && !validMoods.includes(request.context.mood_before)) {
+    return `Invalid mood_before. Must be one of: ${validMoods.join(', ')}`
+  }
+
+  const validWeather = ['sunny', 'rainy', 'cold', 'hot', 'mild', 'unknown']
+  if (request.context.weather && !validWeather.includes(request.context.weather)) {
+    return `Invalid weather. Must be one of: ${validWeather.join(', ')}`
+  }
+
+  const validLocationTypes = ['home', 'restaurant', 'office', 'outdoor', 'event', 'travel']
+  if (request.context.location_type && !validLocationTypes.includes(request.context.location_type)) {
+    return `Invalid location_type. Must be one of: ${validLocationTypes.join(', ')}`
+  }
+
+  if (request.preferences?.max_recommendations && 
+      (request.preferences.max_recommendations < 1 || request.preferences.max_recommendations > 50)) {
+    return 'max_recommendations must be between 1 and 50'
+  }
+
+  if (request.preferences?.diversity_factor && 
+      (request.preferences.diversity_factor < 0 || request.preferences.diversity_factor > 1)) {
+    return 'diversity_factor must be between 0 and 1'
+  }
+
+  if (request.preferences?.location) {
+    const { latitude, longitude } = request.preferences.location
+    if (latitude < -90 || latitude > 90) {
+      return 'latitude must be between -90 and 90'
+    }
+    if (longitude < -180 || longitude > 180) {
+      return 'longitude must be between -180 and 180'
+    }
+  }
+
+  return null
+}
+
+/**
+ * Clean up rate limiting data periodically
+ */
+setInterval(() => {
+  const now = Date.now()
+  for (const [key, value] of rateLimitMap.entries()) {
+    if (now > value.resetTime) {
+      rateLimitMap.delete(key)
+    }
+  }
+}, 5 * 60 * 1000) // Clean up every 5 minutes

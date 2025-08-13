@@ -1,32 +1,28 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 
 export default function DemoPage() {
   const [isLoading, setIsLoading] = useState(true)
-  const router = useRouter()
 
   useEffect(() => {
     // Simulate authentication for demo purposes
-    const demoUser = {
-      id: 'demo-user-123',
-      email: 'demo@kuchisabishii.app',
-      display_name: 'Demo User',
-      first_name: 'Demo',
-      last_name: 'User'
-    }
+    if (typeof window !== 'undefined') {
+      const demoUser = {
+        id: 'demo-user-123',
+        email: 'demo@kuchisabishii.app',
+        display_name: 'Demo User',
+        first_name: 'Demo',
+        last_name: 'User'
+      }
 
-    // Store demo user in localStorage for components to access
-    localStorage.setItem('demo-user', JSON.stringify(demoUser))
-    localStorage.setItem('demo-mode', 'true')
+      // Store demo user in localStorage for components to access
+      localStorage.setItem('demo-user', JSON.stringify(demoUser))
+      localStorage.setItem('demo-mode', 'true')
+    }
     
     setIsLoading(false)
   }, [])
-
-  const navigateToFeature = (path: string) => {
-    router.push(path)
-  }
 
   if (isLoading) {
     return (
@@ -73,12 +69,12 @@ export default function DemoPage() {
               Complete the AI-powered taste questionnaire with adaptive questions, 
               real-time insights, and personalized radar chart visualization.
             </p>
-            <button
-              onClick={() => navigateToFeature('/onboarding')}
-              className="w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+            <a
+              href="/onboarding"
+              className="block w-full text-center bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
             >
               Try AI Onboarding →
-            </button>
+            </a>
           </div>
 
           {/* Enhanced Profiles */}
@@ -96,12 +92,12 @@ export default function DemoPage() {
               Explore comprehensive user profiles with food history tabs, 
               palate visualization, and recommendation accuracy tracking.
             </p>
-            <button
-              onClick={() => navigateToFeature('/profile')}
-              className="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+            <a
+              href="/profile"
+              className="block w-full text-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
             >
               View Enhanced Profile →
-            </button>
+            </a>
           </div>
 
           {/* Recommendation Engine */}
@@ -119,12 +115,12 @@ export default function DemoPage() {
               Test the patent-pending recommendation engine with 11-dimensional 
               taste vectors and emotional gradient descent learning.
             </p>
-            <button
-              onClick={() => navigateToFeature('/?demo-recs=true')}
-              className="w-full bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
+            <a
+              href="/"
+              className="block w-full text-center bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
             >
               Try Recommendations →
-            </button>
+            </a>
           </div>
 
           {/* Group Features */}
@@ -142,12 +138,12 @@ export default function DemoPage() {
               Experience group recommendation system with collaborative voting, 
               70% consensus threshold, and real-time decision making.
             </p>
-            <button
-              onClick={() => navigateToFeature('/profile?tab=groups')}
-              className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            <a
+              href="/profile"
+              className="block w-full text-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
             >
               Try Group Voting →
-            </button>
+            </a>
           </div>
         </div>
 

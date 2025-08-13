@@ -1,13 +1,16 @@
 'use client';
 
 import React, { useState } from 'react';
-import { MapPin, Star, Search, Plus, User, Home, Map, List, ChefHat, TrendingUp, Clock } from 'lucide-react';
+import { MapPin, Star, Search, Plus, User, Home, Map, List, ChefHat, TrendingUp, Clock, Users, Share2 } from 'lucide-react';
 import AuthWrapper from '../components/auth/AuthWrapper';
 import { useAuth } from '../hooks/useAuth';
 import FoodImage from '../components/FoodImage';
 import MainApp from '../components/MainApp';
 import FoodExperienceForm from '../components/food/FoodExperienceForm';
 import MapView from '../components/map/MapView';
+import FriendsManager from '../components/social/FriendsManager';
+import ActivityFeed from '../components/social/ActivityFeed';
+import SocialShare from '../components/social/SocialShare';
 import { getFoodEmoji } from '../utils/foodEmojis';
 import { mockFoodReviews, mockUserProfile, recommendedFoods, kuchisabishiFoods, recentFoods } from '../data/seed-data';
 
@@ -22,6 +25,8 @@ export default function KuchisabishiiPWA() {
   const [userFoodReviews, setUserFoodReviews] = useState<any[]>([]);
   const [showFoodForm, setShowFoodForm] = useState(false);
   const [prefillData, setPrefillData] = useState<any>(null);
+  const [showSocialShare, setShowSocialShare] = useState(false);
+  const [shareReview, setShareReview] = useState<any>(null);
 
   // Handle authentication success
   const handleAuthSuccess = () => {
@@ -269,12 +274,24 @@ export default function KuchisabishiiPWA() {
                         </div>
                       </div>
                     </div>
-                    <button 
-                      onClick={() => handleEatingAgain(food)}
-                      className="bg-orange-500 hover:bg-orange-600 text-white text-xs px-3 py-1 rounded-full transition-colors"
-                    >
-                      Eating Again?
-                    </button>
+                    <div className="flex space-x-2">
+                      <button 
+                        onClick={() => {
+                          setShareReview(food)
+                          setShowSocialShare(true)
+                        }}
+                        className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-1 rounded-full transition-colors flex items-center space-x-1"
+                      >
+                        <Share2 className="w-3 h-3" />
+                        <span>Share</span>
+                      </button>
+                      <button 
+                        onClick={() => handleEatingAgain(food)}
+                        className="bg-orange-500 hover:bg-orange-600 text-white text-xs px-3 py-1 rounded-full transition-colors"
+                      >
+                        Eating Again?
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -366,7 +383,7 @@ export default function KuchisabishiiPWA() {
           {/* Quick Actions */}
           <section>
             <h2 className="text-lg font-semibold text-gray-800 mb-3">Quick Actions</h2>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <button 
                 onClick={handleAddNewFood}
                 className="bg-orange-500 hover:bg-orange-600 text-white p-4 rounded-lg transition-colors"
@@ -380,6 +397,24 @@ export default function KuchisabishiiPWA() {
               >
                 <MapPin className="w-6 h-6 mx-auto mb-2" />
                 <span className="text-sm font-medium">Find Places</span>
+              </button>
+              <button 
+                onClick={() => setCurrentView('friends')}
+                className="bg-green-500 hover:bg-green-600 text-white p-4 rounded-lg transition-colors"
+              >
+                <Users className="w-6 h-6 mx-auto mb-2" />
+                <span className="text-sm font-medium">Friends</span>
+              </button>
+            </div>
+            <div className="grid grid-cols-1 gap-3 mt-3">
+              <button 
+                onClick={() => setCurrentView('activity')}
+                className="bg-purple-500 hover:bg-purple-600 text-white p-4 rounded-lg transition-colors"
+              >
+                <div className="flex items-center justify-center space-x-2">
+                  <Share2 className="w-5 h-5" />
+                  <span className="text-sm font-medium">Friends' Activity</span>
+                </div>
               </button>
             </div>
           </section>
@@ -409,6 +444,22 @@ export default function KuchisabishiiPWA() {
       )
     }
 
+    if (currentView === 'friends') {
+      return (
+        <FriendsManager 
+          onBack={() => setCurrentView('enhanced-app')}
+        />
+      )
+    }
+
+    if (currentView === 'activity') {
+      return (
+        <ActivityFeed 
+          onBack={() => setCurrentView('enhanced-app')}
+        />
+      )
+    }
+
     return (
       <div className="max-w-md mx-auto bg-white shadow-lg min-h-screen flex flex-col">
         {currentView === 'onboarding' && <OnboardingScreens />}
@@ -426,6 +477,16 @@ export default function KuchisabishiiPWA() {
           onClose={() => setShowFoodForm(false)}
           onSave={handleFoodSave}
           prefillData={prefillData}
+        />
+      )}
+      {showSocialShare && shareReview && (
+        <SocialShare
+          foodReview={shareReview}
+          showShareOptions={true}
+          onClose={() => {
+            setShowSocialShare(false)
+            setShareReview(null)
+          }}
         />
       )}
     </AuthWrapper>

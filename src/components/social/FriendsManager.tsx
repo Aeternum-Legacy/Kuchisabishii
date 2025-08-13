@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, UserPlus, QrCode, Camera, Users, Bell, UserCheck } from 'lucide-react'
+import { Search, UserPlus, QrCode, Camera, Users, Bell, UserCheck, Sparkles } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import QRCodeGenerator from './QRCodeGenerator'
 import QRScanner from './QRScanner'
+import FriendRecommendations from './FriendRecommendations'
 
 interface Friend {
   friendshipId: string
@@ -46,7 +47,7 @@ interface FriendsManagerProps {
 
 export default function FriendsManager({ onBack }: FriendsManagerProps) {
   const { user } = useAuth()
-  const [activeTab, setActiveTab] = useState<'friends' | 'requests' | 'search'>('friends')
+  const [activeTab, setActiveTab] = useState<'friends' | 'requests' | 'search' | 'discover'>('friends')
   const [friends, setFriends] = useState<Friend[]>([])
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([])
   const [searchResults, setSearchResults] = useState<User[]>([])
@@ -221,7 +222,8 @@ export default function FriendsManager({ onBack }: FriendsManagerProps) {
           {[
             { id: 'friends', label: 'Friends', icon: Users, count: friends.length },
             { id: 'requests', label: 'Requests', icon: Bell, count: friendRequests.length },
-            { id: 'search', label: 'Search', icon: Search }
+            { id: 'search', label: 'Search', icon: Search },
+            { id: 'discover', label: 'Discover', icon: Sparkles }
           ].map(tab => (
             <button
               key={tab.id}
@@ -419,6 +421,13 @@ export default function FriendsManager({ onBack }: FriendsManagerProps) {
                 <p className="text-sm">New requests will appear here</p>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Discover Tab */}
+        {activeTab === 'discover' && (
+          <div>
+            <FriendRecommendations limit={10} showTitle={false} />
           </div>
         )}
       </div>

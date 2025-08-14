@@ -48,13 +48,25 @@ export function useAuth() {
         }
 
         if (session?.user) {
-          // Fetch user profile
-          const response = await fetch('/api/auth/me')
-          if (response.ok) {
-            const data = await response.json()
-            setAuthState({ user: data.user, loading: false, error: null })
-          } else {
-            // Fallback to basic user data
+          try {
+            // Fetch user profile with timeout
+            const controller = new AbortController()
+            const timeoutId = setTimeout(() => controller.abort(), 3000) // 3 second timeout
+            
+            const response = await fetch('/api/auth/me', {
+              signal: controller.signal
+            })
+            clearTimeout(timeoutId)
+            
+            if (response.ok) {
+              const data = await response.json()
+              setAuthState({ user: data.user, loading: false, error: null })
+            } else {
+              throw new Error('Profile API failed')
+            }
+          } catch (error) {
+            // Fallback to basic user data if API fails
+            console.warn('Profile API error, using basic user data:', error)
             setAuthState({
               user: {
                 id: session.user.id,
@@ -77,6 +89,12 @@ export function useAuth() {
     }
 
     getInitialSession()
+
+    // Add timeout to prevent infinite loading
+    const authTimeout = setTimeout(() => {
+      console.warn('Auth timeout - forcing no user state')
+      setAuthState({ user: null, loading: false, error: null })
+    }, 5000)
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -120,7 +138,10 @@ export function useAuth() {
       }
     )
 
-    return () => subscription.unsubscribe()
+    return () => {
+      subscription.unsubscribe()
+      clearTimeout(authTimeout)
+    }
   }, [])
 
   const signUp = async (userData: {

@@ -20,6 +20,7 @@ export default function AuthWrapper({ children, onAuthSuccess }: AuthWrapperProp
   const [previousUser, setPreviousUser] = useState<typeof user>(null)
   const [confirmationEmail, setConfirmationEmail] = useState<string>('')
   const [verificationEmail, setVerificationEmail] = useState<string>('')
+  const [forceShowAuth, setForceShowAuth] = useState(false)
 
   // Handle auth success when user state changes from null to authenticated
   useEffect(() => {
@@ -29,14 +30,32 @@ export default function AuthWrapper({ children, onAuthSuccess }: AuthWrapperProp
     setPreviousUser(user)
   }, [user, previousUser, onAuthSuccess])
 
-  // Show loading state
-  if (loading) {
+  // Add timeout to prevent infinite loading
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (loading) {
+        console.warn('Auth loading timeout - showing auth forms')
+        setForceShowAuth(true)
+      }
+    }, 3000) // 3 second timeout
+
+    return () => clearTimeout(timeout)
+  }, [loading])
+
+  // Show loading state (but not if timeout has occurred)
+  if (loading && !forceShowAuth) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center">
         <StaggeredFadeIn className="text-center">
           <div className="text-6xl mb-4 animate-bounce">🍜</div>
           <p className="text-gray-600 mb-4">Loading your food journey...</p>
           <AuthLoadingSpinner size="lg" />
+          <button 
+            onClick={() => setForceShowAuth(true)}
+            className="mt-4 text-sm text-orange-600 hover:text-orange-800 underline"
+          >
+            Continue without waiting
+          </button>
         </StaggeredFadeIn>
       </div>
     )

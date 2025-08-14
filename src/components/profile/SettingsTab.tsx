@@ -5,7 +5,7 @@ import {
   Settings, Shield, Bell, Eye, EyeOff, Globe, 
   Smartphone, Mail, Lock, Trash2, Download,
   AlertTriangle, Check, X, Info, Users,
-  Database, Share2, Camera, MapPin
+  Database, Share2, Camera, MapPin, TrendingUp
 } from 'lucide-react';
 
 interface UserProfile {
@@ -436,6 +436,57 @@ const SettingsTab: React.FC<SettingsTabProps> = ({ userProfile, setUserProfile }
                 <p className="text-sm text-gray-600">See recent account activity</p>
               </div>
               <Globe className="w-5 h-5 text-gray-400" />
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* Taste Profile Management */}
+      <div className="bg-white rounded-xl shadow-sm p-6 border-2 border-purple-200">
+        <h3 className="text-lg font-semibold mb-6 flex items-center text-purple-600">
+          <Database className="w-5 h-5 mr-2" />
+          Taste Profile Management
+        </h3>
+        
+        <div className="space-y-4">
+          <button 
+            onClick={() => {
+              if (confirm('This will reset your taste profile and restart the onboarding questionnaire. Continue?')) {
+                // Clear taste profile data
+                localStorage.removeItem('tasteProfile');
+                localStorage.removeItem('onboardingCompleted');
+                // Redirect to onboarding
+                window.location.href = '/onboarding/intro';
+              }
+            }}
+            className="w-full text-left p-4 border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-medium text-purple-900">Reset Taste Profile</h4>
+                <p className="text-sm text-purple-600">Restart the AI taste questionnaire</p>
+              </div>
+              <Database className="w-5 h-5 text-purple-400" />
+            </div>
+          </button>
+
+          <button className="w-full text-left p-4 border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-medium text-purple-900">View Taste Evolution</h4>
+                <p className="text-sm text-purple-600">See how your preferences have changed</p>
+              </div>
+              <TrendingUp className="w-5 h-5 text-purple-400" />
+            </div>
+          </button>
+
+          <button className="w-full text-left p-4 border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-medium text-purple-900">Export Taste Data</h4>
+                <p className="text-sm text-purple-600">Download your taste profile for analysis</p>
+              </div>
+              <Download className="w-5 h-5 text-purple-400" />
             </div>
           </button>
         </div>

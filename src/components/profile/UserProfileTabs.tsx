@@ -327,14 +327,11 @@ const UserProfileTabs: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Header */}
+      {/* Header - removed duplicate settings button since it's in tabs */}
       <div className="bg-white shadow-sm">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-gray-900">Profile</h1>
-            <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-              <Settings className="w-6 h-6 text-gray-600" />
-            </button>
           </div>
         </div>
       </div>

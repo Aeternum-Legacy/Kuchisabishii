@@ -8,7 +8,7 @@ import { MapPin, Star, Search, Plus, User, Home, Bell, Settings, QrCode, Trendin
 import { BottomTabBar } from '@/components/mobile/BottomTabBar';
 import { CategoryScroll, sampleCategories } from '@/components/mobile/CategoryScroll';
 import FoodImage from '@/components/FoodImage';
-import { mockFoodReviews, mockUserProfile, recommendedFoods } from '@/data/seed-data';
+import { transformedFoodReviews, mockUserProfile, recommendedFoods } from '@/data/seed-data';
 // Removed supabase import since we're not using the database
 
 // Main authenticated app component with proper navigation
@@ -65,7 +65,22 @@ export default function AuthenticatedApp() {
 
   const handleLogout = async () => {
     if (confirm('Are you sure you want to logout?')) {
-      router.push('/');
+      // Clear any stored data
+      localStorage.removeItem('onboardingCompleted');
+      localStorage.clear();
+      
+      // Reset app state
+      setUserProfile(null);
+      setHasCompletedOnboarding(false);
+      setLoading(true);
+      
+      // Create a proper login experience
+      router.replace('/');
+      
+      // Show logout confirmation after redirect
+      setTimeout(() => {
+        alert('You have been logged out successfully!');
+      }, 100);
     }
   };
 
@@ -211,7 +226,7 @@ export default function AuthenticatedApp() {
           </div>
           
           <div className="space-y-4">
-            {mockFoodReviews.slice(0, 3).map((food) => (
+            {transformedFoodReviews.slice(0, 3).map((food) => (
               <div key={food.id} className="bg-white rounded-xl shadow-sm p-4">
                 <div className="flex items-start space-x-4">
                   <div className="w-20 h-20 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">

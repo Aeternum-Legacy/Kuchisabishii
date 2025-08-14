@@ -410,14 +410,24 @@ export const mockUserProfile: UserProfile = {
   achievements: ["First Kuchisabishii!", "Streak Master", "Cuisine Explorer"]
 };
 
+// Transform mockFoodReviews for the app
+export const transformedFoodReviews = mockFoodReviews.map(food => ({
+  ...food,
+  foodName: food.name,
+  restaurant: food.location
+}));
+
 // Additional data for enhanced features
 export const recommendedFoods = [
   {
     id: "rec-1",
     name: "Korean Fried Chicken",
+    restaurant: "Seoul House", 
     restaurantName: "Seoul House", 
     cuisineType: "Korean",
     image: "https://images.unsplash.com/photo-1626082936687-ace09a26e8b8?w=400&h=400&fit=crop&crop=center",
+    matchScore: 92,
+    price: "$18.99",
     aiConfidence: 92,
     reasoning: ["Based on your love for Korean BBQ", "Similar spice profile"],
     estimatedRating: 4.5,
@@ -426,9 +436,12 @@ export const recommendedFoods = [
   {
     id: "rec-2",
     name: "Truffle Pizza",
+    restaurant: "Tony's Pizza",
     restaurantName: "Tony's Pizza",
     cuisineType: "Italian", 
     image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=400&fit=crop&crop=center",
+    matchScore: 85,
+    price: "$24.99",
     aiConfidence: 85,
     reasoning: ["Trending in your area", "Premium upgrade to Margherita"],
     estimatedRating: 4.8,
@@ -437,9 +450,12 @@ export const recommendedFoods = [
   {
     id: "rec-3", 
     name: "Tom Yum Soup",
+    restaurant: "Bangkok Street Food Co.",
     restaurantName: "Bangkok Street Food Co.",
     cuisineType: "Thai",
     image: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400&h=400&fit=crop&crop=center",
+    matchScore: 88,
+    price: "$12.99",
     aiConfidence: 88,
     reasoning: ["Friends with similar taste loved this", "Matches your spice preference"],
     estimatedRating: 4.3,

@@ -4,7 +4,9 @@ import React, { useState } from 'react';
 
 interface FoodImageProps {
   src?: string;
-  alt: string;
+  alt?: string;
+  foodName?: string;
+  imageUrl?: string;
   fallbackEmoji?: string;
   className?: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -13,12 +15,17 @@ interface FoodImageProps {
 
 const FoodImage: React.FC<FoodImageProps> = ({ 
   src, 
-  alt, 
+  alt,
+  foodName,
+  imageUrl,
   fallbackEmoji = '🍽️', 
   className = '',
   size = 'md',
   rounded = true
 }) => {
+  // Support both src/alt and foodName/imageUrl patterns
+  const imageSrc = src || imageUrl;
+  const imageAlt = alt || foodName || 'Food item';
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
 
@@ -34,10 +41,10 @@ const FoodImage: React.FC<FoodImageProps> = ({
   const baseClasses = `${sizeClasses[size]} ${roundedClass} object-cover bg-gray-800 ${className}`;
 
   // If no src provided or image failed to load, show emoji fallback
-  if (!src || imageError) {
+  if (!imageSrc || imageError) {
     return (
       <div className={`${baseClasses} flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700`}>
-        <span className="text-2xl" role="img" aria-label={alt}>
+        <span className="text-2xl" role="img" aria-label={imageAlt}>
           {fallbackEmoji}
         </span>
       </div>
@@ -52,8 +59,8 @@ const FoodImage: React.FC<FoodImageProps> = ({
         </div>
       )}
       <img
-        src={src}
-        alt={alt}
+        src={imageSrc}
+        alt={imageAlt}
         className={`${baseClasses} transition-opacity duration-300 ${
           imageLoading ? 'opacity-0' : 'opacity-100'
         }`}

@@ -220,7 +220,7 @@ const UserProfileTabs: React.FC = () => {
       setLoading(false);
     };
 
-    loadRealData();
+    loadDemoData();
   }, [user]);
 
   // Filter and search reviews

@@ -41,6 +41,15 @@ export default function AuthenticatedApp() {
           // No profile exists, need onboarding
           setHasCompletedOnboarding(false);
           router.push('/onboarding/intro');
+        } else if (error) {
+          // Database error - skip onboarding check and show main app
+          console.warn('Database not available, skipping onboarding check:', error);
+          setHasCompletedOnboarding(true);
+          setUserProfile({
+            id: user.id,
+            display_name: user.email?.split('@')[0] || 'User',
+            onboarding_completed: true
+          });
         } else if (profile) {
           setUserProfile(profile);
           setHasCompletedOnboarding(profile.onboarding_completed || false);
@@ -51,13 +60,36 @@ export default function AuthenticatedApp() {
         }
       } catch (error) {
         console.error('Error checking onboarding status:', error);
+        // Fallback: Allow access to main app if database fails
+        setHasCompletedOnboarding(true);
+        setUserProfile({
+          id: user.id,
+          display_name: user.email?.split('@')[0] || 'User',
+          onboarding_completed: true
+        });
       } finally {
         setLoading(false);
       }
     };
 
     checkOnboardingStatus();
-  }, [user, router]);
+
+    // Add timeout to prevent infinite loading
+    const timeout = setTimeout(() => {
+      if (loading) {
+        console.warn('Loading timeout - forcing app access');
+        setLoading(false);
+        setHasCompletedOnboarding(true);
+        setUserProfile({
+          id: user?.id || 'demo',
+          display_name: user?.email?.split('@')[0] || 'Demo User',
+          onboarding_completed: true
+        });
+      }
+    }, 5000); // 5 second timeout
+
+    return () => clearTimeout(timeout);
+  }, [user, router, loading]);
 
   // Handle navigation based on tab selection
   const handleTabChange = (tabId: string) => {

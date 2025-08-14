@@ -230,8 +230,8 @@ export const HallOfFameSection: React.FC<HallOfFameSectionProps> = ({
                 className={`flex items-center justify-center w-8 h-8 rounded-full text-white text-sm font-bold ${
                   index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : 'bg-orange-400'
                 }`}
-                animate={{ rotate: [0, 10, -10, 0] }}
-                transition={{ repeat: Infinity, duration: 4, delay: index * 0.5 }}
+                animate={{ rotate: [0, 3, -3, 0] }}
+                transition={{ repeat: Infinity, duration: 6, delay: index * 0.5, repeatDelay: 4 }}
               >
                 {index === 0 ? '👑' : index === 1 ? '🥈' : '🥉'}
               </motion.div>

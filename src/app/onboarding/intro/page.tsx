@@ -78,8 +78,8 @@ export default function OnboardingIntro() {
                 />
                 <motion.div
                   className="absolute -top-2 -right-2 text-4xl"
-                  animate={{ rotate: [0, 10, -10, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                  animate={{ rotate: [0, 5, -5, 0] }}
+                  transition={{ duration: 3, repeat: Infinity, repeatDelay: 5 }}
                 >
                   {currentStepData.emoji}
                 </motion.div>

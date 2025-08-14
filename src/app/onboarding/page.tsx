@@ -152,13 +152,14 @@ export default function OnboardingPage() {
               <div className="text-center">
                 <motion.div
                   animate={{ 
-                    scale: [1, 1.2, 1],
-                    rotate: [0, 10, -10, 0]
+                    scale: [1, 1.05, 1],
+                    rotate: [0, 2, -2, 0]
                   }}
                   transition={{ 
-                    duration: 2,
+                    duration: 4,
                     repeat: Infinity,
-                    repeatType: "reverse"
+                    repeatType: "reverse",
+                    repeatDelay: 3
                   }}
                   className="text-8xl mb-8"
                 >

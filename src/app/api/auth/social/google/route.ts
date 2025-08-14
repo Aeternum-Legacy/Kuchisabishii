@@ -28,9 +28,23 @@ export async function POST(request: NextRequest) {
     const clientId = process.env.GOOGLE_CLIENT_ID
     const redirectUri = `${baseUrl}/api/auth/callback/google`
     
+    console.log('Environment check:', {
+      baseUrl,
+      clientId: clientId ? 'SET' : 'MISSING',
+      redirectUri
+    })
+    
     if (!clientId) {
+      console.error('Google Client ID is missing from environment variables')
       return NextResponse.json(
-        { error: 'Google OAuth not configured' },
+        { 
+          error: 'Google OAuth not configured',
+          debug: {
+            baseUrl,
+            clientId: clientId ? 'SET' : 'MISSING',
+            allEnvVars: Object.keys(process.env).filter(key => key.includes('GOOGLE'))
+          }
+        },
         { status: 500 }
       )
     }

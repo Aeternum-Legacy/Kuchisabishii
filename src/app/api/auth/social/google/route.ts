@@ -22,14 +22,31 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Use NextAuth.js for professional OAuth flow (shows your domain, not Supabase)
+    // Create direct Google OAuth URL for professional appearance
     const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
-    const googleOAuthUrl = `${baseUrl}/api/auth/signin/google`
+    const clientId = process.env.GOOGLE_CLIENT_ID
+    const redirectUri = `${baseUrl}/api/auth/callback/google`
+    
+    if (!clientId) {
+      return NextResponse.json(
+        { error: 'Google OAuth not configured' },
+        { status: 500 }
+      )
+    }
+    
+    // Build Google OAuth URL manually for better control
+    const googleOAuthUrl = new URL('https://accounts.google.com/oauth/authorize')
+    googleOAuthUrl.searchParams.set('client_id', clientId)
+    googleOAuthUrl.searchParams.set('redirect_uri', redirectUri)
+    googleOAuthUrl.searchParams.set('response_type', 'code')
+    googleOAuthUrl.searchParams.set('scope', 'email profile')
+    googleOAuthUrl.searchParams.set('access_type', 'offline')
+    googleOAuthUrl.searchParams.set('prompt', 'consent')
     
     return NextResponse.json({
-      url: googleOAuthUrl,
+      url: googleOAuthUrl.toString(),
       provider: 'google',
-      message: 'Redirecting to professional OAuth flow'
+      message: 'Redirecting to Google OAuth'
     })
 
   } catch (error) {

@@ -116,7 +116,7 @@ export default function DemoPage() {
               taste vectors and emotional gradient descent learning.
             </p>
             <a
-              href="/"
+              href="/app?demo=true"
               className="block w-full text-center bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
             >
               Try Recommendations →

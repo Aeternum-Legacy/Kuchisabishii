@@ -29,10 +29,10 @@ export default function HomePage() {
   }, [user, router]);
 
   const enterDemoMode = () => {
-    console.log('ENTERING DEMO MODE - bypassing all auth');
+    console.log('ENTERING DEMO MODE - going to dedicated demo page');
     localStorage.setItem('demoMode', 'true');
     setDemoMode(true);
-    router.push('/app?demo=true');
+    router.push('/demo');
   };
 
   // Handle authentication success

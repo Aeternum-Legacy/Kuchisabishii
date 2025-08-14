@@ -5,7 +5,7 @@ import {
   Camera, Settings, Users, Heart, MapPin, Calendar, Star, 
   UserPlus, Search, Bell, TrendingUp, Award, Download,
   Filter, SortAsc, Eye, EyeOff, Share2, BarChart3, PieChart,
-  Target, Bookmark, Clock, ChefHat, Globe, Edit3, Briefcase
+  Target, Bookmark, Clock, ChefHat, Globe, Edit3
 } from 'lucide-react';
 import { Database } from '@/lib/supabase/types';
 // Removed useAuth import - using demo mode
@@ -15,19 +15,15 @@ import PalateProfileTab from './PalateProfileTab';
 import SettingsTab from './SettingsTab';
 import ImageUpload from './ImageUpload';
 
-// Type definitions - Extended to include LinkedIn integration fields
+// Type definitions - Food-focused user profile
 type BaseUserProfile = Database['public']['Tables']['user_profiles']['Row'];
 interface UserProfile extends BaseUserProfile {
-  linkedin_imported?: boolean;
-  linkedin_data?: any;
-  professional_title?: string;
-  credentials?: string[];
+  // Only food-related profile extensions
 }
 type FoodExperience = Database['public']['Tables']['food_experiences']['Row'];
 type BaseTasteProfile = Database['public']['Tables']['taste_profiles']['Row'];
 interface TasteProfile extends BaseTasteProfile {
-  linkedin_derived?: boolean;
-  professional_context?: any;
+  // Only food-related taste profile extensions
 }
 type RestaurantReview = Database['public']['Tables']['restaurant_reviews']['Row'];
 
@@ -84,35 +80,32 @@ const UserProfileTabs: React.FC = () => {
     sortOrder: 'desc'
   });
 
-  // Load real profile data (Aaron Tong's LinkedIn integration)
+  // Load demo food profile data
   useEffect(() => {
-    const loadRealData = () => {
+    const loadDemoData = () => {
       setUserProfile({
         id: user?.id || '1',
         created_at: '2024-01-15T00:00:00Z',
         updated_at: '2024-08-13T00:00:00Z',
-        username: 'aaron_tong_eng',
-        display_name: 'Aaron Tong',
-        avatar_url: undefined, // No avatar set yet
-        bio: 'My goal in life is to challenge stagnation. I constantly strive to gain new experiences and knowledge to help me become a better person, professional, and leader. Passionate about food experiences that challenge conventional thinking.',
-        location: 'Alberta, Canada',
-        dietary_restrictions: [], // No specific dietary restrictions
+        username: 'foodie_explorer',
+        display_name: 'Demo Food Explorer',
+        avatar_url: undefined,
+        bio: 'Passionate food lover always seeking new culinary adventures! Love discovering hidden gems and sharing amazing food experiences with fellow foodies.',
+        location: 'Demo City, Demo State',
+        dietary_restrictions: [],
         allergies: [],
-        spice_tolerance: 4, // Engineering precision suggests moderate spice tolerance
-        sweetness_preference: 3, // Balanced preference
+        spice_tolerance: 4,
+        sweetness_preference: 3,
         profile_visibility: 'public',
         allow_recommendations: true,
         share_analytics: true,
         onboarding_completed: true,
-        taste_profile_setup: true,
-        linkedin_imported: true,
-        professional_title: 'P.Eng, PMP at Aeternum',
-        credentials: ['P.Eng', 'PMP']
+        taste_profile_setup: true
       });
 
       setUserStats({
-        totalReviews: 89, // More realistic for a busy professional
-        averageRating: 4.3, // Slightly higher - engineering precision in rating
+        totalReviews: 89,
+        averageRating: 4.3,
         totalRestaurants: 67, // Good exploration for Alberta location
         totalPhotos: 156, // Moderate photo activity
         favoriteCuisines: [
@@ -172,13 +165,7 @@ const UserProfileTabs: React.FC = () => {
           Indian: 3, // Developing palate
           Mexican: 3 // Moderate interest
         },
-        culinary_adventurousness: 3.8, // Professional but open to growth
-        linkedin_derived: true,
-        professional_context: {
-          work_dining_style: 'structured',
-          business_meal_preferences: ['upscale_casual', 'discussion_friendly'],
-          cultural_background_influence: ['canadian', 'cantonese']
-        }
+        culinary_adventurousness: 3.8 // Food-focused adventurous rating
       });
 
       // Mock reviews
@@ -495,15 +482,6 @@ const OverviewTab: React.FC<{
               <div>
                 <div className="flex items-center space-x-2">
                   <h1 className="text-2xl font-bold text-gray-900">{userProfile.display_name}</h1>
-                  {userProfile.credentials && userProfile.credentials.length > 0 && (
-                    <div className="flex items-center space-x-1">
-                      {userProfile.credentials.map((credential, index) => (
-                        <span key={credential} className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm font-medium">
-                          {credential}
-                        </span>
-                      ))}
-                    </div>
-                  )}
                   <button
                     onClick={() => setIsEditing(true)}
                     className="p-1 hover:bg-gray-100 rounded-full transition-colors"
@@ -511,12 +489,6 @@ const OverviewTab: React.FC<{
                     <Edit3 className="w-4 h-4 text-gray-500" />
                   </button>
                 </div>
-                {userProfile.professional_title && (
-                  <p className="text-blue-600 font-medium flex items-center mt-1">
-                    <Briefcase className="w-4 h-4 mr-1" />
-                    {userProfile.professional_title}
-                  </p>
-                )}
                 {userProfile.username && (
                   <p className="text-gray-500">@{userProfile.username}</p>
                 )}
@@ -528,16 +500,6 @@ const OverviewTab: React.FC<{
                 )}
                 {userProfile.bio && (
                   <p className="text-gray-600 mt-2">{userProfile.bio}</p>
-                )}
-                {userProfile.linkedin_imported && (
-                  <div className="flex items-center space-x-2 mt-2">
-                    <div className="flex items-center space-x-1 text-sm text-blue-600">
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                      </svg>
-                      <span>LinkedIn Profile Imported</span>
-                    </div>
-                  </div>
                 )}
                 <p className="text-sm text-gray-500 mt-2">
                   Joined {new Date(userProfile.created_at).toLocaleDateString()}

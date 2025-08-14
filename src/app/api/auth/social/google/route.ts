@@ -24,7 +24,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Create direct Google OAuth URL for professional appearance
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+    const requestUrl = new URL(request.url)
+    const baseUrl = process.env.NEXTAUTH_URL || `${requestUrl.protocol}//${requestUrl.host}`
     const clientId = process.env.GOOGLE_CLIENT_ID
     const redirectUri = `${baseUrl}/api/auth/callback/google`
     

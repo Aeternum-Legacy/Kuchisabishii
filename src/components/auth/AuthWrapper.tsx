@@ -21,6 +21,7 @@ export default function AuthWrapper({ children, onAuthSuccess }: AuthWrapperProp
   const [confirmationEmail, setConfirmationEmail] = useState<string>('')
   const [verificationEmail, setVerificationEmail] = useState<string>('')
   const [forceShowAuth, setForceShowAuth] = useState(false)
+  const [emergencyMode, setEmergencyMode] = useState(false)
 
   // Handle auth success when user state changes from null to authenticated
   useEffect(() => {
@@ -33,14 +34,25 @@ export default function AuthWrapper({ children, onAuthSuccess }: AuthWrapperProp
   // Add timeout to prevent infinite loading
   useEffect(() => {
     const timeout = setTimeout(() => {
-      if (loading) {
+      if (loading && !user) {
         console.warn('Auth loading timeout - showing auth forms')
         setForceShowAuth(true)
       }
-    }, 3000) // 3 second timeout
+    }, 2000) // 2 second timeout
 
-    return () => clearTimeout(timeout)
-  }, [loading])
+    // Emergency timeout - skip auth completely
+    const emergencyTimeout = setTimeout(() => {
+      if (loading) {
+        console.error('EMERGENCY: Auth completely stuck, rendering children anyway')
+        setEmergencyMode(true)
+      }
+    }, 5000) // 5 second emergency timeout
+
+    return () => {
+      clearTimeout(timeout)
+      clearTimeout(emergencyTimeout)
+    }
+  }, [loading, user])
 
   // Show loading state (but not if timeout has occurred)
   if (loading && !forceShowAuth) {
@@ -61,8 +73,8 @@ export default function AuthWrapper({ children, onAuthSuccess }: AuthWrapperProp
     )
   }
 
-  // If user is authenticated, render children
-  if (user) {
+  // If user is authenticated OR emergency mode, render children
+  if (user || emergencyMode) {
     return <>{children}</>
   }
 

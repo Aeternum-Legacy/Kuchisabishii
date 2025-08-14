@@ -3,9 +3,10 @@ import Image from 'next/image'
 interface KuchisabishiiLogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl'
   className?: string
+  seamless?: boolean // New prop to control shadow
 }
 
-export default function KuchisabishiiLogo({ size = 'lg', className = '' }: KuchisabishiiLogoProps) {
+export default function KuchisabishiiLogo({ size = 'lg', className = '', seamless = false }: KuchisabishiiLogoProps) {
   const dimensions = {
     sm: { width: 48, height: 48 },    // 12x12 in Tailwind (48px)
     md: { width: 64, height: 64 },    // 16x16 in Tailwind (64px)
@@ -32,6 +33,8 @@ export default function KuchisabishiiLogo({ size = 'lg', className = '' }: Kuchi
         style={{
           maxWidth: '100%',
           height: 'auto',
+          filter: seamless ? 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))' : undefined,
+          background: 'transparent'
         }}
       />
     </div>

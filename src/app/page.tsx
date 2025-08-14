@@ -44,6 +44,10 @@ export default function HomePage() {
             width={80}
             height={80}
             className="rounded-xl mx-auto mb-4"
+            style={{
+              filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))',
+              background: 'transparent'
+            }}
           />
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
         </div>

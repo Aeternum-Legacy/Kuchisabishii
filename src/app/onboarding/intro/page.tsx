@@ -69,8 +69,12 @@ export default function OnboardingIntro() {
                   alt="Kuchisabishii Logo"
                   width={120}
                   height={120}
-                  className="rounded-2xl shadow-lg"
+                  className="rounded-2xl"
                   priority
+                  style={{
+                    filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))',
+                    background: 'transparent'
+                  }}
                 />
                 <motion.div
                   className="absolute -top-2 -right-2 text-4xl"

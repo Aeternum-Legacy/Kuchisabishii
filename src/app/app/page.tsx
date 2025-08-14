@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { MapPin, Star, Search, Plus, User, Home, Bell, Settings, QrCode, TrendingUp } from 'lucide-react';
+import { MapPin, Star, Search, Plus, User, Home, Bell, Settings, QrCode, TrendingUp, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { BottomTabBar } from '@/components/mobile/BottomTabBar';
 import { CategoryScroll, sampleCategories } from '@/components/mobile/CategoryScroll';
@@ -13,7 +13,7 @@ import { supabase } from '@/lib/supabase/client';
 
 // Main authenticated app component with proper navigation
 export default function AuthenticatedApp() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('home');
   const [activeCategory, setActiveCategory] = useState('all');
@@ -86,6 +86,13 @@ export default function AuthenticatedApp() {
     setActiveCategory(categoryId);
   };
 
+  const handleLogout = async () => {
+    if (confirm('Are you sure you want to logout?')) {
+      await signOut();
+      router.push('/');
+    }
+  };
+
   // Navigation tabs configuration
   const navigationTabs = [
     { id: 'home', label: 'Home', icon: '🏠', badge: 0 },
@@ -105,6 +112,10 @@ export default function AuthenticatedApp() {
             width={80}
             height={80}
             className="rounded-xl mx-auto mb-4"
+            style={{
+              filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))',
+              background: 'transparent'
+            }}
           />
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
         </div>
@@ -148,6 +159,13 @@ export default function AuthenticatedApp() {
                 className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center"
               >
                 <QrCode className="w-4 h-4 text-white" />
+              </button>
+              <button 
+                onClick={handleLogout}
+                className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-white hover:bg-opacity-30 transition-colors"
+                title="Logout"
+              >
+                <LogOut className="w-4 h-4 text-white" />
               </button>
             </div>
           </div>

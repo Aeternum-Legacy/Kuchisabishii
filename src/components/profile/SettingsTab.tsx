@@ -5,7 +5,7 @@ import {
   Settings, Shield, Bell, Eye, EyeOff, Globe, 
   Smartphone, Mail, Lock, Trash2, Download,
   AlertTriangle, Check, X, Info, Users,
-  Database, Share2, Camera, MapPin, TrendingUp
+  Database, Share2, Camera, MapPin, TrendingUp, LogOut
 } from 'lucide-react';
 
 interface UserProfile {
@@ -500,6 +500,25 @@ const SettingsTab: React.FC<SettingsTabProps> = ({ userProfile, setUserProfile }
         </h3>
         
         <div className="space-y-4">
+          <div className="p-4 bg-orange-50 rounded-lg">
+            <h4 className="font-medium text-orange-900 mb-2">Logout</h4>
+            <p className="text-sm text-orange-700 mb-4">
+              Sign out of your account on this device.
+            </p>
+            <button
+              onClick={() => {
+                if (confirm('Are you sure you want to logout?')) {
+                  // This would call the logout function passed as prop
+                  window.location.href = '/';
+                }
+              }}
+              className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors flex items-center space-x-2"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Logout</span>
+            </button>
+          </div>
+
           <div className="p-4 bg-red-50 rounded-lg">
             <h4 className="font-medium text-red-900 mb-2">Delete Account</h4>
             <p className="text-sm text-red-700 mb-4">

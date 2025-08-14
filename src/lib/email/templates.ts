@@ -3,6 +3,12 @@
  * Branded email communications for better user experience
  */
 
+export interface EmailTemplate {
+  subject: string;
+  html: string;
+  text: string;
+}
+
 export const emailTemplates = {
   /**
    * Email Verification Template
@@ -369,4 +375,42 @@ The Kuchisabishii Team
 © 2024 Kuchisabishii. All rights reserved.
     `
   }
+}
+
+// Named export functions for backwards compatibility
+export function getEmailVerificationTemplate(
+  confirmationUrl: string, 
+  userName?: string
+): EmailTemplate {
+  return {
+    subject: emailTemplates.verification.subject,
+    html: emailTemplates.verification.html(confirmationUrl, userName),
+    text: emailTemplates.verification.text(confirmationUrl, userName)
+  }
+}
+
+export function getPasswordResetTemplate(
+  resetUrl: string, 
+  userName?: string
+): EmailTemplate {
+  return {
+    subject: emailTemplates.passwordReset.subject,
+    html: emailTemplates.passwordReset.html(resetUrl, userName),
+    text: emailTemplates.passwordReset.text(resetUrl, userName)
+  }
+}
+
+export function getWelcomeTemplate(userName?: string): EmailTemplate {
+  return {
+    subject: emailTemplates.welcome.subject,
+    html: emailTemplates.welcome.html(userName),
+    text: emailTemplates.welcome.text(userName)
+  }
+}
+
+
+export interface EmailTemplate {
+  subject: string
+  html: string
+  text: string
 }

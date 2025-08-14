@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { authRateLimit } from '@/lib/middleware/rateLimit'
+import { emailService } from '@/lib/email/service'
+import { getEmailVerificationTemplate } from '@/lib/email/templates'
 
 const registerSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -63,6 +65,20 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    // Send custom verification email
+    if (authData.user && !authData.user.email_confirmed_at) {
+      const verificationLink = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/auth/verify-email?token=${authData.user.id}&email=${encodeURIComponent(validatedData.email)}`
+      const emailTemplate = getEmailVerificationTemplate(verificationLink, validatedData.displayName)
+      
+      try {
+        await emailService.sendEmail(validatedData.email, emailTemplate)
+        console.log('Verification email sent successfully')
+      } catch (emailError) {
+        console.error('Failed to send verification email:', emailError)
+        // Continue with registration even if email fails
+      }
+    }
+
     if (authError) {
       return NextResponse.json(
         { error: authError.message },
@@ -112,12 +128,14 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({
-      message: 'Registration successful',
+      message: 'Registration successful! Please check your email to verify your account.',
       user: {
         id: authData.user.id,
         email: authData.user.email,
-        displayName: validatedData.displayName
-      }
+        displayName: validatedData.displayName,
+        emailVerified: false
+      },
+      nextStep: 'email_verification'
     }, { status: 201 })
 
   } catch (error) {

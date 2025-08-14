@@ -80,7 +80,7 @@ export default function EmailConfirmation({ email, onBackToLogin }: EmailConfirm
         <button
           onClick={handleResendEmail}
           disabled={isResending}
-          className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2 mb-4"
+          className="w-full bg-orange-500 hover:bg-orange-600 hover:shadow-lg disabled:bg-gray-300 text-white py-3 rounded-lg font-medium transition-all duration-200 flex items-center justify-center space-x-2 mb-4 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
         >
           {isResending ? (
             <>
@@ -97,7 +97,7 @@ export default function EmailConfirmation({ email, onBackToLogin }: EmailConfirm
         
         <button
           onClick={onBackToLogin}
-          className="text-orange-500 hover:text-orange-600 font-medium"
+          className="text-orange-500 hover:text-orange-600 font-medium cursor-pointer transition-colors duration-200 hover:underline"
         >
           Back to Sign In
         </button>

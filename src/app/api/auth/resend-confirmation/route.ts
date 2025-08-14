@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { emailResendRateLimit } from '@/lib/middleware/rateLimit'
+import { emailService } from '@/lib/email/service'
+import { getEmailVerificationTemplate } from '@/lib/email/templates'
 
 const resendSchema = z.object({
   email: z.string().email('Invalid email address')
@@ -50,20 +52,37 @@ export async function POST(request: NextRequest) {
                    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 
                    'http://localhost:3000'
     
-    // Resend confirmation email
-    const { error } = await supabase.auth.resend({
-      type: 'signup',
-      email: validatedData.email,
-      options: {
-        emailRedirectTo: `${baseUrl}/auth/callback`
-      }
-    })
+    // Get user profile for personalized email
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('display_name, first_name')
+      .eq('email', validatedData.email)
+      .single()
 
-    if (error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      )
+    const displayName = profile?.display_name || profile?.first_name || 'there'
+    
+    // Send custom verification email
+    const verificationLink = `${baseUrl}/auth/verify-email?email=${encodeURIComponent(validatedData.email)}`
+    const emailTemplate = getEmailVerificationTemplate(verificationLink, displayName)
+    
+    const emailSent = await emailService.sendEmail(validatedData.email, emailTemplate)
+    
+    if (!emailSent) {
+      // Fallback to Supabase resend if custom email fails
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: validatedData.email,
+        options: {
+          emailRedirectTo: `${baseUrl}/auth/callback`
+        }
+      })
+
+      if (error) {
+        return NextResponse.json(
+          { error: 'Failed to send verification email' },
+          { status: 500 }
+        )
+      }
     }
 
     return NextResponse.json({

@@ -95,7 +95,7 @@ export default function EmailVerificationRequired({ email, onBackToLogin }: Emai
         <button
           onClick={handleResendEmail}
           disabled={isResending || !canResend()}
-          className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+          className="w-full bg-orange-500 hover:bg-orange-600 hover:shadow-lg disabled:bg-gray-300 text-white py-3 rounded-lg font-medium transition-all duration-200 flex items-center justify-center space-x-2 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
         >
           {isResending ? (
             <>
@@ -117,7 +117,7 @@ export default function EmailVerificationRequired({ email, onBackToLogin }: Emai
 
         <button
           onClick={onBackToLogin}
-          className="w-full text-orange-500 hover:text-orange-600 font-medium py-2 transition-colors"
+          className="w-full text-orange-500 hover:text-orange-600 font-medium py-2 transition-colors duration-200 cursor-pointer hover:underline"
         >
           Back to Sign In
         </button>

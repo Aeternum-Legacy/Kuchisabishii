@@ -270,33 +270,6 @@ export function useAuth() {
     }
   }
 
-  const signInWithApple = async () => {
-    try {
-      setAuthState(prev => ({ ...prev, loading: true, error: null }))
-      
-      const response = await fetch('/api/auth/social/apple', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({})
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Apple sign-in failed')
-      }
-
-      // Redirect to Apple OAuth URL
-      window.location.href = data.url
-      
-      return { success: true, data }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Apple sign-in failed'
-      setAuthState(prev => ({ ...prev, loading: false, error: errorMessage }))
-      return { success: false, error: errorMessage }
-    }
-  }
-
   const resendConfirmation = async (email: string) => {
     try {
       setAuthState(prev => ({ ...prev, loading: true, error: null }))
@@ -330,7 +303,6 @@ export function useAuth() {
     signIn,
     signOut,
     signInWithGoogle,
-    signInWithApple,
     resendConfirmation
   }
 }

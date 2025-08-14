@@ -135,7 +135,7 @@
 5. Add:
    - **Client ID**: (from Google OAuth setup)
    - **Client Secret**: (from Google OAuth setup)
-6. Copy the Callback URL shown (should be: https://auelvsosyxrvbvxozhuz.supabase.co/auth/v1/callback)
+6. Copy the Callback URL shown (should be: https://auelvsosyxrvbvxozhuz.supabase.co/auth/v1/callback) -  https://auelvsosyxrvbvxozhuz.supabase.co/auth/v1/callback confirmed
 7. Click "Save"
 
 ### Step 2: Configure Apple Provider
@@ -168,8 +168,8 @@ After completing the above, update your `.env.local` and `.env.staging`:
 
 ```env
 # Google OAuth
-GOOGLE_CLIENT_ID=your_client_id_here.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=your_client_secret_here
+GOOGLE_CLIENT_ID=YOUR_GOOGLE_CLIENT_ID_HERE
+GOOGLE_CLIENT_SECRET=YOUR_GOOGLE_CLIENT_SECRET_HERE
 
 # Apple OAuth
 APPLE_CLIENT_ID=io.kuchisabishii.web

@@ -4,37 +4,28 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { MapPin, Star, Search, Plus, User, Home, Bell, Settings, QrCode, TrendingUp, LogOut } from 'lucide-react';
-// Removed useAuth dependency since we're not using authentication
+import { useAuth } from '@/hooks/useAuth';
 import { BottomTabBar } from '@/components/mobile/BottomTabBar';
 import { CategoryScroll, sampleCategories } from '@/components/mobile/CategoryScroll';
 import FoodImage from '@/components/FoodImage';
-import { transformedFoodReviews, mockUserProfile, recommendedFoods } from '@/data/seed-data';
-// Removed supabase import since we're not using the database
+import { transformedFoodReviews, recommendedFoods } from '@/data/seed-data';
+import AuthWrapper from '@/components/auth/AuthWrapper';
 
 // Main authenticated app component with proper navigation
 export default function AuthenticatedApp() {
-  // Simplified app without auth dependencies
+  const { user, signOut } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('home');
   const [activeCategory, setActiveCategory] = useState('all');
-  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean | null>(null);
-  const [userProfile, setUserProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  // Simplified: Just show the app immediately
+  // Initialize app with authenticated user
   useEffect(() => {
-    console.log('Initializing app with demo profile');
-    
-    // Always show app with demo profile
-    setHasCompletedOnboarding(true);
-    setUserProfile({
-      id: 'demo-user',
-      display_name: 'Demo User',
-      onboarding_completed: true,
-      location: 'Demo Location'
-    });
-    setLoading(false);
-  }, []);
+    if (user) {
+      console.log('App initialized for user:', user.displayName);
+      setLoading(false);
+    }
+  }, [user]);
 
   // Handle navigation based on tab selection
   const handleTabChange = (tabId: string) => {
@@ -65,22 +56,10 @@ export default function AuthenticatedApp() {
 
   const handleLogout = async () => {
     if (confirm('Are you sure you want to logout?')) {
-      // Clear any stored data
-      localStorage.removeItem('onboardingCompleted');
-      localStorage.clear();
-      
-      // Reset app state
-      setUserProfile(null);
-      setHasCompletedOnboarding(false);
-      setLoading(true);
-      
-      // Create a proper login experience
-      router.replace('/');
-      
-      // Show logout confirmation after redirect
-      setTimeout(() => {
-        alert('You have been logged out successfully!');
-      }, 100);
+      const result = await signOut();
+      if (result.success) {
+        router.replace('/');
+      }
     }
   };
 
@@ -115,7 +94,8 @@ export default function AuthenticatedApp() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <AuthWrapper>
+      <div className="flex flex-col min-h-screen bg-gray-50">
       {/* Main Content Area */}
       <div className="flex-1 pb-20">
         {/* Mobile Header */}
@@ -134,7 +114,7 @@ export default function AuthenticatedApp() {
               <div>
                 <p className="text-sm text-orange-100">Welcome back</p>
                 <h1 className="text-lg font-bold">
-                  {userProfile?.display_name || 'Demo User'}
+                  {user?.displayName || user?.firstName || 'User'}
                 </h1>
               </div>
             </div>
@@ -165,7 +145,7 @@ export default function AuthenticatedApp() {
           <div className="flex items-center space-x-2 bg-white bg-opacity-20 rounded-xl px-3 py-2">
             <MapPin className="w-4 h-4" />
             <span className="text-sm font-medium">
-              {userProfile?.location || 'Set your location'}
+              {user?.location || 'Set your location'}
             </span>
           </div>
         </div>
@@ -304,5 +284,6 @@ export default function AuthenticatedApp() {
         onTabChange={handleTabChange}
       />
     </div>
+    </AuthWrapper>
   );
 }

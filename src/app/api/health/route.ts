@@ -1,55 +1,76 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
-  // Check environment variables
-  const hasSupabaseUrl = !!process.env.NEXT_PUBLIC_SUPABASE_URL
-  const hasSupabaseKey = !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  const hasNextAuthUrl = !!process.env.NEXTAUTH_URL
-  const hasNextAuthSecret = !!process.env.NEXTAUTH_SECRET
-  
-  // Create health check response
-  const health = {
-    status: 'checking',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV,
-    checks: {
-      supabase_url: hasSupabaseUrl,
-      supabase_key: hasSupabaseKey,
-      nextauth_url: hasNextAuthUrl,
-      nextauth_secret: hasNextAuthSecret,
-    },
-    supabase: {
-      url_prefix: hasSupabaseUrl ? process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 30) + '...' : 'NOT SET',
-      key_length: hasSupabaseKey ? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.length : 0
+  const start = Date.now()
+  const checks: Record<string, any> = {}
+
+  try {
+    // Check environment variables
+    checks.environment = {
+      nodeEnv: process.env.NODE_ENV,
+      hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+      hasSupabaseKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      hasGoogleOAuth: !!process.env.GOOGLE_CLIENT_ID,
+      hasEmailConfig: !!process.env.EMAIL_FROM,
+      status: 'healthy'
     }
-  }
-  
-  // Determine overall status
-  const allChecksPass = hasSupabaseUrl && hasSupabaseKey
-  health.status = allChecksPass ? 'healthy' : 'unhealthy'
-  
-  // Try to connect to Supabase
-  if (allChecksPass) {
+
+    // Check database connection
     try {
-      const { createClient } = await import('@/lib/supabase/server')
-      const supabase = await createClient()
-      const { error } = await supabase.from('profiles').select('count').limit(1)
-      
-      if (error) {
-        health.status = 'degraded'
-        health.checks['database'] = false
-        health['database_error'] = error.message
-      } else {
-        health.checks['database'] = true
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('count')
+        .limit(1)
+        .single()
+
+      checks.database = {
+        status: error ? 'unhealthy' : 'healthy',
+        error: error?.message,
+        responseTime: Date.now() - start
       }
-    } catch (error) {
-      health.status = 'degraded'
-      health.checks['database'] = false
-      health['database_error'] = error instanceof Error ? error.message : 'Unknown error'
+    } catch (err) {
+      checks.database = {
+        status: 'unhealthy',
+        error: err instanceof Error ? err.message : 'Unknown database error',
+        responseTime: Date.now() - start
+      }
     }
+
+    // System health
+    checks.system = {
+      uptime: process.uptime(),
+      memory: process.memoryUsage(),
+      timestamp: new Date().toISOString(),
+      status: 'healthy'
+    }
+
+    // Overall health determination
+    const isHealthy = checks.database.status === 'healthy'
+    const overallStatus = isHealthy ? 'healthy' : 'unhealthy'
+    const statusCode = isHealthy ? 200 : 503
+
+    return NextResponse.json(
+      {
+        status: overallStatus,
+        timestamp: new Date().toISOString(),
+        responseTime: Date.now() - start,
+        version: process.env.npm_package_version || '1.0.0',
+        checks
+      },
+      { status: statusCode }
+    )
+  } catch (error) {
+    return NextResponse.json(
+      {
+        status: 'unhealthy',
+        timestamp: new Date().toISOString(),
+        responseTime: Date.now() - start,
+        error: error instanceof Error ? error.message : 'Health check failed',
+        checks
+      },
+      { status: 503 }
+    )
   }
-  
-  return NextResponse.json(health, { 
-    status: health.status === 'healthy' ? 200 : 503 
-  })
 }

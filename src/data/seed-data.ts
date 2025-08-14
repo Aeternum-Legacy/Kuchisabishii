@@ -397,18 +397,8 @@ export const mockShops: Shop[] = [
   }
 ];
 
-// User Profile
-export const mockUserProfile: UserProfile = {
-  id: "user-1",
-  name: "Alex Chen",
-  email: "alex.chen@example.com", 
-  totalReviews: 47,
-  averageRating: 3.8,
-  kuchisabishiCount: 8,
-  favoritesCuisines: ["Japanese", "Korean", "Italian", "Thai"],
-  dietaryRestrictions: ["No Shellfish", "Prefers Organic"],
-  achievements: ["First Kuchisabishii!", "Streak Master", "Cuisine Explorer"]
-};
+// User Profile structure - no more demo data, will be populated from real user data
+// export const mockUserProfile: UserProfile = { ... } - REMOVED FOR PRODUCTION
 
 // Transform mockFoodReviews for the app
 export const transformedFoodReviews = mockFoodReviews.map(food => ({

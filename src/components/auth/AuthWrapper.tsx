@@ -64,7 +64,7 @@ export default function AuthWrapper({ children, onAuthSuccess }: AuthWrapperProp
           <AuthLoadingSpinner size="lg" />
           <button 
             onClick={() => setForceShowAuth(true)}
-            className="mt-4 text-sm text-orange-600 hover:text-orange-800 underline"
+            className="mt-4 text-sm text-orange-600 hover:text-orange-800 underline cursor-pointer transition-colors duration-200"
           >
             Continue without waiting
           </button>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { socialAuthRateLimit } from '@/lib/middleware/rateLimit'
 
 export async function POST(request: NextRequest) {
+  console.log('Google OAuth endpoint hit:', new Date().toISOString())
   try {
     // Apply rate limiting
     const rateLimitResult = socialAuthRateLimit(request)
@@ -56,4 +57,12 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
+}
+
+export async function GET(request: NextRequest) {
+  return NextResponse.json({
+    message: 'Google OAuth endpoint is working',
+    timestamp: new Date().toISOString(),
+    method: 'GET'
+  })
 }

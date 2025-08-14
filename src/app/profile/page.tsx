@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Linkedin, User, Download, Upload, Settings } from 'lucide-react';
 import UserProfileTabs from '@/components/profile/UserProfileTabs';
 import LinkedInProfileCard from '@/components/profile/LinkedInProfileCard';
-import AuthWrapper from '@/components/auth/AuthWrapper';
+// Removed AuthWrapper - no auth required in simplified mode
 import { LinkedInProfileData, aaronTongLinkedInData } from '@/lib/linkedin/profile-import';
 
 const ProfilePage: React.FC = () => {
@@ -55,7 +55,6 @@ const ProfilePage: React.FC = () => {
   };
 
   return (
-    <AuthWrapper>
       <div className="min-h-screen bg-gray-100">
         {/* Header with LinkedIn Integration */}
         <div className="bg-white shadow-sm">
@@ -192,7 +191,6 @@ const ProfilePage: React.FC = () => {
         {/* Main Profile Content */}
         <UserProfileTabs />
       </div>
-    </AuthWrapper>
   );
 };
 

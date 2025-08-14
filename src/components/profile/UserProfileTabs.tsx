@@ -8,7 +8,7 @@ import {
   Target, Bookmark, Clock, ChefHat, Globe, Edit3, Briefcase
 } from 'lucide-react';
 import { Database } from '@/lib/supabase/types';
-import { useAuth } from '@/hooks/useAuth';
+// Removed useAuth import - using demo mode
 import ReviewsTab from './ReviewsTab';
 import StatisticsTab from './StatisticsTab';
 import PalateProfileTab from './PalateProfileTab';
@@ -66,7 +66,8 @@ interface FilterOptions {
 }
 
 const UserProfileTabs: React.FC = () => {
-  const { user } = useAuth();
+  // Demo user data instead of auth
+  const user = { id: 'demo-user', email: 'demo@kuchisabishii.io' };
   const [activeTab, setActiveTab] = useState<'overview' | 'reviews' | 'statistics' | 'settings' | 'palate'>('overview');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [userStats, setUserStats] = useState<UserStats | null>(null);

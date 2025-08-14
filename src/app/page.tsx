@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { MapPin, Star, Search, Plus, User, Home, Bell, Settings } from 'lucide-react';
 import AuthWrapper from '../components/auth/AuthWrapper';
 import { useAuth } from '../hooks/useAuth';
@@ -98,6 +99,18 @@ export default function KuchisabishiiPWA() {
     return (
       <div className="flex-1 bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center px-6">
         <div className="text-center space-y-8 max-w-sm">
+          {/* Logo */}
+          <div className="flex justify-center mb-8">
+            <Image
+              src="/images/kuchisabishii-logo.png"
+              alt="Kuchisabishii Logo"
+              width={120}
+              height={120}
+              className="rounded-2xl shadow-lg"
+              priority
+            />
+          </div>
+          
           <div className="space-y-4">
             <h1 className="text-3xl font-bold text-gray-800">{currentStep.title}</h1>
             <p className="text-lg text-gray-700 leading-relaxed">{currentStep.message}</p>
@@ -134,8 +147,15 @@ export default function KuchisabishiiPWA() {
         <div className="bg-gradient-to-r from-orange-400 to-red-500 text-white p-4 pt-12">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                <User className="w-5 h-5 text-white" />
+              {/* Logo in Header */}
+              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center p-1">
+                <Image
+                  src="/images/kuchisabishii-logo.png"
+                  alt="Kuchisabishii"
+                  width={32}
+                  height={32}
+                  className="rounded-md"
+                />
               </div>
               <div>
                 <p className="text-sm text-orange-100">Welcome back</p>

@@ -1,41 +1,39 @@
-export default function KuchisabishiiLogo({ size = 'lg' }: { size?: 'sm' | 'md' | 'lg' }) {
+import Image from 'next/image'
+
+interface KuchisabishiiLogoProps {
+  size?: 'sm' | 'md' | 'lg' | 'xl'
+  className?: string
+}
+
+export default function KuchisabishiiLogo({ size = 'lg', className = '' }: KuchisabishiiLogoProps) {
   const dimensions = {
+    sm: { width: 48, height: 48 },    // 12x12 in Tailwind (48px)
+    md: { width: 64, height: 64 },    // 16x16 in Tailwind (64px)
+    lg: { width: 80, height: 80 },    // 20x20 in Tailwind (80px)
+    xl: { width: 120, height: 120 }   // 30x30 in Tailwind (120px)
+  }
+
+  const sizeClasses = {
     sm: 'w-12 h-12',
-    md: 'w-16 h-16',
-    lg: 'w-20 h-20'
+    md: 'w-16 h-16', 
+    lg: 'w-20 h-20',
+    xl: 'w-30 h-30'
   }
   
   return (
-    <div className={`inline-flex items-center justify-center ${dimensions[size]} bg-gray-100 rounded-full`}>
-      <svg viewBox="0 0 100 100" className={size === 'sm' ? 'w-10 h-10' : size === 'md' ? 'w-14 h-14' : 'w-16 h-16'}>
-        <g>
-          {/* Main bowl/face */}
-          <circle cx="50" cy="50" r="35" fill="white" stroke="black" strokeWidth="3"/>
-          
-          {/* Smile with noodles */}
-          <path d="M 25 50 Q 50 65 75 50" fill="none" stroke="black" strokeWidth="3" strokeLinecap="round"/>
-          
-          {/* Noodle strands */}
-          <line x1="35" y1="50" x2="35" y2="54" stroke="black" strokeWidth="2" strokeLinecap="round"/>
-          <line x1="45" y1="50" x2="45" y2="54" stroke="black" strokeWidth="2" strokeLinecap="round"/>
-          <line x1="55" y1="50" x2="55" y2="54" stroke="black" strokeWidth="2" strokeLinecap="round"/>
-          <line x1="65" y1="50" x2="65" y2="54" stroke="black" strokeWidth="2" strokeLinecap="round"/>
-          
-          {/* Eyes */}
-          <circle cx="35" cy="35" r="3" fill="black"/>
-          <circle cx="65" cy="35" r="3" fill="black"/>
-          
-          {/* Eye shine */}
-          <circle cx="36" cy="34" r="1" fill="white"/>
-          <circle cx="66" cy="34" r="1" fill="white"/>
-          
-          {/* Chopsticks */}
-          <circle cx="25" cy="25" r="10" fill="white" stroke="black" strokeWidth="3"/>
-          <circle cx="75" cy="25" r="10" fill="white" stroke="black" strokeWidth="3"/>
-          <circle cx="25" cy="25" r="5" fill="none" stroke="black" strokeWidth="2"/>
-          <circle cx="75" cy="25" r="5" fill="none" stroke="black" strokeWidth="2"/>
-        </g>
-      </svg>
+    <div className={`inline-flex items-center justify-center ${className}`}>
+      <Image
+        src="/images/kuchisabishii-logo.png"
+        alt="Kuchisabishii Logo"
+        width={dimensions[size].width}
+        height={dimensions[size].height}
+        className={`${sizeClasses[size]} rounded-lg object-contain`}
+        priority={size === 'lg' || size === 'xl'}
+        style={{
+          maxWidth: '100%',
+          height: 'auto',
+        }}
+      />
     </div>
   )
 }

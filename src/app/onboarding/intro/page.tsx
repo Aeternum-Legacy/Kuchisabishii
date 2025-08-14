@@ -42,6 +42,12 @@ export default function OnboardingIntro() {
     router.push('/onboarding');
   };
 
+  const skipOnboardingCompletely = () => {
+    // Mark onboarding as completed and go directly to app
+    localStorage.setItem('onboardingCompleted', 'true');
+    router.push('/app');
+  };
+
   const currentStepData = onboardingSteps[currentStep];
 
   return (
@@ -144,12 +150,20 @@ export default function OnboardingIntro() {
               </motion.button>
               
               {currentStep === 0 && (
-                <button
-                  onClick={skipIntro}
-                  className="w-full text-gray-500 py-2 text-sm hover:text-gray-700 transition-colors"
-                >
-                  Skip intro
-                </button>
+                <div className="space-y-1">
+                  <button
+                    onClick={skipIntro}
+                    className="w-full text-gray-500 py-2 text-sm hover:text-gray-700 transition-colors"
+                  >
+                    Skip intro
+                  </button>
+                  <button
+                    onClick={skipOnboardingCompletely}
+                    className="w-full text-gray-400 py-1 text-xs hover:text-gray-600 transition-colors"
+                  >
+                    Skip all onboarding
+                  </button>
+                </div>
               )}
             </div>
           </motion.div>

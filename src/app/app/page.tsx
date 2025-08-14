@@ -29,6 +29,21 @@ export default function AuthenticatedApp() {
         return;
       }
 
+      // Check localStorage first as fallback
+      const localOnboardingCompleted = localStorage.getItem('onboardingCompleted') === 'true';
+      
+      if (localOnboardingCompleted) {
+        console.log('Onboarding marked as completed in localStorage');
+        setHasCompletedOnboarding(true);
+        setUserProfile({
+          id: user.id,
+          display_name: user.email?.split('@')[0] || 'User',
+          onboarding_completed: true
+        });
+        setLoading(false);
+        return;
+      }
+
       try {
         // Check if user profile exists and onboarding is completed
         const { data: profile, error } = await supabase
@@ -56,6 +71,9 @@ export default function AuthenticatedApp() {
           
           if (!profile.onboarding_completed) {
             router.push('/onboarding/intro');
+          } else {
+            // Mark as completed in localStorage for future sessions
+            localStorage.setItem('onboardingCompleted', 'true');
           }
         }
       } catch (error) {
@@ -89,7 +107,7 @@ export default function AuthenticatedApp() {
     }, 5000); // 5 second timeout
 
     return () => clearTimeout(timeout);
-  }, [user, router, loading]);
+  }, [user, router]);
 
   // Handle navigation based on tab selection
   const handleTabChange = (tabId: string) => {

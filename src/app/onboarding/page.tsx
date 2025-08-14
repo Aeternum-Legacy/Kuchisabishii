@@ -86,9 +86,13 @@ export default function OnboardingPage() {
 
   const handleOnboardingComplete = () => {
     setCurrentStep('complete')
+    
+    // Mark onboarding as completed in localStorage as fallback
+    localStorage.setItem('onboardingCompleted', 'true')
+    
     // Redirect to main app after a short delay
     setTimeout(() => {
-      router.push('/')
+      router.push('/app')
     }, 2000)
   }
 
@@ -100,7 +104,9 @@ export default function OnboardingPage() {
   }
 
   const handleSkipOnboarding = () => {
-    router.push('/')
+    // Mark onboarding as completed when skipped
+    localStorage.setItem('onboardingCompleted', 'true')
+    router.push('/app')
   }
 
   return (

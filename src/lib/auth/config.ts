@@ -90,6 +90,12 @@ export const authConfig: NextAuthConfig = {
         token.id = user.id
       }
       return token
+    },
+    async redirect({ url, baseUrl }) {
+      // Always redirect to home page after successful authentication
+      if (url.startsWith('/')) return `${baseUrl}${url}`
+      else if (new URL(url).origin === baseUrl) return url
+      return baseUrl
     }
   },
   pages: {

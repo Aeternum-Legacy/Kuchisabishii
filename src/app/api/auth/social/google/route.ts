@@ -1,4 +1,3 @@
-import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { socialAuthRateLimit } from '@/lib/middleware/rateLimit'
 
@@ -23,37 +22,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await createClient()
-    
-    // Get the redirect URL from the request or use default
-    const { redirectTo } = await request.json().catch(() => ({}))
+    // Use NextAuth.js for professional OAuth flow (shows your domain, not Supabase)
     const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
-    const redirectUrl = redirectTo || `${baseUrl}/auth/callback`
+    const googleOAuthUrl = `${baseUrl}/api/auth/signin/google`
     
-    // Sign in with Google OAuth
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: redirectUrl,
-        queryParams: {
-          access_type: 'offline',
-          prompt: 'consent',
-        },
-        scopes: 'email profile'
-      }
-    })
-
-    if (error) {
-      console.error('Google OAuth error:', error)
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      )
-    }
-
     return NextResponse.json({
-      url: data.url,
-      provider: 'google'
+      url: googleOAuthUrl,
+      provider: 'google',
+      message: 'Redirecting to professional OAuth flow'
     })
 
   } catch (error) {

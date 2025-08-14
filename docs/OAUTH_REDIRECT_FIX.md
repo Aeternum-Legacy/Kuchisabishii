@@ -18,20 +18,19 @@ In Google Cloud Console (https://console.cloud.google.com/):
 3. Add these Authorized redirect URIs:
 
 ```
-https://kuchisabishii-app-git-staging-aeternum-legacys-projects.vercel.app/auth/callback
 https://kuchisabishii-app-git-staging-aeternum-legacys-projects.vercel.app/api/auth/callback/google
-https://auelvsosyxrvbvxozhuz.supabase.co/auth/v1/callback
+https://kuchisabishii.io/api/auth/callback/google
+https://staging.kuchisabishii.io/api/auth/callback/google
 ```
 
-### 2. Verify Supabase Redirect URLs
+**Note**: Using NextAuth.js instead of Supabase OAuth for professional domain appearance.
 
-In Supabase Dashboard:
-1. Go to "Authentication" → "URL Configuration"
-2. Ensure these are in "Redirect URLs":
-```
-https://kuchisabishii-app-git-staging-aeternum-legacys-projects.vercel.app
-https://kuchisabishii-app-git-staging-aeternum-legacys-projects.vercel.app/auth/callback
-```
+### 2. Remove Supabase OAuth URLs (No Longer Needed)
+
+Since we're using NextAuth.js for professional OAuth flow:
+1. Go to Supabase Dashboard → "Authentication" → "URL Configuration"
+2. **Remove** the Supabase callback URLs (we no longer use them)
+3. Keep only your domain URLs if any
 
 ### 3. Update Vercel Environment Variables
 

@@ -4,16 +4,16 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { MapPin, Star, Search, Plus, User, Home, Bell, Settings, QrCode, TrendingUp, LogOut } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+// Removed useAuth dependency since we're not using authentication
 import { BottomTabBar } from '@/components/mobile/BottomTabBar';
 import { CategoryScroll, sampleCategories } from '@/components/mobile/CategoryScroll';
 import FoodImage from '@/components/FoodImage';
 import { mockFoodReviews, mockUserProfile, recommendedFoods } from '@/data/seed-data';
-import { supabase } from '@/lib/supabase/client';
+// Removed supabase import since we're not using the database
 
 // Main authenticated app component with proper navigation
 export default function AuthenticatedApp() {
-  const { user, signOut } = useAuth();
+  // Simplified app without auth dependencies
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('home');
   const [activeCategory, setActiveCategory] = useState('all');
@@ -21,38 +21,20 @@ export default function AuthenticatedApp() {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  // EMERGENCY: Skip all onboarding checks and go directly to app
+  // Simplified: Just show the app immediately
   useEffect(() => {
-    const initializeApp = () => {
-      // If no user and not from auth, redirect to home
-      if (!user) {
-        // Check if this is demo mode (URL parameter or localStorage)
-        const isDemoMode = window.location.search.includes('demo') || 
-                          localStorage.getItem('demoMode') === 'true';
-        
-        if (!isDemoMode) {
-          router.push('/');
-          return;
-        }
-      }
-
-      console.log('EMERGENCY MODE: Bypassing onboarding checks');
-      
-      // Force app access with demo profile
-      setHasCompletedOnboarding(true);
-      setUserProfile({
-        id: user?.id || 'demo-user',
-        display_name: user?.email?.split('@')[0] || 'Demo User',
-        onboarding_completed: true,
-        location: 'Demo Location'
-      });
-      setLoading(false);
-    };
-
-    // Small delay to ensure user state is stable
-    const timeout = setTimeout(initializeApp, 100);
-    return () => clearTimeout(timeout);
-  }, [user, router]);
+    console.log('Initializing app with demo profile');
+    
+    // Always show app with demo profile
+    setHasCompletedOnboarding(true);
+    setUserProfile({
+      id: 'demo-user',
+      display_name: 'Demo User',
+      onboarding_completed: true,
+      location: 'Demo Location'
+    });
+    setLoading(false);
+  }, []);
 
   // Handle navigation based on tab selection
   const handleTabChange = (tabId: string) => {
@@ -83,7 +65,6 @@ export default function AuthenticatedApp() {
 
   const handleLogout = async () => {
     if (confirm('Are you sure you want to logout?')) {
-      await signOut();
       router.push('/');
     }
   };
@@ -138,7 +119,7 @@ export default function AuthenticatedApp() {
               <div>
                 <p className="text-sm text-orange-100">Welcome back</p>
                 <h1 className="text-lg font-bold">
-                  {userProfile?.display_name || user?.email?.split('@')[0] || 'Food Lover'}
+                  {userProfile?.display_name || 'Demo User'}
                 </h1>
               </div>
             </div>

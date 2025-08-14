@@ -27,7 +27,8 @@ export async function POST(request: NextRequest) {
     
     // Get the redirect URL from the request or use default
     const { redirectTo } = await request.json().catch(() => ({}))
-    const redirectUrl = redirectTo || `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/auth/callback`
+    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+    const redirectUrl = redirectTo || `${baseUrl}/auth/callback`
     
     // Sign in with Google OAuth
     const { data, error } = await supabase.auth.signInWithOAuth({

@@ -566,19 +566,19 @@ function SliderQuestion({ question, value, onChange }: Record<string, unknown>) 
     <div className="space-y-6">
       <div className="text-center mb-8">
         <div className="text-6xl font-bold text-transparent bg-gradient-to-r from-purple-500 to-orange-500 bg-clip-text mb-2">
-          {currentValue}
+          {String(currentValue)}
         </div>
-        <div className="text-sm text-gray-500">out of {question.max}</div>
+        <div className="text-sm text-gray-500">out of {(question as any).max}</div>
       </div>
       
       <div className="relative">
         <input
           type="range"
-          min={question.min || 1}
-          max={question.max || 10}
-          step={question.step || 1}
-          value={currentValue}
-          onChange={(e) => onChange(question.id, parseInt(e.target.value))}
+          min={(question as any).min || 1}
+          max={(question as any).max || 10}
+          step={(question as any).step || 1}
+          value={Number(currentValue)}
+          onChange={(e) => (onChange as any)((question as any).id, parseInt(e.target.value))}
           className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-gradient"
         />
         
@@ -593,7 +593,7 @@ function SliderQuestion({ question, value, onChange }: Record<string, unknown>) 
         {[1, 5, 10].map(num => (
           <button
             key={num}
-            onClick={() => onChange(question.id, num)}
+            onClick={() => (onChange as any)((question as any).id, num)}
             className={`p-3 rounded-lg border-2 transition-all ${
               currentValue === num
                 ? 'border-purple-400 bg-purple-50 text-purple-700'
@@ -612,35 +612,35 @@ function SliderQuestion({ question, value, onChange }: Record<string, unknown>) 
 }
 
 function MultiSelectQuestion({ question, value, onChange }: Record<string, unknown>) {
-  const selectedValues = value || []
+  const selectedValues: string[] = (value as string[]) || []
   
   const toggleSelection = (optionValue: string) => {
-    const newSelection = selectedValues.includes(optionValue)
+    const newSelection: string[] = selectedValues.includes(optionValue)
       ? selectedValues.filter((v: string) => v !== optionValue)
       : [...selectedValues, optionValue]
-    onChange(question.id, newSelection)
+    ;(onChange as any)((question as any).id, newSelection)
   }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {question.options?.map((option: Record<string, unknown>) => (
+      {(question as any).options?.map((option: Record<string, unknown>) => (
         <motion.button
-          key={option.value}
+          key={option.value as string}
           whileHover={{ scale: 1.02, y: -2 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => toggleSelection(option.value)}
+          onClick={() => toggleSelection(option.value as string)}
           className={`p-6 rounded-xl border-2 transition-all text-left ${
-            selectedValues.includes(option.value)
+            selectedValues.includes(option.value as string)
               ? 'border-purple-400 bg-gradient-to-br from-purple-50 to-orange-50 text-purple-700 shadow-lg'
               : 'border-gray-200 hover:border-gray-300 hover:shadow-md bg-white'
           }`}
         >
-          <div className="text-3xl mb-3">{option.emoji}</div>
-          <div className="font-semibold mb-1">{option.label}</div>
-          {option.description && (
-            <div className="text-sm text-gray-600">{option.description}</div>
+          <div className="text-3xl mb-3">{String(option.emoji)}</div>
+          <div className="font-semibold mb-1">{String(option.label)}</div>
+          {Boolean(option.description) && (
+            <div className="text-sm text-gray-600">{String(option.description)}</div>
           )}
-          {selectedValues.includes(option.value) && (
+          {selectedValues.includes(option.value as string) && (
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
@@ -661,20 +661,20 @@ function EmojiRatingQuestion({ question, value, onChange }: Record<string, unkno
   return (
     <div className="space-y-8">
       <div className="flex justify-center gap-4">
-        {question.options?.map((option: Record<string, unknown>) => (
+        {(question as any).options?.map((option: Record<string, unknown>) => (
           <motion.button
-            key={option.value}
+            key={option.value as string}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            onClick={() => onChange(question.id, option.value)}
+            onClick={() => (onChange as any)((question as any).id, option.value)}
             className={`p-6 rounded-2xl border-3 transition-all ${
               currentValue === option.value
                 ? 'border-purple-400 bg-purple-50 shadow-lg scale-110'
                 : 'border-gray-200 hover:border-gray-300 bg-white hover:shadow-md'
             }`}
           >
-            <div className="text-4xl mb-2">{option.emoji}</div>
-            <div className="font-medium text-sm">{option.label}</div>
+            <div className="text-4xl mb-2">{String(option.emoji)}</div>
+            <div className="font-medium text-sm">{String(option.label)}</div>
           </motion.button>
         ))}
       </div>
@@ -683,11 +683,11 @@ function EmojiRatingQuestion({ question, value, onChange }: Record<string, unkno
 }
 
 function RankingQuestion({ question, value, onChange }: Record<string, unknown>) {
-  const [rankings, setRankings] = useState(value || [])
+  const [rankings, setRankings] = useState<any[]>((value as any[]) || [])
   
   const handleRank = (optionValue: string, rank: number) => {
     const newRankings = [...rankings]
-    const existingIndex = newRankings.findIndex(r => r.value === optionValue)
+    const existingIndex = newRankings.findIndex((r: any) => r.value === optionValue)
     
     if (existingIndex >= 0) {
       newRankings[existingIndex].rank = rank
@@ -695,14 +695,14 @@ function RankingQuestion({ question, value, onChange }: Record<string, unknown>)
       newRankings.push({ value: optionValue, rank })
     }
     
-    const sortedRankings = newRankings.sort((a, b) => a.rank - b.rank)
-    setRankings(sortedRankings)
-    onChange(question.id, sortedRankings)
+    const sortedRankings = [...newRankings].sort((a: any, b: any) => a.rank - b.rank)
+    ;(setRankings as any)(sortedRankings)
+    (onChange as any)((question as any).id, sortedRankings)
   }
 
   const getRank = (optionValue: string) => {
     const item = rankings.find((r: Record<string, unknown>) => r.value === optionValue)
-    return item?.rank || 0
+    return (item?.rank as number) || 0
   }
 
   return (
@@ -711,18 +711,18 @@ function RankingQuestion({ question, value, onChange }: Record<string, unknown>)
         Click the stars to rank from 1 (most favorite) to 5 (least favorite)
       </p>
       
-      {question.options?.map((option: Record<string, unknown>) => {
-        const rank = getRank(option.value)
+      {(question as any).options?.map((option: Record<string, unknown>) => {
+        const rank = getRank(option.value as string)
         return (
           <motion.div
-            key={option.value}
+            key={option.value as string}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
           >
             <div className="flex items-center gap-4">
-              <span className="text-2xl">{option.emoji}</span>
-              <span className="font-medium text-lg">{option.label}</span>
+              <span className="text-2xl">{String(option.emoji)}</span>
+              <span className="font-medium text-lg">{String(option.label)}</span>
               {rank > 0 && (
                 <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
                   #{rank}
@@ -735,7 +735,7 @@ function RankingQuestion({ question, value, onChange }: Record<string, unknown>)
                   key={starRank}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
-                  onClick={() => handleRank(option.value, starRank)}
+                  onClick={() => handleRank(option.value as string, starRank)}
                   className={`p-1 rounded ${
                     rank === starRank 
                       ? 'text-yellow-400 bg-yellow-50' 
@@ -756,21 +756,21 @@ function RankingQuestion({ question, value, onChange }: Record<string, unknown>)
 function ComparisonQuestion({ question, value, onChange }: Record<string, unknown>) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {question.options?.map((option: Record<string, unknown>) => (
+      {(question as any).options?.map((option: Record<string, unknown>) => (
         <motion.button
-          key={option.value}
+          key={option.value as string}
           whileHover={{ scale: 1.02, y: -4 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => onChange(question.id, option.value)}
+          onClick={() => (onChange as any)((question as any).id, option.value)}
           className={`p-8 rounded-2xl border-2 transition-all text-center ${
             value === option.value
               ? 'border-purple-400 bg-gradient-to-br from-purple-50 to-orange-50 text-purple-700 shadow-xl'
               : 'border-gray-200 hover:border-gray-300 hover:shadow-lg bg-white'
           }`}
         >
-          <div className="text-5xl mb-4">{option.emoji}</div>
-          <div className="text-xl font-bold mb-2">{option.label}</div>
-          <div className="text-sm text-gray-600">{option.description}</div>
+          <div className="text-5xl mb-4">{String(option.emoji)}</div>
+          <div className="text-xl font-bold mb-2">{String(option.label)}</div>
+          <div className="text-sm text-gray-600">{String(option.description)}</div>
         </motion.button>
       ))}
     </div>
@@ -780,18 +780,18 @@ function ComparisonQuestion({ question, value, onChange }: Record<string, unknow
 function ScenarioQuestion({ question, value, onChange }: Record<string, unknown>) {
   return (
     <div className="space-y-6">
-      {question.scenarios?.map((scenario: Record<string, unknown>, scenarioIndex: number) => (
+      {(question as any).scenarios?.map((scenario: Record<string, unknown>, scenarioIndex: number) => (
         <div key={scenarioIndex} className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl">
           <h3 className="font-semibold text-gray-800 mb-4">
-            Scenario: {scenario.situation}
+            Scenario: {String(scenario.situation)}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {scenario.options.map((option: string, optionIndex: number) => (
+            {(scenario.options as string[]).map((option: string, optionIndex: number) => (
               <motion.button
                 key={optionIndex}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => onChange(question.id, option)}
+                onClick={() => (onChange as any)((question as any).id, option)}
                 className={`p-4 rounded-lg border-2 transition-all text-left ${
                   value === option
                     ? 'border-purple-400 bg-white text-purple-700 shadow-md'

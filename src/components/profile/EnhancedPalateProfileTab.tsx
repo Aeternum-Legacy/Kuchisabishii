@@ -358,8 +358,8 @@ export default function EnhancedPalateProfileTab({
   const TasteSlider = ({ label, value, color, onChange, disabled }: Record<string, unknown>) => (
     <div className="space-y-2">
       <div className="flex justify-between items-center">
-        <label className="text-sm font-medium text-gray-700">{label}</label>
-        <span className="text-sm font-bold" style={{ color }}>{value}/10</span>
+        <label className="text-sm font-medium text-gray-700">{String(label)}</label>
+        <span className="text-sm font-bold" style={{ color: color as string }}>{String(value)}/10</span>
       </div>
       <div className="relative">
         <input

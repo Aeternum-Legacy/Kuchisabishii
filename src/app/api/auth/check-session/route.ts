@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
         },
         profile,
         needsOnboarding: !profile?.onboarding_completed,
-        redirectTo: profile?.onboarding_completed ? '/dashboard' : '/onboarding'
+        redirectTo: profile?.onboarding_completed ? '/dashboard' : '/onboarding/intro'
       })
     }
     

@@ -84,15 +84,31 @@ export default function OnboardingPage() {
     }
   }
 
-  const handleOnboardingComplete = () => {
+  const handleOnboardingComplete = async () => {
     setCurrentStep('complete')
+    
+    try {
+      // Mark onboarding as completed in database
+      const response = await fetch('/api/onboarding/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      if (response.ok) {
+        console.log('Onboarding completed successfully')
+      } else {
+        console.error('Failed to mark onboarding as completed')
+      }
+    } catch (error) {
+      console.error('Error completing onboarding:', error)
+    }
     
     // Mark onboarding as completed in localStorage as fallback
     localStorage.setItem('onboardingCompleted', 'true')
     
     // Redirect to main app after a short delay
     setTimeout(() => {
-      router.push('/app')
+      router.push('/dashboard')
     }, 2000)
   }
 
@@ -103,10 +119,31 @@ export default function OnboardingPage() {
     setRecommendations([])
   }
 
-  const handleSkipOnboarding = () => {
+  const handleSkipOnboarding = async () => {
+    // Show popup notice about accessing through settings
+    const shouldSkip = window.confirm(
+      "You can restart the AI Taste Profiling anytime through the Settings menu in your profile.\n\nContinue to skip?"
+    )
+    
+    if (!shouldSkip) return
+    
+    try {
+      // Mark onboarding as completed in database
+      const response = await fetch('/api/onboarding/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      if (response.ok) {
+        console.log('Onboarding skipped and marked as completed')
+      }
+    } catch (error) {
+      console.error('Error marking onboarding as completed:', error)
+    }
+    
     // Mark onboarding as completed when skipped
     localStorage.setItem('onboardingCompleted', 'true')
-    router.push('/app')
+    router.push('/dashboard')
   }
 
   return (

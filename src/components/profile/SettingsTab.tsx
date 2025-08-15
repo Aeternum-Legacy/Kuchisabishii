@@ -451,7 +451,23 @@ const SettingsTab: React.FC<SettingsTabProps> = ({ userProfile, setUserProfile }
         <div className="space-y-4">
           <button 
             onClick={() => {
-              if (confirm('This will reset your taste profile and restart the onboarding questionnaire. Continue?')) {
+              // Navigate directly to taste profiling questionnaire
+              window.location.href = '/onboarding';
+            }}
+            className="w-full text-left p-4 border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors bg-purple-50"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-medium text-purple-900">Retake AI Taste Profiling</h4>
+                <p className="text-sm text-purple-600">Update your taste profile with new questionnaire</p>
+              </div>
+              <TrendingUp className="w-5 h-5 text-purple-400" />
+            </div>
+          </button>
+
+          <button 
+            onClick={() => {
+              if (confirm('This will reset your taste profile and restart the full onboarding process. Continue?')) {
                 // Clear taste profile data
                 localStorage.removeItem('tasteProfile');
                 localStorage.removeItem('onboardingCompleted');
@@ -464,7 +480,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({ userProfile, setUserProfile }
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="font-medium text-purple-900">Reset Taste Profile</h4>
-                <p className="text-sm text-purple-600">Restart the AI taste questionnaire</p>
+                <p className="text-sm text-purple-600">Completely restart the AI taste questionnaire</p>
               </div>
               <Database className="w-5 h-5 text-purple-400" />
             </div>

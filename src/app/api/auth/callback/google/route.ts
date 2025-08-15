@@ -193,7 +193,7 @@ export async function GET(request: NextRequest) {
     })
     
     // Determine redirect URL based on profile completeness
-    let redirectUrl = '/onboarding'
+    let redirectUrl = '/onboarding/intro'
     
     // Check if profile is complete
     const { data: profile } = await supabase

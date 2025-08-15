@@ -42,10 +42,24 @@ export default function OnboardingIntro() {
     router.push('/onboarding');
   };
 
-  const skipOnboardingCompletely = () => {
+  const skipOnboardingCompletely = async () => {
+    try {
+      // Mark onboarding as completed in database
+      const response = await fetch('/api/onboarding/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      if (response.ok) {
+        console.log('Onboarding skipped and marked as completed')
+      }
+    } catch (error) {
+      console.error('Error marking onboarding as completed:', error)
+    }
+    
     // Mark onboarding as completed and go directly to app
     localStorage.setItem('onboardingCompleted', 'true');
-    router.push('/app');
+    router.push('/dashboard');
   };
 
   const currentStepData = onboardingSteps[currentStep];

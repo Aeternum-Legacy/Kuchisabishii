@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
         .eq('id', existingSession.user.id)
         .single()
       
-      const redirectUrl = profile?.onboarding_completed ? '/dashboard' : '/onboarding/intro'
+      const redirectUrl = profile?.onboarding_completed ? '/app' : '/onboarding/intro'
       console.log('🔄 Redirecting existing session to:', redirectUrl)
       
       return NextResponse.redirect(new URL(redirectUrl, requestUrl.origin))
@@ -223,7 +223,7 @@ export async function GET(request: NextRequest) {
       .single()
     
     if (profile?.onboarding_completed) {
-      redirectUrl = '/dashboard'
+      redirectUrl = '/app'
     }
     
     console.log('🔄 Redirecting to:', redirectUrl)

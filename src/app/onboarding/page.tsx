@@ -108,7 +108,7 @@ export default function OnboardingPage() {
     
     // Redirect to main app after a short delay
     setTimeout(() => {
-      router.push('/dashboard')
+      router.push('/app')
     }, 2000)
   }
 
@@ -143,7 +143,7 @@ export default function OnboardingPage() {
     
     // Mark onboarding as completed when skipped
     localStorage.setItem('onboardingCompleted', 'true')
-    router.push('/dashboard')
+    router.push('/app')
   }
 
   return (

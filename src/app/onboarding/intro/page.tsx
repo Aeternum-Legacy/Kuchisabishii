@@ -59,7 +59,7 @@ export default function OnboardingIntro() {
     
     // Mark onboarding as completed and go directly to app
     localStorage.setItem('onboardingCompleted', 'true');
-    router.push('/dashboard');
+    router.push('/app');
   };
 
   const currentStepData = onboardingSteps[currentStep];

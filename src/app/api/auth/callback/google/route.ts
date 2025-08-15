@@ -141,10 +141,25 @@ export async function GET(request: NextRequest) {
       
       if (signUpError) {
         console.error('Signup error:', signUpError)
-        throw new Error(`Failed to create user: ${signUpError.message}`)
+        // If user already exists, try to find them again
+        if (signUpError.message.includes('already registered')) {
+          console.log('🔄 User exists, trying to find existing user again...')
+          const { data: { users }, error: listError } = await supabase.auth.admin.listUsers()
+          if (!listError && users) {
+            const existingUser = users.find(u => u.email === googleUser.email)
+            if (existingUser) {
+              userId = existingUser.id
+              console.log('✅ Found existing user:', userId)
+            }
+          }
+        }
+        
+        if (!userId) {
+          throw new Error(`Failed to create user: ${signUpError.message}`)
+        }
+      } else {
+        userId = signUpData?.user?.id
       }
-      
-      userId = signUpData?.user?.id
     }
     
     if (!userId) {
@@ -236,6 +251,6 @@ export async function GET(request: NextRequest) {
       stack: error instanceof Error ? error.stack : undefined,
       timestamp: new Date().toISOString()
     })
-    return NextResponse.redirect(new URL(`/debug-oauth?error=callback_error&details=${encodeURIComponent(error instanceof Error ? error.message : 'Unknown error')}`, requestUrl.origin))
+    return NextResponse.redirect(new URL(`/?error=auth_failed&message=${encodeURIComponent(error instanceof Error ? error.message : 'Authentication failed')}`, requestUrl.origin))
   }
 }

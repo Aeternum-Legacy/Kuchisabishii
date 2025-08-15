@@ -156,7 +156,7 @@ export function useAuth() {
     const authTimeout = setTimeout(() => {
       console.warn('Auth timeout - forcing no user state')
       setAuthState({ user: null, loading: false, error: null })
-    }, 5000)
+    }, 8000) // Increased timeout for slower connections
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(

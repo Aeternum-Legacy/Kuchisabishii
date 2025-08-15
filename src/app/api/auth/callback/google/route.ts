@@ -24,6 +24,13 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    console.log('🔄 Step 1: Starting token exchange with Google...')
+    
+    // Check environment variables first
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+      throw new Error(`Missing OAuth credentials: clientId=${!!process.env.GOOGLE_CLIENT_ID}, clientSecret=${!!process.env.GOOGLE_CLIENT_SECRET}`)
+    }
+    
     // Exchange code for tokens
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
@@ -37,6 +44,11 @@ export async function GET(request: NextRequest) {
         grant_type: 'authorization_code',
         redirect_uri: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/auth/callback/google`,
       }),
+    })
+    
+    console.log('🔄 Step 2: Token exchange response received:', {
+      status: tokenResponse.status,
+      ok: tokenResponse.ok
     })
 
     if (!tokenResponse.ok) {
@@ -70,10 +82,14 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient()
     console.log('🔗 Supabase client created')
     
+    console.log('🔄 Step 4: Creating Supabase user...')
+    
     // Generate a temporary password for the OAuth user
     const tempPassword = crypto.randomUUID() + crypto.randomUUID()
+    console.log('🔑 Generated temporary password for OAuth user')
     
     // Try to sign up first (will fail if user exists)
+    console.log('🔄 Step 5: Attempting user signup...')
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email: googleUser.email,
       password: tempPassword,

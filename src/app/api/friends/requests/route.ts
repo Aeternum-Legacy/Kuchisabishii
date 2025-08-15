@@ -37,11 +37,11 @@ export async function GET(request: NextRequest) {
     const friendRequests = requests?.map(request => ({
       id: request.id,
       requester: {
-        id: request.requester.id,
-        displayName: request.requester.display_name,
-        firstName: request.requester.first_name,
-        lastName: request.requester.last_name,
-        profileImage: request.requester.profile_image_url
+        id: request.requester[0]?.id,
+        displayName: request.requester[0]?.display_name,
+        firstName: request.requester[0]?.first_name,
+        lastName: request.requester[0]?.last_name,
+        profileImage: request.requester[0]?.profile_image_url
       },
       requestedAt: request.created_at
     })) || []

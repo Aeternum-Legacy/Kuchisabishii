@@ -148,7 +148,7 @@ export async function GET(request: NextRequest) {
 }
 
 // Process user feedback and update systems
-async function processFeedback(supabase: ReturnType<typeof createClient>, userId: string, feedback: z.infer<typeof feedbackSchema>) {
+async function processFeedback(supabase: Awaited<ReturnType<typeof createClient>>, userId: string, feedback: z.infer<typeof feedbackSchema>) {
   let profileUpdated = false
   let learningScore = 0
 
@@ -223,7 +223,7 @@ async function processFeedback(supabase: ReturnType<typeof createClient>, userId
 }
 
 // Update taste profile based on feedback
-async function updateTasteProfile(supabase: ReturnType<typeof createClient>, userId: string, feedback: z.infer<typeof feedbackSchema>) {
+async function updateTasteProfile(supabase: Awaited<ReturnType<typeof createClient>>, userId: string, feedback: z.infer<typeof feedbackSchema>) {
   if (feedback.action !== 'tried' || !feedback.rating) {
     return // Only update profile for explicit ratings
   }
@@ -295,7 +295,7 @@ async function updateTasteProfile(supabase: ReturnType<typeof createClient>, use
 }
 
 // Generate training data for ML model
-async function generateTrainingData(supabase: ReturnType<typeof createClient>, userId: string, feedback: z.infer<typeof feedbackSchema>): Promise<TrainingData> {
+async function generateTrainingData(supabase: Awaited<ReturnType<typeof createClient>>, userId: string, feedback: z.infer<typeof feedbackSchema>): Promise<TrainingData> {
   // Get user features
   const [userProfile, tasteProfile, recentExperiences] = await Promise.all([
     supabase.from('user_profiles').select('*').eq('id', userId).single(),
@@ -381,7 +381,7 @@ async function generateTrainingData(supabase: ReturnType<typeof createClient>, u
 }
 
 // Store training data for batch ML processing
-async function storeTrainingData(supabase: ReturnType<typeof createClient>, trainingData: TrainingData) {
+async function storeTrainingData(supabase: Awaited<ReturnType<typeof createClient>>, trainingData: TrainingData) {
   await supabase
     .from('ml_training_data')
     .insert([{
@@ -392,7 +392,7 @@ async function storeTrainingData(supabase: ReturnType<typeof createClient>, trai
 }
 
 // Update recommendation preferences based on feedback patterns
-async function updateRecommendationPreferences(supabase: ReturnType<typeof createClient>, userId: string, feedback: z.infer<typeof feedbackSchema>) {
+async function updateRecommendationPreferences(supabase: Awaited<ReturnType<typeof createClient>>, userId: string, feedback: z.infer<typeof feedbackSchema>) {
   // Get current preferences
   const { data: preferences } = await supabase
     .from('recommendation_preferences')
@@ -460,7 +460,7 @@ function mapActionToEngagement(action: string): string {
   }
 }
 
-async function calculateBehaviorPatterns(supabase: ReturnType<typeof createClient>, userId: string) {
+async function calculateBehaviorPatterns(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
   const { data: analytics } = await supabase
     .from('user_analytics')
     .select('*')
@@ -539,7 +539,7 @@ function calculatePreferenceAdjustments(recentFeedback: Record<string, unknown>[
   }
 }
 
-async function getPersonalModelMetrics(supabase: ReturnType<typeof createClient>, userId: string) {
+async function getPersonalModelMetrics(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
   const { data: interactions } = await supabase
     .from('recommendation_interactions')
     .select('*')
@@ -567,7 +567,7 @@ async function getPersonalModelMetrics(supabase: ReturnType<typeof createClient>
   }
 }
 
-async function getSystemMetrics(supabase: ReturnType<typeof createClient>) {
+async function getSystemMetrics(supabase: Awaited<ReturnType<typeof createClient>>) {
   // Return anonymized system-wide metrics
   return {
     total_users: 1250, // Placeholder
@@ -577,7 +577,7 @@ async function getSystemMetrics(supabase: ReturnType<typeof createClient>) {
   }
 }
 
-async function getImprovementSuggestions(supabase: ReturnType<typeof createClient>, userId: string) {
+async function getImprovementSuggestions(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
   // Analyze user's interaction patterns and suggest improvements
   return [
     {

@@ -96,12 +96,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       valid: true,
       user: {
-        id: tokenData.profiles.id,
-        displayName: tokenData.profiles.display_name,
-        firstName: tokenData.profiles.first_name,
-        lastName: tokenData.profiles.last_name,
-        profileImage: tokenData.profiles.profile_image_url,
-        email: tokenData.profiles.email
+        id: tokenData.profiles[0]?.id,
+        displayName: tokenData.profiles[0]?.display_name,
+        firstName: tokenData.profiles[0]?.first_name,
+        lastName: tokenData.profiles[0]?.last_name,
+        profileImage: tokenData.profiles[0]?.profile_image_url,
+        email: tokenData.profiles[0]?.email
       }
     })
 

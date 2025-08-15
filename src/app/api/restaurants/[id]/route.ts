@@ -29,16 +29,18 @@ const restaurantUpdateSchema = z.object({
 })
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
+
+type RestaurantUpdate = z.infer<typeof restaurantUpdateSchema>
 
 // GET - Fetch specific restaurant with detailed information
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const supabase = await createClient()
-    const { id } = params
+    const { id } = await params
 
     if (!id) {
       return NextResponse.json({
@@ -143,7 +145,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       }, { status: 401 })
     }
 
-    const { id } = params
+    const { id } = await params
 
     if (!id) {
       return NextResponse.json({
@@ -240,7 +242,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       }, { status: 401 })
     }
 
-    const { id } = params
+    const { id } = await params
 
     if (!id) {
       return NextResponse.json({

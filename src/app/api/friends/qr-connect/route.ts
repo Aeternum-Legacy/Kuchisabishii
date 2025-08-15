@@ -152,8 +152,8 @@ async function markTokenAsUsed(token: string): Promise<void> {
 }
 
 async function sendFriendRequestNotification(
-  requester: Record<string, unknown>, 
-  targetUser: Record<string, unknown>, 
+  requester: { id: string; email?: string }, 
+  targetUser: { display_name?: string; email?: string; notification_preferences?: any }, 
   connectionMethod: string
 ): Promise<void> {
   try {
@@ -169,7 +169,7 @@ async function sendFriendRequestNotification(
     // Example:
     // await emailService.sendFriendRequestNotification({
     //   to: targetUser.email,
-    //   requesterName: requester.display_name,
+    //   requesterName: targetUser.display_name,
     //   connectionMethod
     // })
   } catch (error) {

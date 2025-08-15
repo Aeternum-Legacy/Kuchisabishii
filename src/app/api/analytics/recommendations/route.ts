@@ -162,7 +162,7 @@ export async function POST(request: NextRequest) {
 
 // Generate comprehensive recommendation analytics
 async function generateRecommendationAnalytics(
-  supabase: ReturnType<typeof createClient>,
+  supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string,
   startDate: string,
   endDate: string,
@@ -232,7 +232,7 @@ async function generateRecommendationAnalytics(
 }
 
 // Calculate recommendation diversity (variety of cuisines, restaurants, etc.)
-async function calculateDiversityScore(supabase: ReturnType<typeof createClient>, userId: string, interactions: Record<string, unknown>[]): Promise<number> {
+async function calculateDiversityScore(supabase: Awaited<ReturnType<typeof createClient>>, userId: string, interactions: Record<string, unknown>[]): Promise<number> {
   if (interactions.length === 0) return 0
 
   const restaurantIds = new Set()
@@ -263,7 +263,7 @@ async function calculateDiversityScore(supabase: ReturnType<typeof createClient>
 }
 
 // Calculate user engagement metrics
-async function calculateUserEngagement(supabase: ReturnType<typeof createClient>, userId: string, startDate: string, endDate: string) {
+async function calculateUserEngagement(supabase: Awaited<ReturnType<typeof createClient>>, userId: string, startDate: string, endDate: string) {
   // Get user analytics for the period
   const { data: analytics } = await supabase
     .from('user_analytics')
@@ -292,13 +292,13 @@ async function calculateUserEngagement(supabase: ReturnType<typeof createClient>
 }
 
 // Calculate recommendation breakdown by type
-async function calculateRecommendationBreakdown(supabase: ReturnType<typeof createClient>, userId: string, interactions: Record<string, unknown>[]) {
+async function calculateRecommendationBreakdown(supabase: Awaited<ReturnType<typeof createClient>>, userId: string, interactions: Record<string, unknown>[]) {
   const breakdown: Record<string, { count: number; clicked: number; visited: number; rated: number }> = {}
   
   for (const interaction of interactions) {
-    const type = interaction.recommendation_type || 'unknown'
+    const type = (interaction.recommendation_type as string) || 'unknown'
     if (!breakdown[type]) {
-      breakdown[type as string] = { count: 0, clicked: 0, visited: 0, rated: 0 }
+      breakdown[type] = { count: 0, clicked: 0, visited: 0, rated: 0 }
     }
     
     breakdown[type].count++
@@ -315,7 +315,7 @@ async function calculateRecommendationBreakdown(supabase: ReturnType<typeof crea
 }
 
 // Calculate trending patterns in food preferences
-async function calculateTrendingPatterns(supabase: ReturnType<typeof createClient>, startDate: string, endDate: string) {
+async function calculateTrendingPatterns(supabase: Awaited<ReturnType<typeof createClient>>, startDate: string, endDate: string) {
   // Get recent food experiences to identify trends
   const { data: recentExperiences } = await supabase
     .from('food_experiences')

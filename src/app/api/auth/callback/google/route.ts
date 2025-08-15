@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
       const { data: profile } = await supabase
         .from('profiles')
         .select('onboarding_completed')
-        .eq('id', existingSession.user.id)
+        .eq('id', existingSession?.user?.id)
         .single()
       
       const redirectUrl = profile?.onboarding_completed ? '/app' : '/onboarding/intro'

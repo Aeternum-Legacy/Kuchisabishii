@@ -108,7 +108,8 @@ export default function OnboardingPage() {
     
     // Redirect to main app after a short delay
     setTimeout(() => {
-      router.push('/app')
+      // Force a page reload to ensure session is recognized
+      window.location.href = '/app'
     }, 2000)
   }
 
@@ -143,7 +144,8 @@ export default function OnboardingPage() {
     
     // Mark onboarding as completed when skipped
     localStorage.setItem('onboardingCompleted', 'true')
-    router.push('/app')
+    // Force a page reload to ensure session is recognized
+    window.location.href = '/app'
   }
 
   return (

@@ -247,10 +247,9 @@ export function useAuth() {
     try {
       setAuthState(prev => ({ ...prev, loading: true, error: null }))
       
-      const response = await fetch('/api/auth/social/google', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({})
+      // Try GET instead of POST to work around deployment issue
+      const response = await fetch('/api/auth/social/google?action=signin', {
+        method: 'GET'
       })
 
       const data = await response.json()

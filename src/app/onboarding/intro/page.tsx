@@ -59,8 +59,8 @@ export default function OnboardingIntro() {
     
     // Mark onboarding as completed and go directly to app
     localStorage.setItem('onboardingCompleted', 'true');
-    // Force a page reload to ensure session is recognized
-    window.location.href = '/app';
+    // Use router.push to maintain session state
+    router.push('/app');
   };
 
   const currentStepData = onboardingSteps[currentStep];

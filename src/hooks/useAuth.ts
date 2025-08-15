@@ -46,18 +46,15 @@ export function useAuth() {
           window.history.replaceState({}, '', window.location.pathname)
         }
         
-        // Also check if we just completed onboarding
+        // Check if we just completed onboarding and need session restoration priority
         const justCompletedOnboarding = typeof window !== 'undefined' && 
           (window.location.pathname === '/app' && localStorage.getItem('onboardingCompleted') === 'true')
         
+        // For post-onboarding users, prioritize session restoration
         if (justCompletedOnboarding) {
-          // Force a quicker session refresh for post-onboarding users
-          setTimeout(async () => {
-            const { data: { session: newSession } } = await supabase.auth.getSession()
-            if (newSession) {
-              console.log('✅ Post-onboarding session verified')
-            }
-          }, 500)
+          console.log('🔄 Post-onboarding user detected, prioritizing session restoration')
+          // Clear the onboarding flag to prevent repeated checks
+          localStorage.removeItem('onboardingCompleted')
         }
         
         // Try to restore session from cookies first
@@ -116,6 +113,7 @@ export function useAuth() {
         }
 
         if (session?.user) {
+          console.log('✅ Session found:', session.user.id, 'at', window.location.pathname)
           try {
             // Fetch user profile with timeout
             const controller = new AbortController()
@@ -148,6 +146,7 @@ export function useAuth() {
             })
           }
         } else {
+          console.log('❌ No session found at', window.location.pathname)
           setAuthState({ user: null, loading: false, error: null })
         }
       } catch (error) {
@@ -158,11 +157,12 @@ export function useAuth() {
 
     getInitialSession()
 
-    // Add timeout to prevent infinite loading
+    // Add timeout to prevent infinite loading - shorter for post-onboarding users
+    const timeoutDuration = justCompletedOnboarding ? 5000 : 8000
     const authTimeout = setTimeout(() => {
       console.warn('Auth timeout - forcing no user state')
       setAuthState({ user: null, loading: false, error: null })
-    }, 8000) // Increased timeout for slower connections
+    }, timeoutDuration)
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(

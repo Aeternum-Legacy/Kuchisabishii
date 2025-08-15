@@ -6,13 +6,21 @@ export async function GET(request: NextRequest) {
   const code = requestUrl.searchParams.get('code')
   const error = requestUrl.searchParams.get('error')
   
+  console.log('🔍 OAuth Callback Started:', {
+    url: requestUrl.toString(),
+    hasCode: !!code,
+    error,
+    timestamp: new Date().toISOString()
+  })
+  
   if (error) {
-    console.error('Google OAuth error:', error)
-    return NextResponse.redirect(new URL('/?error=oauth_error', requestUrl.origin))
+    console.error('❌ Google OAuth error:', error)
+    return NextResponse.redirect(new URL(`/debug-oauth?error=oauth_error&details=${encodeURIComponent(error)}`, requestUrl.origin))
   }
   
   if (!code) {
-    return NextResponse.redirect(new URL('/?error=no_code', requestUrl.origin))
+    console.error('❌ No authorization code received')
+    return NextResponse.redirect(new URL('/debug-oauth?error=no_code', requestUrl.origin))
   }
 
   try {
@@ -51,10 +59,16 @@ export async function GET(request: NextRequest) {
     }
 
     const googleUser = await userResponse.json()
-    console.log('Google user authenticated:', googleUser.email)
+    console.log('✅ Google user authenticated:', {
+      email: googleUser.email,
+      name: googleUser.name,
+      id: googleUser.id,
+      verified_email: googleUser.verified_email
+    })
     
     // Create Supabase client
     const supabase = await createClient()
+    console.log('🔗 Supabase client created')
     
     // Generate a temporary password for the OAuth user
     const tempPassword = crypto.randomUUID() + crypto.randomUUID()
@@ -129,7 +143,14 @@ export async function GET(request: NextRequest) {
     }
     
     // Success! Set cookies and redirect
-    const response = NextResponse.redirect(new URL('/', requestUrl.origin))
+    console.log('🎉 OAuth Success! Creating session and redirecting:', {
+      userId: userId,
+      email: googleUser.email,
+      sessionExists: !!signInData.session,
+      accessToken: signInData.session.access_token ? 'SET' : 'MISSING'
+    })
+    
+    const response = NextResponse.redirect(new URL('/debug-oauth?auth=success&step=session_created', requestUrl.origin))
     
     // Set Supabase auth cookies manually
     response.cookies.set('sb-access-token', signInData.session.access_token, {
@@ -148,13 +169,18 @@ export async function GET(request: NextRequest) {
       path: '/'
     })
     
+    console.log('🍪 Session cookies set, redirecting to debug page')
     return response
     
     // Fallback redirect
     return NextResponse.redirect(new URL('/?auth=success', requestUrl.origin))
     
   } catch (error) {
-    console.error('OAuth callback error:', error)
-    return NextResponse.redirect(new URL('/?error=callback_error', requestUrl.origin))
+    console.error('💥 OAuth callback error:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString()
+    })
+    return NextResponse.redirect(new URL(`/debug-oauth?error=callback_error&details=${encodeURIComponent(error instanceof Error ? error.message : 'Unknown error')}`, requestUrl.origin))
   }
 }

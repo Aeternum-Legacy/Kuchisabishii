@@ -349,7 +349,7 @@ export default function FoodHistoryTabs({ userId }: FoodHistoryTabsProps) {
             {/* Notes */}
             {item.notes && (
               <div className="p-3 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-700 italic">"{item.notes}"</p>
+                <p className="text-sm text-gray-700 italic">&ldquo;{item.notes}&rdquo;</p>
               </div>
             )}
 

@@ -639,7 +639,7 @@ export default function GroupRecommendationSystem({
             onClick={() => onGroupDecision(finalRecommendation)}
             className="px-12 py-4 bg-gradient-to-r from-green-500 to-blue-500 text-white text-lg font-bold rounded-full shadow-lg hover:from-green-600 hover:to-blue-600 transition-all transform hover:scale-105"
           >
-            Let's Go!
+            Let&apos;s Go!
           </button>
         </motion.div>
       )}

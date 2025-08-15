@@ -537,7 +537,7 @@ export default function ExperienceComparisonTracker({ userId }: ExperienceCompar
                             
                             {exp.notes && (
                               <p className="text-sm text-gray-700 italic">
-                                "{exp.notes}"
+                                &ldquo;{exp.notes}&rdquo;
                               </p>
                             )}
                           </div>

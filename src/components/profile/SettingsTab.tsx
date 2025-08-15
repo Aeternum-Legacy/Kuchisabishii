@@ -551,7 +551,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({ userProfile, setUserProfile }
             ) : (
               <div className="space-y-3">
                 <p className="text-sm text-red-700 font-medium">
-                  Type "DELETE MY ACCOUNT" to confirm:
+                  Type &quot;DELETE MY ACCOUNT&quot; to confirm:
                 </p>
                 <input
                   type="text"

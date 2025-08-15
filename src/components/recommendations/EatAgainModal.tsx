@@ -381,7 +381,7 @@ export default function EatAgainModal({
                     Dishes Similar to {experience.food_name}
                   </h3>
                   <p className="text-gray-600">
-                    Based on your taste preferences and this dish's flavor profile
+                    Based on your taste preferences and this dish&apos;s flavor profile
                   </p>
                 </div>
 

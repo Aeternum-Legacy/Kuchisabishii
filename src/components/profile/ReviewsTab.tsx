@@ -125,7 +125,7 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({
               <span className="text-gray-600">{label}: {value}</span>
             </div>
           );
-        })}
+        }) as React.ReactNode}
       </div>
     );
   };

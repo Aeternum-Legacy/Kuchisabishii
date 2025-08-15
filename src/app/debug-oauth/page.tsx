@@ -133,6 +133,22 @@ export default function DebugOAuthPage() {
       }])
     }
   }
+
+  const checkExistingSession = async () => {
+    try {
+      const response = await fetch('/api/auth/check-session')
+      const data = await response.json()
+      
+      if (data.authenticated) {
+        alert(`You are already authenticated as ${data.user.email}! Redirecting to ${data.redirectTo}`)
+        window.location.href = data.redirectTo
+      } else {
+        alert('No valid session found. You need to sign in.')
+      }
+    } catch (error) {
+      alert('Error checking session: ' + error)
+    }
+  }
   
   return (
     <div className="min-h-screen p-8 bg-gray-50">
@@ -187,6 +203,12 @@ export default function DebugOAuthPage() {
               className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700"
             >
               Test Google OAuth Flow
+            </button>
+            <button
+              onClick={checkExistingSession}
+              className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+            >
+              Check Existing Session
             </button>
           </div>
         </div>

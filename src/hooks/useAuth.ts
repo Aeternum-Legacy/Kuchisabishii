@@ -39,17 +39,61 @@ export function useAuth() {
     // Get initial session
     const getInitialSession = async () => {
       try {
-        // Check for OAuth success/error in URL
+        // Check for OAuth success/error in URL and handle redirect
         const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
         if (urlParams?.get('auth') === 'success') {
-          // Remove the query parameter
+          // Remove the query parameter and wait for session to be established
           window.history.replaceState({}, '', window.location.pathname)
+          
+          // Force a session refresh after OAuth callback
+          setTimeout(async () => {
+            const { data: { session: newSession } } = await supabase.auth.getSession()
+            if (newSession) {
+              console.log('✅ OAuth session restored successfully')
+            }
+          }, 1000)
         }
         
         // Try to restore session from cookies first
         let { data: { session }, error } = await supabase.auth.getSession()
         
-        // If no session from Supabase, check if we need to refresh
+        // If no session from Supabase, try to recover from existing cookies
+        if (!session && typeof window !== 'undefined') {
+          // Check for existing Supabase auth cookies
+          const cookies = document.cookie.split(';').reduce((acc: any, cookie) => {
+            const [name, value] = cookie.trim().split('=')
+            acc[name] = value
+            return acc
+          }, {})
+          
+          // Look for Supabase auth token cookie
+          const authCookie = Object.keys(cookies).find(key => 
+            key.includes('sb-') && key.includes('auth-token')
+          )
+          
+          if (authCookie && cookies[authCookie]) {
+            try {
+              const authData = JSON.parse(decodeURIComponent(cookies[authCookie]))
+              if (authData.access_token) {
+                console.log('🔄 Found existing auth cookie, attempting to restore session')
+                // Set the session manually and refresh
+                await supabase.auth.setSession({
+                  access_token: authData.access_token,
+                  refresh_token: authData.refresh_token
+                })
+                
+                // Get the restored session
+                const result = await supabase.auth.getSession()
+                session = result.data.session
+                error = result.error
+              }
+            } catch (cookieError) {
+              console.warn('Failed to parse auth cookie:', cookieError)
+            }
+          }
+        }
+        
+        // If still no session, try refresh
         if (!session) {
           const { error: refreshError } = await supabase.auth.refreshSession()
           if (!refreshError) {

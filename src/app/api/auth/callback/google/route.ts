@@ -88,37 +88,63 @@ export async function GET(request: NextRequest) {
     const tempPassword = crypto.randomUUID() + crypto.randomUUID()
     console.log('🔑 Generated temporary password for OAuth user')
     
-    // Try to sign up first (will fail if user exists)
-    console.log('🔄 Step 5: Attempting user signup...')
-    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-      email: googleUser.email,
-      password: tempPassword,
-      options: {
-        data: {
-          display_name: googleUser.name,
-          first_name: googleUser.given_name,
-          last_name: googleUser.family_name,
-          profile_image_url: googleUser.picture,
-          provider: 'google',
-          google_id: googleUser.id
+    // Check if user already exists first
+    console.log('🔄 Step 5: Checking for existing user...')
+    const { data: { users }, error: listError } = await supabase.auth.admin.listUsers()
+    
+    let userId: string | undefined
+    let existingUser = null
+    
+    if (!listError && users) {
+      existingUser = users.find(u => u.email === googleUser.email)
+      if (existingUser) {
+        console.log('✅ Found existing user:', { id: existingUser.id, email: existingUser.email })
+        userId = existingUser.id
+        
+        // Update the user's password and metadata
+        console.log('🔄 Updating existing user with new password...')
+        const { error: updateError } = await supabase.auth.admin.updateUserById(userId, {
+          password: tempPassword,
+          user_metadata: {
+            display_name: googleUser.name,
+            first_name: googleUser.given_name,
+            last_name: googleUser.family_name,
+            profile_image_url: googleUser.picture,
+            provider: 'google',
+            google_id: googleUser.id
+          }
+        })
+        
+        if (updateError) {
+          console.error('Failed to update user:', updateError)
         }
       }
-    })
+    }
     
-    let userId = signUpData?.user?.id
-    
-    // If signup failed because user exists, get existing user
-    if (signUpError?.message.includes('already registered')) {
-      // Get existing user by email
-      const { data: { users }, error: listError } = await supabase.auth.admin.listUsers()
-      if (!listError) {
-        const existingUser = users?.find(u => u.email === googleUser.email)
-        if (existingUser) {
-          userId = existingUser.id
-          // Update the user's password
-          await supabase.auth.admin.updateUserById(userId, { password: tempPassword })
+    // If user doesn't exist, create new one
+    if (!userId) {
+      console.log('🔄 Creating new user...')
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email: googleUser.email,
+        password: tempPassword,
+        options: {
+          data: {
+            display_name: googleUser.name,
+            first_name: googleUser.given_name,
+            last_name: googleUser.family_name,
+            profile_image_url: googleUser.picture,
+            provider: 'google',
+            google_id: googleUser.id
+          }
         }
+      })
+      
+      if (signUpError) {
+        console.error('Signup error:', signUpError)
+        throw new Error(`Failed to create user: ${signUpError.message}`)
       }
+      
+      userId = signUpData?.user?.id
     }
     
     if (!userId) {
@@ -166,30 +192,43 @@ export async function GET(request: NextRequest) {
       accessToken: signInData.session.access_token ? 'SET' : 'MISSING'
     })
     
-    const response = NextResponse.redirect(new URL('/debug-oauth?auth=success&step=session_created', requestUrl.origin))
+    // Determine redirect URL based on profile completeness
+    let redirectUrl = '/onboarding'
     
-    // Set Supabase auth cookies manually
-    response.cookies.set('sb-access-token', signInData.session.access_token, {
-      httpOnly: true,
+    // Check if profile is complete
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('onboarding_completed')
+      .eq('id', userId)
+      .single()
+    
+    if (profile?.onboarding_completed) {
+      redirectUrl = '/dashboard'
+    }
+    
+    console.log('🔄 Redirecting to:', redirectUrl)
+    const response = NextResponse.redirect(new URL(redirectUrl, requestUrl.origin))
+    
+    // Set proper Supabase auth cookies
+    const supabaseUrl = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL!)
+    const projectRef = supabaseUrl.hostname.split('.')[0]
+    
+    response.cookies.set(`sb-${projectRef}-auth-token`, JSON.stringify({
+      access_token: signInData.session.access_token,
+      refresh_token: signInData.session.refresh_token,
+      provider_token: null,
+      provider_refresh_token: null,
+      user: signInData.user
+    }), {
+      httpOnly: false, // Supabase client needs to read this
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7, // 7 days
       path: '/'
     })
     
-    response.cookies.set('sb-refresh-token', signInData.session.refresh_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 30, // 30 days
-      path: '/'
-    })
-    
-    console.log('🍪 Session cookies set, redirecting to debug page')
+    console.log('🍪 Session cookies set, redirecting to:', redirectUrl)
     return response
-    
-    // Fallback redirect
-    return NextResponse.redirect(new URL('/?auth=success', requestUrl.origin))
     
   } catch (error) {
     console.error('💥 OAuth callback error:', {

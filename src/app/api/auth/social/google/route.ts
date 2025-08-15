@@ -3,24 +3,30 @@ import { socialAuthRateLimit } from '@/lib/middleware/rateLimit'
 
 export async function POST(request: NextRequest) {
   console.log('Google OAuth endpoint hit:', new Date().toISOString())
+  
+  // Test without rate limiting to isolate the issue
   try {
-    // Apply rate limiting
-    const rateLimitResult = socialAuthRateLimit(request)
-    if (!rateLimitResult.allowed) {
-      return NextResponse.json(
-        { 
-          error: rateLimitResult.error,
-          retryAfter: Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000)
-        },
-        { 
-          status: 429,
-          headers: {
-            'X-RateLimit-Limit': '10',
-            'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
-            'X-RateLimit-Reset': rateLimitResult.resetTime.toString()
+    // Temporarily skip rate limiting to debug
+    const skipRateLimit = true
+    
+    if (!skipRateLimit) {
+      const rateLimitResult = socialAuthRateLimit(request)
+      if (!rateLimitResult.allowed) {
+        return NextResponse.json(
+          { 
+            error: rateLimitResult.error,
+            retryAfter: Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000)
+          },
+          { 
+            status: 429,
+            headers: {
+              'X-RateLimit-Limit': '10',
+              'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+              'X-RateLimit-Reset': rateLimitResult.resetTime.toString()
+            }
           }
-        }
-      )
+        )
+      }
     }
 
     // Create direct Google OAuth URL for professional appearance
@@ -67,7 +73,11 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Google auth API error:', error)
     return NextResponse.json(
-      { error: 'Failed to initiate Google authentication' },
+      { 
+        error: 'Failed to initiate Google authentication',
+        details: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      },
       { status: 500 }
     )
   }

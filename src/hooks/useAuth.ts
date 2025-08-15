@@ -46,6 +46,27 @@ export function useAuth() {
           window.history.replaceState({}, '', window.location.pathname)
         }
         
+        // Quick check for existing session first
+        if (typeof window !== 'undefined') {
+          // Check multiple possible auth token locations
+          const tokenKeys = [
+            'sb-auelvsosyxrvbvxozhuz-auth-token',
+            'supabase.auth.token'
+          ]
+          const hasToken = tokenKeys.some(key => {
+            const token = localStorage.getItem(key)
+            return token && token !== 'undefined' && token !== 'null'
+          })
+          
+          if (!hasToken) {
+            console.log('❌ No valid auth token found in localStorage, skipping session restore')
+            setAuthState({ user: null, loading: false, error: null })
+            return
+          } else {
+            console.log('✅ Auth token found, proceeding with session restore')
+          }
+        }
+        
         // Check if we just completed onboarding and need session restoration priority
         const justCompletedOnboarding = typeof window !== 'undefined' && 
           (window.location.pathname === '/app' && localStorage.getItem('onboardingCompleted') === 'true')
@@ -146,7 +167,7 @@ export function useAuth() {
             })
           }
         } else {
-          console.log('❌ No session found at', window.location.pathname)
+          console.log('❌ No session found at', typeof window !== 'undefined' ? window.location.pathname : 'server')
           setAuthState({ user: null, loading: false, error: null })
         }
       } catch (error) {
@@ -157,8 +178,8 @@ export function useAuth() {
 
     getInitialSession()
 
-    // Add timeout to prevent infinite loading - shorter for post-onboarding users
-    const timeoutDuration = justCompletedOnboarding ? 5000 : 8000
+    // Add timeout to prevent infinite loading - more aggressive timeouts
+    const timeoutDuration = 3000 // 3 seconds max
     const authTimeout = setTimeout(() => {
       console.warn('Auth timeout - forcing no user state')
       setAuthState({ user: null, loading: false, error: null })

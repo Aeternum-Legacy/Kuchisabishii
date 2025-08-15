@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
 
     // Check database connection
     try {
-      const supabase = createClient()
+      const supabase = await createClient()
       const { data, error } = await supabase
         .from('profiles')
         .select('count')

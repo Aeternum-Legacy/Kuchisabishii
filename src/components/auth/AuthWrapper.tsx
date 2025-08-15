@@ -31,14 +31,14 @@ export default function AuthWrapper({ children, onAuthSuccess }: AuthWrapperProp
     setPreviousUser(user)
   }, [user, previousUser, onAuthSuccess])
 
-  // Add timeout to prevent infinite loading
+  // Add timeout to prevent infinite loading - more aggressive
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (loading && !user) {
         console.warn('Auth loading timeout - showing auth forms')
         setForceShowAuth(true)
       }
-    }, 2000) // 2 second timeout
+    }, 1500) // 1.5 second timeout
 
     // Emergency timeout - skip auth completely
     const emergencyTimeout = setTimeout(() => {
@@ -46,7 +46,7 @@ export default function AuthWrapper({ children, onAuthSuccess }: AuthWrapperProp
         console.error('EMERGENCY: Auth completely stuck, rendering children anyway')
         setEmergencyMode(true)
       }
-    }, 5000) // 5 second emergency timeout
+    }, 3000) // 3 second emergency timeout
 
     return () => {
       clearTimeout(timeout)

@@ -4,30 +4,12 @@ import { socialAuthRateLimit } from '@/lib/middleware/rateLimit'
 export async function POST(request: NextRequest) {
   console.log('Google OAuth endpoint hit:', new Date().toISOString())
   
-  // Test without rate limiting to isolate the issue
   try {
-    // Temporarily skip rate limiting to debug
-    const skipRateLimit = true
-    
-    if (!skipRateLimit) {
-      const rateLimitResult = socialAuthRateLimit(request)
-      if (!rateLimitResult.allowed) {
-        return NextResponse.json(
-          { 
-            error: rateLimitResult.error,
-            retryAfter: Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000)
-          },
-          { 
-            status: 429,
-            headers: {
-              'X-RateLimit-Limit': '10',
-              'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
-              'X-RateLimit-Reset': rateLimitResult.resetTime.toString()
-            }
-          }
-        )
-      }
-    }
+    // TEMPORARILY DISABLED: Rate limiting is blocking OAuth
+    // const rateLimitResult = socialAuthRateLimit(request)
+    // if (!rateLimitResult.allowed) {
+    //   return NextResponse.json(...)
+    // }
 
     // Create direct Google OAuth URL for professional appearance
     const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
@@ -84,9 +66,15 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
+  // Test endpoint to verify route is accessible
   return NextResponse.json({
     message: 'Google OAuth endpoint is working',
     timestamp: new Date().toISOString(),
-    method: 'GET'
+    method: 'GET',
+    env: {
+      hasGoogleClientId: !!process.env.GOOGLE_CLIENT_ID,
+      hasGoogleClientSecret: !!process.env.GOOGLE_CLIENT_SECRET,
+      nextAuthUrl: process.env.NEXTAUTH_URL || 'not set'
+    }
   })
 }

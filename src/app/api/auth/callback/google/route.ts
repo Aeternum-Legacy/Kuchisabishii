@@ -82,63 +82,66 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient()
     console.log('🔗 Supabase client created')
     
-    console.log('🔄 Step 4: Creating Supabase user...')
+    // Check if user already has a valid session first
+    const { data: { session: existingSession } } = await supabase.auth.getSession()
     
-    // Generate a temporary password for the OAuth user
-    const tempPassword = crypto.randomUUID() + crypto.randomUUID()
-    console.log('🔑 Generated temporary password for OAuth user')
+    if (existingSession?.user?.email === googleUser.email) {
+      console.log('✅ User already has valid session, redirecting...')
+      
+      // Check if profile is complete
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('onboarding_completed')
+        .eq('id', existingSession.user.id)
+        .single()
+      
+      const redirectUrl = profile?.onboarding_completed ? '/dashboard' : '/onboarding/intro'
+      console.log('🔄 Redirecting existing session to:', redirectUrl)
+      
+      return NextResponse.redirect(new URL(redirectUrl, requestUrl.origin))
+    }
     
-    // Check if user already exists first by trying to sign them in
-    console.log('🔄 Step 5: Checking for existing user by sign-in attempt...')
+    console.log('🔄 Step 4: No existing session, handling OAuth user...')
+    
+    // Find existing user by email
+    const { data: { users }, error: listError } = await supabase.auth.admin.listUsers()
     
     let userId: string | undefined
-    let existingUserSession = null
+    let existingUser = null
     
-    // Try to sign in with email and a dummy password first to check if user exists
-    const { data: signInAttempt, error: signInError } = await supabase.auth.signInWithPassword({
-      email: googleUser.email,
-      password: 'dummy-password-check'
-    })
+    if (!listError && users) {
+      existingUser = users.find(u => u.email === googleUser.email)
+      if (existingUser) {
+        userId = existingUser.id
+        console.log('✅ Found existing user:', { id: existingUser.id, email: existingUser.email })
+      }
+    }
     
-    // If sign-in fails with "Invalid login credentials", user doesn't exist
-    // If it fails with "Email not confirmed" or other auth errors, user exists
-    const userExists = signInError && !signInError.message.includes('Invalid login credentials')
+    // Generate a temporary password for signing in
+    const tempPassword = crypto.randomUUID() + crypto.randomUUID()
     
-    if (userExists) {
-      console.log('✅ User exists, getting user info...')
-      // Get existing user by email using admin API
-      const { data: { users }, error: listError } = await supabase.auth.admin.listUsers()
-      
-      if (!listError && users) {
-        const existingUser = users.find(u => u.email === googleUser.email)
-        if (existingUser) {
-          userId = existingUser.id
-          console.log('✅ Found existing user:', { id: existingUser.id, email: existingUser.email })
-          
-          // Update the user's password and metadata
-          console.log('🔄 Updating existing user with OAuth info...')
-          const { error: updateError } = await supabase.auth.admin.updateUserById(userId, {
-            password: tempPassword,
-            user_metadata: {
-              display_name: googleUser.name,
-              first_name: googleUser.given_name,
-              last_name: googleUser.family_name,
-              profile_image_url: googleUser.picture,
-              provider: 'google',
-              google_id: googleUser.id,
-              // Preserve existing metadata
-              ...existingUser.user_metadata
-            }
-          })
-          
-          if (updateError) {
-            console.error('Failed to update user:', updateError)
-          } else {
-            console.log('✅ User updated successfully')
-          }
+    if (existingUser) {
+      // Update existing user's password for sign-in
+      console.log('🔄 Updating existing user password...')
+      const { error: updateError } = await supabase.auth.admin.updateUserById(userId!, {
+        password: tempPassword,
+        user_metadata: {
+          ...existingUser.user_metadata,
+          display_name: googleUser.name,
+          first_name: googleUser.given_name,
+          last_name: googleUser.family_name,
+          profile_image_url: googleUser.picture,
+          provider: 'google',
+          google_id: googleUser.id
         }
+      })
+      
+      if (updateError) {
+        console.error('Failed to update user:', updateError)
+        throw new Error('Failed to update user')
       }
     } else {
+      // Create new user
       console.log('🔄 Creating new user...')
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: googleUser.email,
@@ -190,7 +193,7 @@ export async function GET(request: NextRequest) {
       console.error('Profile upsert error:', profileError)
     }
     
-    // Now sign in the user with the temporary password
+    // Now sign in the user
     const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
       email: googleUser.email,
       password: tempPassword

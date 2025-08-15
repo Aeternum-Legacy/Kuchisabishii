@@ -88,41 +88,57 @@ export async function GET(request: NextRequest) {
     const tempPassword = crypto.randomUUID() + crypto.randomUUID()
     console.log('🔑 Generated temporary password for OAuth user')
     
-    // Check if user already exists first
-    console.log('🔄 Step 5: Checking for existing user...')
-    const { data: { users }, error: listError } = await supabase.auth.admin.listUsers()
+    // Check if user already exists first by trying to sign them in
+    console.log('🔄 Step 5: Checking for existing user by sign-in attempt...')
     
     let userId: string | undefined
-    let existingUser = null
+    let existingUserSession = null
     
-    if (!listError && users) {
-      existingUser = users.find(u => u.email === googleUser.email)
-      if (existingUser) {
-        console.log('✅ Found existing user:', { id: existingUser.id, email: existingUser.email })
-        userId = existingUser.id
-        
-        // Update the user's password and metadata
-        console.log('🔄 Updating existing user with new password...')
-        const { error: updateError } = await supabase.auth.admin.updateUserById(userId, {
-          password: tempPassword,
-          user_metadata: {
-            display_name: googleUser.name,
-            first_name: googleUser.given_name,
-            last_name: googleUser.family_name,
-            profile_image_url: googleUser.picture,
-            provider: 'google',
-            google_id: googleUser.id
+    // Try to sign in with email and a dummy password first to check if user exists
+    const { data: signInAttempt, error: signInError } = await supabase.auth.signInWithPassword({
+      email: googleUser.email,
+      password: 'dummy-password-check'
+    })
+    
+    // If sign-in fails with "Invalid login credentials", user doesn't exist
+    // If it fails with "Email not confirmed" or other auth errors, user exists
+    const userExists = signInError && !signInError.message.includes('Invalid login credentials')
+    
+    if (userExists) {
+      console.log('✅ User exists, getting user info...')
+      // Get existing user by email using admin API
+      const { data: { users }, error: listError } = await supabase.auth.admin.listUsers()
+      
+      if (!listError && users) {
+        const existingUser = users.find(u => u.email === googleUser.email)
+        if (existingUser) {
+          userId = existingUser.id
+          console.log('✅ Found existing user:', { id: existingUser.id, email: existingUser.email })
+          
+          // Update the user's password and metadata
+          console.log('🔄 Updating existing user with OAuth info...')
+          const { error: updateError } = await supabase.auth.admin.updateUserById(userId, {
+            password: tempPassword,
+            user_metadata: {
+              display_name: googleUser.name,
+              first_name: googleUser.given_name,
+              last_name: googleUser.family_name,
+              profile_image_url: googleUser.picture,
+              provider: 'google',
+              google_id: googleUser.id,
+              // Preserve existing metadata
+              ...existingUser.user_metadata
+            }
+          })
+          
+          if (updateError) {
+            console.error('Failed to update user:', updateError)
+          } else {
+            console.log('✅ User updated successfully')
           }
-        })
-        
-        if (updateError) {
-          console.error('Failed to update user:', updateError)
         }
       }
-    }
-    
-    // If user doesn't exist, create new one
-    if (!userId) {
+    } else {
       console.log('🔄 Creating new user...')
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: googleUser.email,
@@ -141,25 +157,11 @@ export async function GET(request: NextRequest) {
       
       if (signUpError) {
         console.error('Signup error:', signUpError)
-        // If user already exists, try to find them again
-        if (signUpError.message.includes('already registered')) {
-          console.log('🔄 User exists, trying to find existing user again...')
-          const { data: { users }, error: listError } = await supabase.auth.admin.listUsers()
-          if (!listError && users) {
-            const existingUser = users.find(u => u.email === googleUser.email)
-            if (existingUser) {
-              userId = existingUser.id
-              console.log('✅ Found existing user:', userId)
-            }
-          }
-        }
-        
-        if (!userId) {
-          throw new Error(`Failed to create user: ${signUpError.message}`)
-        }
-      } else {
-        userId = signUpData?.user?.id
+        throw new Error(`Failed to create user: ${signUpError.message}`)
       }
+      
+      userId = signUpData?.user?.id
+      console.log('✅ New user created:', userId)
     }
     
     if (!userId) {

@@ -210,7 +210,7 @@ export const HallOfFameSection: React.FC<HallOfFameSectionProps> = ({
       <div className="text-sm text-gray-600 bg-orange-50 p-3 rounded-lg border border-orange-200">
         <div className="flex items-center space-x-2">
           <Sparkles className="w-4 h-4 text-orange-500" />
-          <span>These are your 5-star "When my mouth is lonely" foods - the ones that truly satisfy your soul!</span>
+          <span>These are your 5-star &ldquo;When my mouth is lonely&rdquo; foods - the ones that truly satisfy your soul!</span>
         </div>
       </div>
 
@@ -299,7 +299,7 @@ export const HallOfFameSection: React.FC<HallOfFameSectionProps> = ({
 
                   {/* Notes */}
                   <div className="bg-white/60 rounded-lg p-3 mb-3">
-                    <p className="text-sm text-gray-700 italic">💭 "{food.notes}"</p>
+                    <p className="text-sm text-gray-700 italic">💭 &ldquo;{food.notes}&rdquo;</p>
                     {food.personalNotes && (
                       <p className="text-xs text-orange-600 mt-1 font-medium">✨ {food.personalNotes}</p>
                     )}
@@ -375,7 +375,7 @@ export const HallOfFameSection: React.FC<HallOfFameSectionProps> = ({
         >
           <div className="text-6xl mb-4">👑</div>
           <h3 className="font-bold text-gray-800 mb-2">No Hall of Fame Foods Yet</h3>
-          <p className="text-gray-600 mb-4">Rate foods as "Kuchisabishii!" (5 stars) to build your Hall of Fame</p>
+          <p className="text-gray-600 mb-4">Rate foods as &ldquo;Kuchisabishii!&rdquo; (5 stars) to build your Hall of Fame</p>
           <div className="text-sm text-purple-600 bg-purple-100 inline-block px-4 py-2 rounded-full">
             💫 These are your soul-satisfying, mouth-lonely-curing perfect foods!
           </div>

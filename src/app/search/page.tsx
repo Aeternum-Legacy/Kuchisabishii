@@ -373,7 +373,7 @@ export default function SearchPage() {
             {searchQuery ? (
               <div className="space-y-4">
                 <p className="text-gray-500 text-center py-8">
-                  Search results for "{searchQuery}" will appear here
+                  Search results for &ldquo;{searchQuery}&rdquo; will appear here
                 </p>
               </div>
             ) : (

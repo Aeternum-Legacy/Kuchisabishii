@@ -85,7 +85,7 @@ export const FriendSuggestions: React.FC<FriendSuggestionsProps> = ({
             <div className="text-6xl mb-4">👥</div>
             <h3 className="text-lg font-semibold text-gray-800 mb-2">No suggestions</h3>
             <p className="text-gray-500 text-center">
-              We'll show friend suggestions based on your taste preferences
+              We&apos;ll show friend suggestions based on your taste preferences
             </p>
           </div>
         ) : (

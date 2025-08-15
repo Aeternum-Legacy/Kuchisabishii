@@ -102,7 +102,7 @@ export default function ActivityFeed({ onBack }: ActivityFeedProps) {
       {/* Header */}
       <div className="bg-white shadow-sm p-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-800">Friends' Activity</h1>
+          <h1 className="text-xl font-bold text-gray-800">Friends&apos; Activity</h1>
           <button
             onClick={handleRefresh}
             disabled={refreshing}
@@ -122,7 +122,7 @@ export default function ActivityFeed({ onBack }: ActivityFeedProps) {
               <Share2 className="w-8 h-8 text-gray-400" />
             </div>
             <h3 className="text-lg font-semibold text-gray-800 mb-2">No Activity Yet</h3>
-            <p className="text-gray-600 mb-4">Your friends haven't shared any food reviews yet.</p>
+            <p className="text-gray-600 mb-4">Your friends haven&apos;t shared any food reviews yet.</p>
             <p className="text-sm text-gray-500">
               Add more friends or encourage them to share their food experiences!
             </p>

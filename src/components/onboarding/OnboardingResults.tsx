@@ -207,7 +207,7 @@ export default function OnboardingResults({
             </motion.div>
             
             <p className="text-lg text-gray-600">
-              Based on your responses, we've created a personalized taste profile that will help us recommend the perfect dining experiences for you.
+              Based on your responses, we&apos;ve created a personalized taste profile that will help us recommend the perfect dining experiences for you.
             </p>
           </div>
         </motion.div>

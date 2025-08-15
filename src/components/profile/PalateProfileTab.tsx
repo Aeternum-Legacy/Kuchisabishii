@@ -150,7 +150,7 @@ const PalateProfileTab: React.FC<PalateProfileTabProps> = ({
     // Create data points
     const dataPoints = data.map((item, index) => {
       const angle = (index * 2 * Math.PI) / data.length - Math.PI / 2;
-      const dataRadius = (item.value / 5) * radius;
+      const dataRadius = (Number(item.value) / 5) * radius;
       return {
         x: center + dataRadius * Math.cos(angle),
         y: center + dataRadius * Math.sin(angle)
@@ -225,7 +225,7 @@ const PalateProfileTab: React.FC<PalateProfileTabProps> = ({
                   dominantBaseline="middle"
                   className="text-xs font-medium fill-gray-700"
                 >
-                  {item.label}
+                  {String(item.label)}
                 </text>
               );
             })}
@@ -238,9 +238,9 @@ const PalateProfileTab: React.FC<PalateProfileTabProps> = ({
             <div key={index} className="flex items-center justify-between text-sm">
               <div className="flex items-center">
                 <div className={`w-3 h-3 rounded-full ${item.bgColor} mr-2`} />
-                <span>{item.label}</span>
+                <span>{String(item.label)}</span>
               </div>
-              <span className="font-medium">{item.value}/5</span>
+              <span className="font-medium">{Number(item.value)}/5</span>
             </div>
           ))}
         </div>
@@ -362,11 +362,11 @@ const PalateProfileTab: React.FC<PalateProfileTabProps> = ({
             <Star className="w-6 h-6 text-blue-600" />
           </div>
           <div className="text-2xl font-bold text-gray-900">
-            {topCuisines.length > 0 ? topCuisines[0][1] : 0}/5
+            {topCuisines.length > 0 ? Number(topCuisines[0][1]) : 0}/5
           </div>
           <div className="text-sm text-gray-600">Top Cuisine Rating</div>
           <div className="text-xs text-gray-500 mt-1">
-            {topCuisines.length > 0 ? topCuisines[0][0] : 'No data'}
+            {topCuisines.length > 0 ? String(topCuisines[0][0]) : 'No data'}
           </div>
         </div>
       </div>
@@ -473,10 +473,10 @@ const PalateProfileTab: React.FC<PalateProfileTabProps> = ({
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {topCuisines.map(([cuisine, rating]) => (
-            <div key={cuisine} className="p-4 bg-gray-50 rounded-lg">
+            <div key={String(cuisine)} className="p-4 bg-gray-50 rounded-lg">
               <div className="flex justify-between items-center mb-2">
-                <span className="font-medium">{cuisine}</span>
-                <span className="text-sm text-gray-600">{rating}/5</span>
+                <span className="font-medium">{String(cuisine)}</span>
+                <span className="text-sm text-gray-600">{Number(rating)}/5</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div

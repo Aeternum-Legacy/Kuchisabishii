@@ -18,6 +18,7 @@ interface Friend {
     profileImage?: string
   }
   friendsSince: string
+  mutualFriends?: number
 }
 
 interface FriendRequest {

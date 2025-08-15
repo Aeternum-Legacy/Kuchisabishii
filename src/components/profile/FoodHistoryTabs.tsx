@@ -145,7 +145,7 @@ export default function FoodHistoryTabs({ userId }: FoodHistoryTabsProps) {
   }
 
   const getFilteredItems = () => {
-    let items: Record<string, unknown>[] = []
+    let items: (FoodHistoryItem | ToTryItem)[] = []
     
     switch (activeTab) {
       case 'recent':
@@ -176,11 +176,17 @@ export default function FoodHistoryTabs({ userId }: FoodHistoryTabsProps) {
     items.sort((a, b) => {
       switch (sortBy) {
         case 'date':
-          return new Date(b.date_consumed || b.added_date).getTime() - new Date(a.date_consumed || a.added_date).getTime()
+          const aDate = 'date_consumed' in a ? a.date_consumed : a.added_date
+          const bDate = 'date_consumed' in b ? b.date_consumed : b.added_date
+          return new Date(bDate).getTime() - new Date(aDate).getTime()
         case 'rating':
-          return (b.rating || 0) - (a.rating || 0)
+          const aRating = 'rating' in a ? a.rating : 0
+          const bRating = 'rating' in b ? b.rating : 0
+          return bRating - aRating
         case 'price':
-          return (b.price || b.price_range || 0) - (a.price || a.price_range || 0)
+          const aPrice = 'price' in a ? a.price : ('price_range' in a ? a.price_range : 0)
+          const bPrice = 'price' in b ? b.price : ('price_range' in b ? b.price_range : 0)
+          return bPrice - aPrice
         case 'name':
           return a.food_name.localeCompare(b.food_name)
         default:
@@ -205,7 +211,7 @@ export default function FoodHistoryTabs({ userId }: FoodHistoryTabsProps) {
     </div>
   )
 
-  const FoodHistoryCard = ({ item, type }: { item: Record<string, unknown>, type: 'recent' | 'favorites' | 'to_try' }) => {
+  const FoodHistoryCard = ({ item, type }: { item: FoodHistoryItem | ToTryItem, type: 'recent' | 'favorites' | 'to_try' }) => {
     const isToTry = type === 'to_try'
     
     return (
@@ -218,8 +224,8 @@ export default function FoodHistoryTabs({ userId }: FoodHistoryTabsProps) {
         {item.image_url && (
           <div className="aspect-video w-full overflow-hidden">
             <img 
-              src={item.image_url} 
-              alt={item.food_name}
+              src={String(item.image_url)} 
+              alt={String(item.food_name)}
               className="w-full h-full object-cover"
             />
           </div>
@@ -230,24 +236,24 @@ export default function FoodHistoryTabs({ userId }: FoodHistoryTabsProps) {
           <div className="flex items-start justify-between mb-3">
             <div className="flex-1">
               <h3 className="text-lg font-bold text-gray-900 mb-1">
-                {item.food_name}
+                {String(item.food_name)}
               </h3>
               <div className="flex items-center gap-2 text-gray-600 mb-2">
                 <MapPin size={14} />
-                <span className="text-sm">{item.restaurant_name}</span>
+                <span className="text-sm">{String(item.restaurant_name)}</span>
               </div>
             </div>
             
             {!isToTry && (
               <button
-                onClick={() => toggleFavorite(item.id)}
+                onClick={() => toggleFavorite(String(item.id))}
                 className={`p-2 rounded-lg transition-colors ${
-                  item.is_favorite 
+                  'is_favorite' in item && item.is_favorite 
                     ? 'bg-red-100 text-red-600 hover:bg-red-200'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                <Heart size={16} fill={item.is_favorite ? 'currentColor' : 'none'} />
+                <Heart size={16} fill={'is_favorite' in item && item.is_favorite ? 'currentColor' : 'none'} />
               </button>
             )}
           </div>
@@ -259,17 +265,17 @@ export default function FoodHistoryTabs({ userId }: FoodHistoryTabsProps) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2">
-                    {renderStars(item.rating)}
+                    {renderStars('rating' in item ? Number(item.rating) : 0)}
                     <span className="text-sm font-medium text-gray-700">
-                      {item.rating}/5
+                      {'rating' in item ? Number(item.rating) : 0}/5
                     </span>
                   </div>
                   
-                  {item.emotional_rating && (
+                  {'emotional_rating' in item && item.emotional_rating && (
                     <div className="flex items-center gap-1">
                       <Heart size={14} className="text-pink-500" />
                       <span className="text-sm text-pink-600 font-medium">
-                        {item.emotional_rating}/10
+                        {Number(item.emotional_rating)}/10
                       </span>
                     </div>
                   )}
@@ -278,7 +284,7 @@ export default function FoodHistoryTabs({ userId }: FoodHistoryTabsProps) {
                 <div className="flex items-center gap-1">
                   <DollarSign size={14} className="text-gray-500" />
                   <span className="text-sm font-medium text-gray-700">
-                    ${item.price}
+                    ${'price' in item ? Number(item.price) : 0}
                   </span>
                 </div>
               </div>
@@ -288,17 +294,17 @@ export default function FoodHistoryTabs({ userId }: FoodHistoryTabsProps) {
             {isToTry && (
               <div className="flex items-center justify-between">
                 <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  item.priority_level === 'high' ? 'bg-red-100 text-red-700' :
-                  item.priority_level === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                  'priority_level' in item && item.priority_level === 'high' ? 'bg-red-100 text-red-700' :
+                  'priority_level' in item && item.priority_level === 'medium' ? 'bg-yellow-100 text-yellow-700' :
                   'bg-green-100 text-green-700'
                 }`}>
-                  {item.priority_level} priority
+                  {'priority_level' in item ? String(item.priority_level) : 'low'} priority
                 </span>
                 
                 <div className="flex items-center gap-1">
                   <DollarSign size={14} className="text-gray-500" />
                   <span className="text-sm text-gray-600">
-                    {'$'.repeat(item.price_range)}
+                    {'$'.repeat('price_range' in item ? Number(item.price_range) : 1)}
                   </span>
                 </div>
               </div>
@@ -309,33 +315,33 @@ export default function FoodHistoryTabs({ userId }: FoodHistoryTabsProps) {
               <div className="flex items-center gap-1">
                 <Calendar size={12} />
                 <span>
-                  {new Date(item.date_consumed || item.added_date).toLocaleDateString()}
+                  {new Date('date_consumed' in item ? String(item.date_consumed) : String(item.added_date)).toLocaleDateString()}
                 </span>
               </div>
               
               <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
-                {item.cuisine_type}
+                {String(item.cuisine_type)}
               </span>
               
-              {!isToTry && item.times_ordered > 1 && (
+              {!isToTry && 'times_ordered' in item && item.times_ordered && Number(item.times_ordered) > 1 && (
                 <div className="flex items-center gap-1">
                   <Award size={12} className="text-orange-500" />
                   <span className="text-orange-600 font-medium">
-                    {item.times_ordered}x
+                    {Number(item.times_ordered)}x
                   </span>
                 </div>
               )}
             </div>
 
             {/* Tags */}
-            {item.tags && item.tags.length > 0 && (
+            {'tags' in item && item.tags && Array.isArray(item.tags) && item.tags.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {item.tags.slice(0, 3).map((tag: string) => (
                   <span
                     key={tag}
                     className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs"
                   >
-                    {tag}
+                    {String(tag)}
                   </span>
                 ))}
                 {item.tags.length > 3 && (
@@ -349,7 +355,7 @@ export default function FoodHistoryTabs({ userId }: FoodHistoryTabsProps) {
             {/* Notes */}
             {item.notes && (
               <div className="p-3 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-700 italic">&ldquo;{item.notes}&rdquo;</p>
+                <p className="text-sm text-gray-700 italic">&ldquo;{String(item.notes)}&rdquo;</p>
               </div>
             )}
 
@@ -358,7 +364,7 @@ export default function FoodHistoryTabs({ userId }: FoodHistoryTabsProps) {
               {isToTry ? (
                 <div className="flex gap-2">
                   <button
-                    onClick={() => markAsTried(item.id)}
+                    onClick={() => markAsTried(String(item.id))}
                     className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm font-medium"
                   >
                     <Utensils size={14} />
@@ -369,21 +375,21 @@ export default function FoodHistoryTabs({ userId }: FoodHistoryTabsProps) {
                 <div className="flex items-center gap-4 text-sm">
                   <div className="flex items-center gap-1">
                     <Clock size={12} className="text-gray-500" />
-                    <span className="text-gray-600">{item.meal_type}</span>
+                    <span className="text-gray-600">{'meal_type' in item ? String(item.meal_type) : ''}</span>
                   </div>
                   
                   <span className={`px-2 py-1 rounded text-xs ${
-                    item.dining_method === 'dine_in' ? 'bg-green-100 text-green-700' :
-                    item.dining_method === 'takeout' ? 'bg-blue-100 text-blue-700' :
+                    'dining_method' in item && item.dining_method === 'dine_in' ? 'bg-green-100 text-green-700' :
+                    'dining_method' in item && item.dining_method === 'takeout' ? 'bg-blue-100 text-blue-700' :
                     'bg-purple-100 text-purple-700'
                   }`}>
-                    {item.dining_method.replace('_', ' ')}
+                    {'dining_method' in item ? String(item.dining_method).replace('_', ' ') : ''}
                   </span>
                 </div>
               )}
               
               <div className="text-xs text-gray-500">
-                {isToTry ? `Added via ${item.source}` : `Last eaten`}
+                {isToTry ? `Added via ${'source' in item ? String(item.source) : 'unknown'}` : `Last eaten`}
               </div>
             </div>
           </div>

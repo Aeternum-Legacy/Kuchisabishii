@@ -368,7 +368,7 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({
                   )}
 
                   {/* Taste Profile */}
-                  {renderTasteProfile(review.taste_experience)}
+                  {renderTasteProfile(review.taste_experience || {})}
 
                   {/* Actions */}
                   <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">

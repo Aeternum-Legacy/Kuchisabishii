@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useState, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Mail, CheckCircle, XCircle, Loader2 } from 'lucide-react'
 import KuchisabishiiLogo from '@/components/KuchisabishiiLogo'
@@ -29,9 +29,9 @@ function VerifyEmailContent() {
       setStatus('success')
       setMessage('Please check your email for a verification link.')
     }
-  }, [email, searchParams])
+  }, [email, searchParams]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const verifyEmail = async (token: string, email: string) => {
+  const verifyEmail = useCallback(async (token: string, email: string) => {
     try {
       // This would typically verify the token with your backend
       // For now, we'll just show success
@@ -46,7 +46,7 @@ function VerifyEmailContent() {
       setStatus('error')
       setMessage('Failed to verify email. The link may be expired.')
     }
-  }
+  }, [router])
 
   const resendVerification = async () => {
     if (!email) return

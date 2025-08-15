@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, Suspense } from 'react'
+import { useEffect, useState, useCallback, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { UserPlus, CheckCircle, XCircle, ArrowLeft } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
@@ -33,9 +33,9 @@ function AddFriendContent() {
     }
 
     handleAddFriend()
-  }, [user, friendUserId])
+  }, [user, friendUserId]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleAddFriend = async () => {
+  const handleAddFriend = useCallback(async () => {
     try {
       setLoading(true)
 
@@ -91,7 +91,7 @@ function AddFriendContent() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [friendUserId])
 
   const getStatusIcon = () => {
     switch (status) {

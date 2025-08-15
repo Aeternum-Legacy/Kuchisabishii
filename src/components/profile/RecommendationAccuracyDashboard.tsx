@@ -8,7 +8,7 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
-  TrendingUp, Target, Brain, Zap, Award,
+  TrendingUp, TrendingDown, Target, Brain, Zap, Award,
   ThumbsUp, ThumbsDown, Star, Eye, BarChart3,
   Calendar, Filter, RefreshCw, Info, CheckCircle
 } from 'lucide-react'
@@ -90,8 +90,14 @@ export default function RecommendationAccuracyDashboard() {
     }
   }
 
-  const AccuracyCard = ({ title, value, trend, description, icon: Icon }: Record<string, unknown>) => {
-    const colors = getAccuracyColor(value)
+  const AccuracyCard = ({ title, value, trend, description, icon: Icon }: {
+    title: string;
+    value: number;
+    trend: string;
+    description: string;
+    icon: any;
+  }) => {
+    const colors = getAccuracyColor(Number(value))
     const trendData = getTrendIcon(trend)
     const TrendIcon = trendData.icon
     

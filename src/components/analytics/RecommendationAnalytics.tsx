@@ -5,7 +5,7 @@
  * Displays ML performance metrics and recommendation insights
  */
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { 
   TrendingUp, TrendingDown, Target, Users, Clock, 
@@ -69,9 +69,9 @@ export default function RecommendationAnalytics() {
   useEffect(() => {
     loadAnalytics()
     loadModelMetrics()
-  }, [timeRange, selectedMetric])
+  }, [timeRange, selectedMetric]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const loadAnalytics = async () => {
+  const loadAnalytics = useCallback(async () => {
     try {
       const params = new URLSearchParams({
         start_date: getStartDate(timeRange),
@@ -88,9 +88,9 @@ export default function RecommendationAnalytics() {
     } catch (error) {
       console.error('Failed to load analytics:', error)
     }
-  }
+  }, [timeRange, selectedMetric])
 
-  const loadModelMetrics = async () => {
+  const loadModelMetrics = useCallback(async () => {
     try {
       setIsLoading(true)
       const response = await fetch('/api/ml/feedback')
@@ -104,7 +104,7 @@ export default function RecommendationAnalytics() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [])
 
   const getStartDate = (range: string) => {
     const days = {

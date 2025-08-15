@@ -231,10 +231,10 @@ const LinkedInProfileCard: React.FC<LinkedInProfileCardProps> = ({
           Food Profile Insights
         </h4>
         <div className="space-y-2 text-sm text-gray-600">
-          {credentials.includes('P.Eng') && (
+          {credentials.includes('P.Eng' as never) && (
             <p>• Engineering background suggests appreciation for precision in flavor profiles</p>
           )}
-          {credentials.includes('PMP') && (
+          {credentials.includes('PMP' as never) && (
             <p>• Project management experience indicates structured approach to trying new cuisines</p>
           )}
           {profileData.location.includes('Alberta') && (

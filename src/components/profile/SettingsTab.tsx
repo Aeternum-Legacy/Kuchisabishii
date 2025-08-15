@@ -214,7 +214,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({ userProfile, setUserProfile }
             </div>
             <ToggleSwitch
               enabled={privacy.show_location}
-              onChange={(value) => updatePrivacy('show_location', value)}
+              onChange={(value) => updatePrivacy('show_location', { show_location: value } as Record<string, unknown>)}
             />
           </div>
 

@@ -31,9 +31,10 @@ const ONBOARDING_QUESTIONS: OnboardingQuestion[] = [
     min: 1,
     max: 10,
     followUp: (answers) => {
-      if (answers.taste_sensitivity >= 8) {
+      const sensitivity = Number(answers.taste_sensitivity) || 5;
+      if (sensitivity >= 8) {
         return 'Great! We\'ll show you some exciting spicy and exotic options.'
-      } else if (answers.taste_sensitivity <= 3) {
+      } else if (sensitivity <= 3) {
         return 'Perfect! We\'ll focus on familiar, comforting flavors.'
       }
       return 'We\'ll balance familiar favorites with some gentle adventures.'
@@ -311,8 +312,9 @@ async function generateInitialRecommendations(userId: string, answers: Record<st
   const recommendations = []
 
   // Generate cuisine-based recommendations
-  if (answers.cuisine_preferences && answers.cuisine_preferences.length > 0) {
-    const topCuisine = answers.cuisine_preferences[0]
+  const cuisinePrefs = Array.isArray(answers.cuisine_preferences) ? answers.cuisine_preferences : [];
+  if (cuisinePrefs.length > 0) {
+    const topCuisine = String(cuisinePrefs[0])
     recommendations.push({
       type: 'cuisine',
       title: `Explore ${topCuisine.charAt(0).toUpperCase() + topCuisine.slice(1)} Cuisine`,
@@ -323,14 +325,15 @@ async function generateInitialRecommendations(userId: string, answers: Record<st
   }
 
   // Generate adventurousness-based recommendations
-  if (answers.taste_sensitivity >= 7) {
+  const sensitivity = Number(answers.taste_sensitivity) || 5;
+  if (sensitivity >= 7) {
     recommendations.push({
       type: 'adventure',
       title: 'Bold Flavor Adventures',
       description: 'Since you love bold flavors, try these exciting taste experiences',
       confidence: 0.8
     })
-  } else if (answers.taste_sensitivity <= 4) {
+  } else if (sensitivity <= 4) {
     recommendations.push({
       type: 'comfort',
       title: 'Comfort Food Favorites',
@@ -340,8 +343,9 @@ async function generateInitialRecommendations(userId: string, answers: Record<st
   }
 
   // Generate meal timing recommendations
-  if (answers.meal_timing && answers.meal_timing.length > 0) {
-    const favoriteMealTime = answers.meal_timing[0]
+  const mealTiming = Array.isArray(answers.meal_timing) ? answers.meal_timing : [];
+  if (mealTiming.length > 0) {
+    const favoriteMealTime = String(mealTiming[0])
     recommendations.push({
       type: 'timing',
       title: `Perfect ${favoriteMealTime.charAt(0).toUpperCase() + favoriteMealTime.slice(1)} Spots`,
@@ -358,9 +362,10 @@ async function generateInitialRecommendations(userId: string, answers: Record<st
 function generatePersonalitySummary(answers: Record<string, unknown>): string {
   const traits = []
 
-  if (answers.taste_sensitivity >= 8) {
+  const sensitivity = Number(answers.taste_sensitivity) || 5;
+  if (sensitivity >= 8) {
     traits.push('Culinary Adventurer')
-  } else if (answers.taste_sensitivity <= 3) {
+  } else if (sensitivity <= 3) {
     traits.push('Comfort Food Lover')
   } else {
     traits.push('Balanced Explorer')
@@ -372,9 +377,10 @@ function generatePersonalitySummary(answers: Record<string, unknown>): string {
     traits.push('Solo Explorer')
   }
 
-  if (answers.price_sensitivity <= 2) {
+  const priceSensitivity = Number(answers.price_sensitivity) || 3;
+  if (priceSensitivity <= 2) {
     traits.push('Value Seeker')
-  } else if (answers.price_sensitivity >= 4) {
+  } else if (priceSensitivity >= 4) {
     traits.push('Fine Dining Enthusiast')
   }
 

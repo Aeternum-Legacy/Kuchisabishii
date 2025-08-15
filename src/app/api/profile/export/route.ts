@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -71,9 +71,9 @@ export async function GET(request: NextRequest) {
       statistics: {
         totalReviews: experiences?.length || 0,
         totalRestaurants: new Set((experiences || []).map(e => e.restaurant?.id).filter(Boolean)).size,
-        totalPhotos: (experiences || []).reduce((sum, exp) => sum + (exp.photos?.length || 0), 0),
+        totalPhotos: (experiences || []).reduce((sum: number, exp: any) => sum + (exp.photos?.length || 0), 0),
         averageRating: experiences?.length 
-          ? Number(((experiences.reduce((sum, exp) => sum + (exp.overall_rating || 0), 0) / experiences.length).toFixed(2)))
+          ? Number(((experiences.reduce((sum: number, exp: any) => sum + (exp.overall_rating || 0), 0) / experiences.length).toFixed(2)))
           : 0
       }
     };
@@ -112,11 +112,11 @@ function generateCSVExport(experiences: Record<string, unknown>[]) {
     'Photos Count'
   ];
 
-  const csvRows = experiences.map(exp => [
+  const csvRows = experiences.map((exp: any) => [
     new Date(exp.experienced_at).toLocaleDateString(),
     `"${exp.dish_name || ''}"`,
     `"${exp.restaurant?.name || ''}"`,
-    `"${exp.restaurant?.cuisine_types?.join(', ') || ''}"`,
+    `"${(Array.isArray(exp.restaurant?.cuisine_types) ? exp.restaurant.cuisine_types.join(', ') : '') || ''}"`,
     exp.overall_rating || '',
     exp.amount_spent || '',
     exp.meal_time || '',

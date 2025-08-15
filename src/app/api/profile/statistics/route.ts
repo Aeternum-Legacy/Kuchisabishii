@@ -7,7 +7,7 @@ type Restaurant = Database['public']['Tables']['restaurants']['Row'];
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -74,26 +74,26 @@ export async function GET(request: NextRequest) {
   }
 }
 
-function calculateUserStatistics(experiences: Record<string, unknown>[]) {
+function calculateUserStatistics(experiences: any[]) {
   const totalReviews = experiences.length;
-  const totalPhotos = experiences.reduce((sum, exp) => sum + (exp.photos?.length || 0), 0);
+  const totalPhotos = experiences.reduce((sum: number, exp: any) => sum + ((Array.isArray(exp.photos) ? exp.photos.length : 0) || 0), 0);
   
   // Calculate average rating
-  const ratingsSum = experiences.reduce((sum, exp) => sum + (exp.overall_rating || 0), 0);
+  const ratingsSum = experiences.reduce((sum: number, exp: any) => sum + (Number(exp.overall_rating) || 0), 0);
   const averageRating = totalReviews > 0 ? Number((ratingsSum / totalReviews).toFixed(1)) : 0;
 
   // Count unique restaurants
   const uniqueRestaurants = new Set(
     experiences
-      .filter(exp => exp.restaurant?.id)
-      .map(exp => exp.restaurant.id)
+      .filter((exp: any) => exp.restaurant?.id)
+      .map((exp: any) => exp.restaurant.id)
   );
   const totalRestaurants = uniqueRestaurants.size;
 
   // Cuisine analysis
   const cuisineCount: Record<string, number> = {};
-  experiences.forEach(exp => {
-    if (exp.restaurant?.cuisine_types) {
+  experiences.forEach((exp: any) => {
+    if (Array.isArray(exp.restaurant?.cuisine_types)) {
       exp.restaurant.cuisine_types.forEach((cuisine: string) => {
         cuisineCount[cuisine] = (cuisineCount[cuisine] || 0) + 1;
       });
@@ -130,10 +130,10 @@ function calculateUserStatistics(experiences: Record<string, unknown>[]) {
   };
 }
 
-function calculateMonthlyTrends(experiences: Record<string, unknown>[]) {
+function calculateMonthlyTrends(experiences: any[]) {
   const monthlyData: Record<string, { reviews: number; ratings: number[] }> = {};
   
-  experiences.forEach(exp => {
+  experiences.forEach((exp: any) => {
     const date = new Date(exp.experienced_at);
     const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     const monthName = date.toLocaleDateString('en-US', { month: 'short' });
@@ -144,7 +144,7 @@ function calculateMonthlyTrends(experiences: Record<string, unknown>[]) {
     
     monthlyData[monthKey].reviews++;
     if (exp.overall_rating) {
-      monthlyData[monthKey].ratings.push(exp.overall_rating);
+      monthlyData[monthKey].ratings.push(Number(exp.overall_rating));
     }
   });
 
@@ -217,11 +217,11 @@ function calculateAchievements(totalReviews: number, totalRestaurants: number, t
   return achievements;
 }
 
-function calculateTasteEvolution(experiences: Record<string, unknown>[]) {
+function calculateTasteEvolution(experiences: any[]) {
   // Simplified calculation - in a real app, this would be more sophisticated
   const monthlyData: Record<string, { adventurousness: number[]; consistency: number[] }> = {};
   
-  experiences.forEach(exp => {
+  experiences.forEach((exp: any) => {
     const date = new Date(exp.experienced_at);
     const monthKey = date.toLocaleDateString('en-US', { month: 'short' });
     

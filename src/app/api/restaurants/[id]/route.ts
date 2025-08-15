@@ -103,13 +103,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       total_reviews: reviews.length,
       total_experiences: experiences.length,
       average_restaurant_rating: reviews.length > 0
-        ? reviews.reduce((sum, r) => sum + (r.overall_restaurant_rating || 0), 0) / reviews.length
+        ? reviews.reduce((sum: number, r: any) => sum + (r.overall_restaurant_rating || 0), 0) / reviews.length
         : null,
       average_food_rating: experiences.length > 0
-        ? experiences.reduce((sum, e) => sum + (e.overall_rating || 0), 0) / experiences.length
+        ? experiences.reduce((sum: number, e: any) => sum + (e.overall_rating || 0), 0) / experiences.length
         : null,
       recommendation_rate: reviews.length > 0
-        ? reviews.filter(r => r.would_recommend).length / reviews.length
+        ? reviews.filter((r: any) => r.would_recommend).length / reviews.length
         : null
     }
 

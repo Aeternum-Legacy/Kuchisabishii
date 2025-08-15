@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
     // If sorting by restaurant, do it in memory
     let sortedExperiences = experiences || [];
     if (sortBy === 'restaurant') {
-      sortedExperiences.sort((a, b) => {
+      sortedExperiences.sort((a: any, b: any) => {
         const nameA = a.restaurant?.name || '';
         const nameB = b.restaurant?.name || '';
         const comparison = nameA.localeCompare(nameB);
@@ -146,7 +146,7 @@ export async function GET(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser();

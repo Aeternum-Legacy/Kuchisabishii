@@ -145,18 +145,19 @@ export async function POST(request: NextRequest) {
 
     // Merge with existing data if mode is 'merge'
     if (importMode === 'merge' && currentProfile) {
-      // Keep existing dietary restrictions and preferences
-      if (currentProfile.dietary_restrictions) {
-        profileUpdates.dietary_restrictions = currentProfile.dietary_restrictions;
+      // Keep existing dietary restrictions and preferences if they exist
+      const currentProfileAny = currentProfile as any;
+      if (currentProfileAny.dietary_restrictions) {
+        (profileUpdates as any).dietary_restrictions = currentProfileAny.dietary_restrictions;
       }
-      if (currentProfile.allergies) {
-        profileUpdates.allergies = currentProfile.allergies;
+      if (currentProfileAny.allergies) {
+        (profileUpdates as any).allergies = currentProfileAny.allergies;
       }
-      if (currentProfile.spice_tolerance) {
-        profileUpdates.spice_tolerance = currentProfile.spice_tolerance;
+      if (currentProfileAny.spice_tolerance) {
+        (profileUpdates as any).spice_tolerance = currentProfileAny.spice_tolerance;
       }
-      if (currentProfile.sweetness_preference) {
-        profileUpdates.sweetness_preference = currentProfile.sweetness_preference;
+      if (currentProfileAny.sweetness_preference) {
+        (profileUpdates as any).sweetness_preference = currentProfileAny.sweetness_preference;
       }
     }
 

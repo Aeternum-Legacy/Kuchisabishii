@@ -83,37 +83,73 @@ export async function GET(request: NextRequest) {
       }
     }
     
-    // Sign in the user to Supabase
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-      email: googleUser.email,
-      password: googleUser.id // Use Google ID as password for OAuth users
-    })
+    // Create or sign in the user using Supabase Admin API
+    // First, check if user exists in Supabase auth
+    const { data: { users }, error: usersError } = await supabase.auth.admin.listUsers()
     
-    if (authError) {
-      // If password sign-in fails, create a Supabase user account
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: googleUser.email,
-        password: googleUser.id,
-        options: {
-          emailRedirectTo: `${requestUrl.origin}/auth/callback`,
-          data: {
+    let supabaseUserId = null
+    
+    if (!usersError) {
+      const existingAuthUser = users?.find(u => u.email === googleUser.email)
+      
+      if (existingAuthUser) {
+        supabaseUserId = existingAuthUser.id
+      } else {
+        // Create new auth user using admin API
+        const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
+          email: googleUser.email,
+          email_confirm: true,
+          user_metadata: {
             display_name: googleUser.name,
             first_name: googleUser.given_name,
             last_name: googleUser.family_name,
             profile_image_url: googleUser.picture,
-            email_verified: true
+            provider: 'google',
+            google_id: googleUser.id
           }
+        })
+        
+        if (!createError && newUser?.user) {
+          supabaseUserId = newUser.user.id
+          
+          // Update profile with correct Supabase user ID
+          await supabase
+            .from('profiles')
+            .update({ id: supabaseUserId })
+            .eq('email', googleUser.email)
         }
-      })
-      
-      if (signUpError) {
-        console.error('Failed to create Supabase auth user:', signUpError)
-        throw new Error('Failed to authenticate user')
       }
     }
     
-    // Redirect to home page
-    return NextResponse.redirect(new URL('/', requestUrl.origin))
+    // Generate a session token for the user
+    if (supabaseUserId) {
+      // Create a session using the service role
+      const { data: session, error: sessionError } = await supabase.auth.admin.generateLink({
+        type: 'magiclink',
+        email: googleUser.email,
+      })
+      
+      // Set auth cookie for session persistence
+      const response = NextResponse.redirect(new URL('/', requestUrl.origin))
+      
+      // Set a custom session cookie
+      response.cookies.set('sb-auth-token', JSON.stringify({
+        user_id: supabaseUserId,
+        email: googleUser.email,
+        provider: 'google',
+        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+      }), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7 // 7 days
+      })
+      
+      return response
+    }
+    
+    // Fallback redirect if session creation fails
+    return NextResponse.redirect(new URL('/?auth=google_success', requestUrl.origin))
     
   } catch (error) {
     console.error('OAuth callback error:', error)

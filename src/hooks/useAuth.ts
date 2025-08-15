@@ -39,6 +39,13 @@ export function useAuth() {
     // Get initial session
     const getInitialSession = async () => {
       try {
+        // Check for Google OAuth success
+        const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
+        if (urlParams?.get('auth') === 'google_success') {
+          // Remove the query parameter
+          window.history.replaceState({}, '', window.location.pathname)
+        }
+        
         const { data: { session }, error } = await supabase.auth.getSession()
         
         if (error) {

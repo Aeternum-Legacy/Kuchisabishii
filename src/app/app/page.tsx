@@ -13,17 +13,15 @@ import AuthWrapper from '@/components/auth/AuthWrapper';
 
 // Main authenticated app component with proper navigation
 export default function AuthenticatedApp() {
-  const { user, signOut } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('home');
   const [activeCategory, setActiveCategory] = useState('all');
-  const [loading, setLoading] = useState(true);
 
   // Initialize app with authenticated user
   useEffect(() => {
     if (user) {
       console.log('App initialized for user:', user.displayName);
-      setLoading(false);
     }
   }, [user]);
 
@@ -72,26 +70,8 @@ export default function AuthenticatedApp() {
     { id: 'profile', label: 'Profile', icon: '👤', badge: 0 }
   ];
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-orange-50 to-orange-100">
-        <div className="text-center">
-          <Image
-            src="/images/kuchisabishii-logo.png"
-            alt="Kuchisabishii"
-            width={80}
-            height={80}
-            className="rounded-xl mx-auto mb-4"
-            style={{
-              filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))',
-              background: 'transparent'
-            }}
-          />
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
-        </div>
-      </div>
-    );
-  }
+  // Let AuthWrapper handle the authentication and loading states
+  // Remove the custom loading check here since AuthWrapper will handle it
 
   return (
     <AuthWrapper>

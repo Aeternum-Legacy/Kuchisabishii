@@ -42,16 +42,22 @@ export function useAuth() {
         // Check for OAuth success/error in URL and handle redirect
         const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
         if (urlParams?.get('auth') === 'success') {
-          // Remove the query parameter and wait for session to be established
+          // Remove the query parameter
           window.history.replaceState({}, '', window.location.pathname)
-          
-          // Force a session refresh after OAuth callback
+        }
+        
+        // Also check if we just completed onboarding
+        const justCompletedOnboarding = typeof window !== 'undefined' && 
+          (window.location.pathname === '/app' && localStorage.getItem('onboardingCompleted') === 'true')
+        
+        if (justCompletedOnboarding) {
+          // Force a quicker session refresh for post-onboarding users
           setTimeout(async () => {
             const { data: { session: newSession } } = await supabase.auth.getSession()
             if (newSession) {
-              console.log('✅ OAuth session restored successfully')
+              console.log('✅ Post-onboarding session verified')
             }
-          }, 1000)
+          }, 500)
         }
         
         // Try to restore session from cookies first

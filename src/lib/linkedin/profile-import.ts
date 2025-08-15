@@ -37,7 +37,7 @@ export interface UserProfileMapping {
   credentials: string[];
   skills: string[];
   languages: string[];
-  education_history: any[];
+  education_history: Record<string, unknown>[];
 }
 
 // Aaron Tong's real LinkedIn profile data
@@ -163,7 +163,7 @@ function extractProfessionalTitle(title: string): string {
 /**
  * Validate LinkedIn profile data structure
  */
-export function validateLinkedInData(data: any): data is LinkedInProfileData {
+export function validateLinkedInData(data: Record<string, unknown>): data is LinkedInProfileData {
   return (
     data &&
     typeof data.fullName === 'string' &&

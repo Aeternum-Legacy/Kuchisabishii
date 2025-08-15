@@ -355,7 +355,7 @@ export default function EnhancedPalateProfileTab({
     )
   }
 
-  const TasteSlider = ({ label, value, color, onChange, disabled }: any) => (
+  const TasteSlider = ({ label, value, color, onChange, disabled }: Record<string, unknown>) => (
     <div className="space-y-2">
       <div className="flex justify-between items-center">
         <label className="text-sm font-medium text-gray-700">{label}</label>

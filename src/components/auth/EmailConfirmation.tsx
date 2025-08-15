@@ -51,7 +51,7 @@ export default function EmailConfirmation({ email, onBackToLogin }: EmailConfirm
         </h2>
         
         <p className="text-gray-600 mb-6">
-          We've sent a confirmation email to:
+          We&apos;ve sent a confirmation email to:
         </p>
         
         <p className="font-semibold text-gray-800 mb-6">
@@ -61,7 +61,7 @@ export default function EmailConfirmation({ email, onBackToLogin }: EmailConfirm
         <div className="bg-orange-50 rounded-lg p-4 mb-6">
           <p className="text-sm text-orange-800">
             Please click the link in the email to confirm your account. 
-            Check your spam folder if you don't see it within a few minutes.
+            Check your spam folder if you don&apos;t see it within a few minutes.
           </p>
         </div>
 

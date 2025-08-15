@@ -18,7 +18,7 @@ interface OnboardingQuestion {
   options?: Array<{ value: string; label: string; emoji?: string }>
   min?: number
   max?: number
-  followUp?: (answers: Record<string, any>) => string | null
+  followUp?: (answers: Record<string, unknown>) => string | null
 }
 
 // Define the 7 core onboarding questions
@@ -214,7 +214,7 @@ export async function POST(request: NextRequest) {
       user_id: user.id,
       culinary_adventurousness: answers.taste_sensitivity || 5,
       cuisine_preferences: {
-        ...(answers.cuisine_preferences || []).reduce((acc: any, cuisine: string) => {
+        ...(answers.cuisine_preferences || []).reduce((acc: Record<string, number>, cuisine: string) => {
           acc[cuisine] = 10 // High preference for selected cuisines
           return acc
         }, {})
@@ -249,7 +249,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update user profile with onboarding completion and dietary restrictions
-    const profileUpdates: any = {
+    const profileUpdates: Record<string, unknown> = {
       onboarding_completed: true,
       taste_profile_setup: true
     }
@@ -307,7 +307,7 @@ export async function POST(request: NextRequest) {
 }
 
 // Helper function to generate initial recommendations based on onboarding
-async function generateInitialRecommendations(userId: string, answers: Record<string, any>) {
+async function generateInitialRecommendations(userId: string, answers: Record<string, unknown>) {
   const recommendations = []
 
   // Generate cuisine-based recommendations
@@ -355,7 +355,7 @@ async function generateInitialRecommendations(userId: string, answers: Record<st
 }
 
 // Helper function to generate personality summary
-function generatePersonalitySummary(answers: Record<string, any>): string {
+function generatePersonalitySummary(answers: Record<string, unknown>): string {
   const traits = []
 
   if (answers.taste_sensitivity >= 8) {

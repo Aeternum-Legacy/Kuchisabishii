@@ -125,7 +125,7 @@ export default function EmailVerificationRequired({ email, onBackToLogin }: Emai
 
       <div className="mt-6 text-center">
         <p className="text-xs text-gray-500">
-          Check your spam folder if you don't see the email within a few minutes.
+          Check your spam folder if you dondon'tapos;t see the email within a few minutes.
         </p>
         {resendCount > 0 && (
           <p className="text-xs text-gray-400 mt-2">

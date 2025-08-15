@@ -84,7 +84,7 @@ export function useAuth() {
         // If no session from Supabase, try to recover from existing cookies
         if (!session && typeof window !== 'undefined') {
           // Check for existing Supabase auth cookies
-          const cookies = document.cookie.split(';').reduce((acc: any, cookie) => {
+          const cookies = document.cookie.split(';').reduce((acc: Record<string, unknown>, cookie) => {
             const [name, value] = cookie.trim().split('=')
             acc[name] = value
             return acc

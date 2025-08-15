@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   const start = Date.now()
-  const checks: Record<string, any> = {}
+  const checks: Record<string, unknown> = {}
 
   try {
     // Check environment variables
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Overall health determination
-    const isHealthy = checks.database.status === 'healthy'
+    const isHealthy = (checks.database as any).status === 'healthy'
     const overallStatus = isHealthy ? 'healthy' : 'unhealthy'
     const statusCode = isHealthy ? 200 : 503
 

@@ -18,9 +18,9 @@ export interface TrainingData {
   item_id: string
   predicted_score: number
   actual_rating: number
-  taste_vector: any
-  emotional_response: any
-  context: any
+  taste_vector: Record<string, unknown>
+  emotional_response: Record<string, unknown>
+  context: Record<string, unknown>
   timestamp: Date
   confidence: number
 }
@@ -328,7 +328,7 @@ export class MLTrainingPipeline {
     validationSet: TrainingData[]
   ): Promise<any> {
     let bestAccuracy = 0
-    let bestWeights: any = null
+    let bestWeights: Record<string, unknown> = null
     let patienceCounter = 0
 
     // Simulate training epochs
@@ -396,7 +396,7 @@ export class MLTrainingPipeline {
   /**
    * Get current model weights (simplified)
    */
-  private getCurrentWeights(): any {
+  private getCurrentWeights(): Record<string, unknown> {
     return {
       taste_weights: ALGORITHM_CONFIG.EMOTIONAL_WEIGHTS,
       context_weights: ALGORITHM_CONFIG.CONTEXT_WEIGHTS,
@@ -571,7 +571,7 @@ export class MLTrainingPipeline {
   /**
    * Update algorithm parameters based on training results
    */
-  private async updateAlgorithmParameters(modelResults: any): Promise<void> {
+  private async updateAlgorithmParameters(modelResults: Record<string, unknown>): Promise<void> {
     try {
       console.log('Updating algorithm parameters with improved model')
       

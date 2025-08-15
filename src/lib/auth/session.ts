@@ -56,7 +56,7 @@ export async function getServerSession(): Promise<SessionInfo> {
 export function requireAuth() {
   return async function authGuard(
     request: NextRequest
-  ): Promise<{ authorized: boolean; user?: any; response?: NextResponse }> {
+  ): Promise<{ authorized: boolean; user?: Record<string, unknown>; response?: NextResponse }> {
     try {
       const supabase = await createClient()
       const { data: { user }, error } = await supabase.auth.getUser()
@@ -137,7 +137,7 @@ export async function clearSession(): Promise<void> {
   }
 }
 
-export function createSecureResponse(data: any, options?: {
+export function createSecureResponse(data: Record<string, unknown>, options?: {
   headers?: Record<string, string>
   status?: number
 }): NextResponse {

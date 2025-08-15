@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-function generateCSVExport(experiences: any[]) {
+function generateCSVExport(experiences: Record<string, unknown>[]) {
   const csvHeaders = [
     'Date',
     'Dish Name',

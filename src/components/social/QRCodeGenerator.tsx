@@ -86,7 +86,7 @@ export default function QRCodeGenerator({ onClose }: QRCodeGeneratorProps) {
         handleCopyUrl()
       }
     } else {
-      // Fallback for browsers that don't support Web Share API
+      // Fallback for browsers that dondon'tapos;t support Web Share API
       handleCopyUrl()
     }
   }

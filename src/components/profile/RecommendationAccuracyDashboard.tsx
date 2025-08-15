@@ -90,7 +90,7 @@ export default function RecommendationAccuracyDashboard() {
     }
   }
 
-  const AccuracyCard = ({ title, value, trend, description, icon: Icon }: any) => {
+  const AccuracyCard = ({ title, value, trend, description, icon: Icon }: Record<string, unknown>) => {
     const colors = getAccuracyColor(value)
     const trendData = getTrendIcon(trend)
     const TrendIcon = trendData.icon

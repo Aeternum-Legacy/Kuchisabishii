@@ -25,20 +25,20 @@ const feedbackSchema = z.object({
 // Model training data structure
 interface TrainingData {
   user_features: {
-    taste_profile: any
-    demographic: any
-    behavior_patterns: any
-    preference_history: any
+    taste_profile: Record<string, unknown>
+    demographic: Record<string, unknown>
+    behavior_patterns: Record<string, unknown>
+    preference_history: Record<string, unknown>
   }
   item_features: {
-    restaurant_attributes: any
-    menu_item_attributes: any
-    contextual_factors: any
+    restaurant_attributes: Record<string, unknown> | null
+    menu_item_attributes: Record<string, unknown> | null
+    contextual_factors: Record<string, unknown>
   }
   interaction_data: {
-    implicit_feedback: any
-    explicit_feedback: any
-    temporal_factors: any
+    implicit_feedback: Record<string, unknown>
+    explicit_feedback: Record<string, unknown>
+    temporal_factors: Record<string, unknown>
   }
   outcome: {
     satisfaction_score: number
@@ -148,7 +148,7 @@ export async function GET(request: NextRequest) {
 }
 
 // Process user feedback and update systems
-async function processFeedback(supabase: any, userId: string, feedback: any) {
+async function processFeedback(supabase: ReturnType<typeof createClient>, userId: string, feedback: z.infer<typeof feedbackSchema>) {
   let profileUpdated = false
   let learningScore = 0
 
@@ -164,7 +164,7 @@ async function processFeedback(supabase: any, userId: string, feedback: any) {
   }
 
   // Update the interaction with feedback
-  const updateData: any = {
+  const updateData: Record<string, unknown> = {
     feedback_action: feedback.action,
     feedback_rating: feedback.rating,
     feedback_text: feedback.feedback_text,
@@ -223,7 +223,7 @@ async function processFeedback(supabase: any, userId: string, feedback: any) {
 }
 
 // Update taste profile based on feedback
-async function updateTasteProfile(supabase: any, userId: string, feedback: any) {
+async function updateTasteProfile(supabase: ReturnType<typeof createClient>, userId: string, feedback: z.infer<typeof feedbackSchema>) {
   if (feedback.action !== 'tried' || !feedback.rating) {
     return // Only update profile for explicit ratings
   }
@@ -277,7 +277,7 @@ async function updateTasteProfile(supabase: any, userId: string, feedback: any) 
   }
 
   // Update taste profile
-  const updates: any = {
+  const updates: Record<string, unknown> = {
     cuisine_preferences: cuisinePreferences
   }
 
@@ -295,7 +295,7 @@ async function updateTasteProfile(supabase: any, userId: string, feedback: any) 
 }
 
 // Generate training data for ML model
-async function generateTrainingData(supabase: any, userId: string, feedback: any): Promise<TrainingData> {
+async function generateTrainingData(supabase: ReturnType<typeof createClient>, userId: string, feedback: z.infer<typeof feedbackSchema>): Promise<TrainingData> {
   // Get user features
   const [userProfile, tasteProfile, recentExperiences] = await Promise.all([
     supabase.from('user_profiles').select('*').eq('id', userId).single(),
@@ -381,7 +381,7 @@ async function generateTrainingData(supabase: any, userId: string, feedback: any
 }
 
 // Store training data for batch ML processing
-async function storeTrainingData(supabase: any, trainingData: TrainingData) {
+async function storeTrainingData(supabase: ReturnType<typeof createClient>, trainingData: TrainingData) {
   await supabase
     .from('ml_training_data')
     .insert([{
@@ -392,7 +392,7 @@ async function storeTrainingData(supabase: any, trainingData: TrainingData) {
 }
 
 // Update recommendation preferences based on feedback patterns
-async function updateRecommendationPreferences(supabase: any, userId: string, feedback: any) {
+async function updateRecommendationPreferences(supabase: ReturnType<typeof createClient>, userId: string, feedback: z.infer<typeof feedbackSchema>) {
   // Get current preferences
   const { data: preferences } = await supabase
     .from('recommendation_preferences')
@@ -415,7 +415,7 @@ async function updateRecommendationPreferences(supabase: any, userId: string, fe
   const adjustments = calculatePreferenceAdjustments(recentFeedback || [])
 
   // Apply adjustments to preferences
-  const updates: any = {}
+  const updates: Record<string, unknown> = {}
   
   if (adjustments.taste_similarity_weight_change !== 0) {
     updates.taste_similarity_weight = Math.max(0.1, Math.min(0.8, 
@@ -460,7 +460,7 @@ function mapActionToEngagement(action: string): string {
   }
 }
 
-async function calculateBehaviorPatterns(supabase: any, userId: string) {
+async function calculateBehaviorPatterns(supabase: ReturnType<typeof createClient>, userId: string) {
   const { data: analytics } = await supabase
     .from('user_analytics')
     .select('*')
@@ -488,18 +488,19 @@ async function calculateBehaviorPatterns(supabase: any, userId: string) {
   }
 }
 
-function calculateAverageRating(experiences: any[]): number {
+function calculateAverageRating(experiences: Record<string, unknown>[]): number {
   if (experiences.length === 0) return 0
-  const total = experiences.reduce((sum, exp) => sum + (exp.overall_rating || 0), 0)
+  const total = experiences.reduce((sum, exp) => sum + ((exp.overall_rating as number) || 0), 0)
   return total / experiences.length
 }
 
-function extractTopCuisines(experiences: any[]): string[] {
+function extractTopCuisines(experiences: Record<string, unknown>[]): string[] {
   const cuisineCounts: Record<string, number> = {}
   
   experiences.forEach(exp => {
-    if (exp.restaurant?.cuisine_types) {
-      exp.restaurant.cuisine_types.forEach((cuisine: string) => {
+    const restaurant = exp.restaurant as Record<string, unknown>
+    if (restaurant?.cuisine_types && Array.isArray(restaurant.cuisine_types)) {
+      restaurant.cuisine_types.forEach((cuisine: string) => {
         cuisineCounts[cuisine] = (cuisineCounts[cuisine] || 0) + 1
       })
     }
@@ -511,7 +512,7 @@ function extractTopCuisines(experiences: any[]): string[] {
     .map(([cuisine]) => cuisine)
 }
 
-function calculatePreferenceAdjustments(recentFeedback: any[]) {
+function calculatePreferenceAdjustments(recentFeedback: Record<string, unknown>[]) {
   let tasteWeightChange = 0
   let friendWeightChange = 0
   
@@ -538,7 +539,7 @@ function calculatePreferenceAdjustments(recentFeedback: any[]) {
   }
 }
 
-async function getPersonalModelMetrics(supabase: any, userId: string) {
+async function getPersonalModelMetrics(supabase: ReturnType<typeof createClient>, userId: string) {
   const { data: interactions } = await supabase
     .from('recommendation_interactions')
     .select('*')
@@ -566,7 +567,7 @@ async function getPersonalModelMetrics(supabase: any, userId: string) {
   }
 }
 
-async function getSystemMetrics(supabase: any) {
+async function getSystemMetrics(supabase: ReturnType<typeof createClient>) {
   // Return anonymized system-wide metrics
   return {
     total_users: 1250, // Placeholder
@@ -576,7 +577,7 @@ async function getSystemMetrics(supabase: any) {
   }
 }
 
-async function getImprovementSuggestions(supabase: any, userId: string) {
+async function getImprovementSuggestions(supabase: ReturnType<typeof createClient>, userId: string) {
   // Analyze user's interaction patterns and suggest improvements
   return [
     {

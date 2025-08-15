@@ -59,7 +59,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({ userProfile, setUserProfile }
     setNotifications(prev => ({ ...prev, [key]: value }));
   };
 
-  const updatePrivacy = (key: string, value: any) => {
+  const updatePrivacy = (key: string, value: Record<string, unknown>) => {
     setPrivacy(prev => ({ ...prev, [key]: value }));
     
     // Update main profile for relevant settings
@@ -71,7 +71,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({ userProfile, setUserProfile }
     }
   };
 
-  const updateDataSetting = (key: string, value: any) => {
+  const updateDataSetting = (key: string, value: Record<string, unknown>) => {
     setDataSettings(prev => ({ ...prev, [key]: value }));
   };
 

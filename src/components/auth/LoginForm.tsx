@@ -177,7 +177,7 @@ export default function LoginForm({ onSuccess, onSwitchToRegister, onForgotPassw
         {/* Switch to Register */}
         <div className="text-center">
           <p className="text-gray-600">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <button
               type="button"
               onClick={onSwitchToRegister}

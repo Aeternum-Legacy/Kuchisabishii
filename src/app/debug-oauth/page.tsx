@@ -5,13 +5,13 @@ import { useAuth } from '@/hooks/useAuth'
 
 export default function DebugOAuthPage() {
   const { user, loading, error } = useAuth()
-  const [diagnostics, setDiagnostics] = useState<any>(null)
-  const [authFlow, setAuthFlow] = useState<any[]>([])
-  const [cookies, setCookies] = useState<any>({})
+  const [diagnostics, setDiagnostics] = useState<Record<string, unknown>[] | null>(null)
+  const [authFlow, setAuthFlow] = useState<Record<string, unknown>[]>([])
+  const [cookies, setCookies] = useState<Record<string, string>>({})
   
   useEffect(() => {
     // Check cookies on page load
-    const allCookies = document.cookie.split(';').reduce((acc: any, cookie) => {
+    const allCookies = document.cookie.split(';').reduce((acc: Record<string, string>, cookie) => {
       const [name, value] = cookie.trim().split('=')
       acc[name] = value
       return acc
@@ -143,10 +143,10 @@ export default function DebugOAuthPage() {
         alert(`You are already authenticated as ${data.user.email}! Redirecting to ${data.redirectTo}`)
         window.location.href = data.redirectTo
       } else {
-        alert('No valid session found. You need to sign in.')
+        alert(`No valid session found. You need to sign in.`)
       }
     } catch (error) {
-      alert('Error checking session: ' + error)
+      alert(`Error checking session: ${error}`)
     }
   }
   
@@ -162,19 +162,19 @@ export default function DebugOAuthPage() {
             <div className="p-4 border rounded">
               <div className="font-medium">User</div>
               <div className={user ? 'text-green-600' : 'text-red-600'}>
-                {user ? `✅ ${user.email}` : '❌ Not authenticated'}
+                {user ? `✅ ${user.email}` : `❌ Not authenticated`}
               </div>
             </div>
             <div className="p-4 border rounded">
               <div className="font-medium">Loading</div>
               <div className={loading ? 'text-yellow-600' : 'text-gray-600'}>
-                {loading ? '⏳ Loading...' : '✅ Ready'}
+                {loading ? `⏳ Loading...` : `✅ Ready`}
               </div>
             </div>
             <div className="p-4 border rounded">
               <div className="font-medium">Error</div>
               <div className={error ? 'text-red-600' : 'text-green-600'}>
-                {error || '✅ No errors'}
+                {error || `✅ No errors`}
               </div>
             </div>
           </div>
@@ -237,7 +237,7 @@ export default function DebugOAuthPage() {
           <div className="bg-white p-6 rounded-lg shadow">
             <h2 className="text-xl font-bold mb-4">Diagnostic Results</h2>
             <div className="space-y-4">
-              {diagnostics.map((result: any, index: number) => (
+              {diagnostics.map((result: Record<string, unknown>, index: number) => (
                 <div key={index} className="border p-4 rounded">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-medium">{result.test}</h3>
@@ -269,10 +269,10 @@ export default function DebugOAuthPage() {
         <div className="bg-yellow-50 p-6 rounded-lg shadow mt-6">
           <h2 className="text-lg font-bold mb-2">📋 Testing Instructions</h2>
           <ol className="list-decimal list-inside space-y-1 text-sm">
-            <li>First, click "Run System Diagnostics" to check all endpoints</li>
-            <li>Then click "Test Google OAuth Flow" to start authentication</li>
+            <li>First, click &quot;Run System Diagnostics&quot; to check all endpoints</li>
+            <li>Then click &quot;Test Google OAuth Flow&quot; to start authentication</li>
             <li>After OAuth completes, return to this page to see results</li>
-            <li>Check the "Current Authentication State" to see if login worked</li>
+            <li>Check the &quot;Current Authentication State&quot; to see if login worked</li>
           </ol>
         </div>
       </div>

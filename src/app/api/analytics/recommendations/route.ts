@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
       user.id,
       start_date,
       end_date,
-      recommendation_type,
+      recommendation_type || null,
       metric
     )
 
@@ -162,11 +162,11 @@ export async function POST(request: NextRequest) {
 
 // Generate comprehensive recommendation analytics
 async function generateRecommendationAnalytics(
-  supabase: any,
+  supabase: ReturnType<typeof createClient>,
   userId: string,
   startDate: string,
   endDate: string,
-  recommendationType?: string,
+  recommendationType: string | null,
   metric: string = 'all'
 ): Promise<RecommendationMetrics> {
   // Base query for recommendation interactions
@@ -185,22 +185,22 @@ async function generateRecommendationAnalytics(
 
   // Calculate basic metrics
   const totalShown = interactions?.length || 0
-  const totalClicked = interactions?.filter(i => i.clicked).length || 0
-  const totalVisited = interactions?.filter(i => i.visited).length || 0
-  const totalRated = interactions?.filter(i => i.rated).length || 0
+  const totalClicked = interactions?.filter((i: any) => i.clicked).length || 0
+  const totalVisited = interactions?.filter((i: any) => i.visited).length || 0
+  const totalRated = interactions?.filter((i: any) => i.rated).length || 0
   
   const clickRate = totalShown > 0 ? totalClicked / totalShown : 0
   const conversionRate = totalShown > 0 ? totalVisited / totalShown : 0
   
   // Calculate average rating
-  const ratedInteractions = interactions?.filter(i => i.rating != null) || []
+  const ratedInteractions = interactions?.filter((i: any) => i.rating != null) || []
   const averageRating = ratedInteractions.length > 0 
-    ? ratedInteractions.reduce((sum, i) => sum + i.rating, 0) / ratedInteractions.length 
+    ? ratedInteractions.reduce((sum: number, i: any) => sum + i.rating, 0) / ratedInteractions.length 
     : 0
 
   // Calculate satisfaction score (percentage of ratings >= 4)
   const satisfactionScore = ratedInteractions.length > 0
-    ? ratedInteractions.filter(i => i.rating >= 4).length / ratedInteractions.length
+    ? ratedInteractions.filter((i: any) => i.rating >= 4).length / ratedInteractions.length
     : 0
 
   // Calculate diversity score
@@ -232,7 +232,7 @@ async function generateRecommendationAnalytics(
 }
 
 // Calculate recommendation diversity (variety of cuisines, restaurants, etc.)
-async function calculateDiversityScore(supabase: any, userId: string, interactions: any[]): Promise<number> {
+async function calculateDiversityScore(supabase: ReturnType<typeof createClient>, userId: string, interactions: Record<string, unknown>[]): Promise<number> {
   if (interactions.length === 0) return 0
 
   const restaurantIds = new Set()
@@ -249,7 +249,7 @@ async function calculateDiversityScore(supabase: any, userId: string, interactio
         .eq('id', interaction.restaurant_id)
         .single()
       
-      if (restaurant?.cuisine_types) {
+      if (restaurant?.cuisine_types && Array.isArray(restaurant.cuisine_types)) {
         restaurant.cuisine_types.forEach((cuisine: string) => cuisineTypes.add(cuisine))
       }
     }
@@ -263,7 +263,7 @@ async function calculateDiversityScore(supabase: any, userId: string, interactio
 }
 
 // Calculate user engagement metrics
-async function calculateUserEngagement(supabase: any, userId: string, startDate: string, endDate: string) {
+async function calculateUserEngagement(supabase: ReturnType<typeof createClient>, userId: string, startDate: string, endDate: string) {
   // Get user analytics for the period
   const { data: analytics } = await supabase
     .from('user_analytics')
@@ -280,9 +280,9 @@ async function calculateUserEngagement(supabase: any, userId: string, startDate:
     }
   }
 
-  const totalSessions = analytics.reduce((sum, day) => sum + day.app_opens, 0)
-  const totalDuration = analytics.reduce((sum, day) => sum + day.session_duration_minutes, 0)
-  const activeDays = analytics.filter(day => day.app_opens > 0).length
+  const totalSessions = analytics.reduce((sum: number, day: any) => sum + day.app_opens, 0)
+  const totalDuration = analytics.reduce((sum: number, day: any) => sum + day.session_duration_minutes, 0)
+  const activeDays = analytics.filter((day: any) => day.app_opens > 0).length
   
   return {
     daily_active_users: activeDays,
@@ -292,13 +292,13 @@ async function calculateUserEngagement(supabase: any, userId: string, startDate:
 }
 
 // Calculate recommendation breakdown by type
-async function calculateRecommendationBreakdown(supabase: any, userId: string, interactions: any[]) {
+async function calculateRecommendationBreakdown(supabase: ReturnType<typeof createClient>, userId: string, interactions: Record<string, unknown>[]) {
   const breakdown: Record<string, { count: number; clicked: number; visited: number; rated: number }> = {}
   
   for (const interaction of interactions) {
     const type = interaction.recommendation_type || 'unknown'
     if (!breakdown[type]) {
-      breakdown[type] = { count: 0, clicked: 0, visited: 0, rated: 0 }
+      breakdown[type as string] = { count: 0, clicked: 0, visited: 0, rated: 0 }
     }
     
     breakdown[type].count++
@@ -315,7 +315,7 @@ async function calculateRecommendationBreakdown(supabase: any, userId: string, i
 }
 
 // Calculate trending patterns in food preferences
-async function calculateTrendingPatterns(supabase: any, startDate: string, endDate: string) {
+async function calculateTrendingPatterns(supabase: ReturnType<typeof createClient>, startDate: string, endDate: string) {
   // Get recent food experiences to identify trends
   const { data: recentExperiences } = await supabase
     .from('food_experiences')
@@ -330,13 +330,14 @@ async function calculateTrendingPatterns(supabase: any, startDate: string, endDa
   const cuisineTrends: Record<string, { count: number; totalRating: number }> = {}
   
   for (const experience of recentExperiences || []) {
-    const cuisines = experience.restaurant?.cuisine_types || []
+    const restaurant = experience.restaurant as Record<string, unknown>
+    const cuisines = (restaurant?.cuisine_types as string[]) || []
     for (const cuisine of cuisines) {
       if (!cuisineTrends[cuisine]) {
         cuisineTrends[cuisine] = { count: 0, totalRating: 0 }
       }
       cuisineTrends[cuisine].count++
-      cuisineTrends[cuisine].totalRating += experience.overall_rating
+      cuisineTrends[cuisine].totalRating += (experience.overall_rating as number)
     }
   }
   

@@ -16,7 +16,7 @@ const abTestSchema = z.object({
     id: z.string(),
     name: z.string(),
     weight: z.number().min(0).max(1),
-    config: z.record(z.any())
+    config: z.record(z.unknown())
   })),
   target_percentage: z.number().min(0).max(100).optional(),
   start_date: z.string().optional(),
@@ -41,7 +41,7 @@ interface ABTestVariant {
   id: string
   name: string
   weight: number
-  config: Record<string, any>
+  config: Record<string, unknown>
 }
 
 interface ABTest {
@@ -185,8 +185,8 @@ export async function GET(request: NextRequest) {
 
     const { data: existingAssignments } = await assignmentsQuery
 
-    const assignments: Record<string, any> = {}
-    const newAssignments: any[] = []
+    const assignments: Record<string, unknown> = {}
+    const newAssignments: Record<string, unknown>[] = []
 
     // Process each active test
     for (const test of ACTIVE_AB_TESTS) {

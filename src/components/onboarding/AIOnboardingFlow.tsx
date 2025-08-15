@@ -20,13 +20,13 @@ interface OnboardingQuestion {
 }
 
 interface OnboardingProps {
-  onComplete: (answers: Record<string, any>, personalitySummary: string) => void
+  onComplete: (answers: Record<string, unknown>, personalitySummary: string) => void
   onSkip?: () => void
 }
 
 export default function AIOnboardingFlow({ onComplete, onSkip }: OnboardingProps) {
   const [currentStep, setCurrentStep] = useState(0)
-  const [answers, setAnswers] = useState<Record<string, any>>({})
+  const [answers, setAnswers] = useState<Record<string, unknown>>({})
   const [currentQuestion, setCurrentQuestion] = useState<OnboardingQuestion | null>(null)
   const [followUpMessage, setFollowUpMessage] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -88,7 +88,7 @@ export default function AIOnboardingFlow({ onComplete, onSkip }: OnboardingProps
     setPalateInsights(insights)
   }
 
-  const handleAnswer = (questionId: string, value: any) => {
+  const handleAnswer = (questionId: string, value: Record<string, unknown>) => {
     const updatedAnswers = { ...answers, [questionId]: value }
     setAnswers(updatedAnswers)
   }
@@ -284,7 +284,7 @@ export default function AIOnboardingFlow({ onComplete, onSkip }: OnboardingProps
 }
 
 // Question Component Types
-function SliderQuestion({ question, value, onChange }: any) {
+function SliderQuestion({ question, value, onChange }: Record<string, unknown>) {
   return (
     <div className="space-y-4">
       <div className="flex justify-between text-sm text-gray-500">
@@ -307,7 +307,7 @@ function SliderQuestion({ question, value, onChange }: any) {
   )
 }
 
-function MultiSelectQuestion({ question, value, onChange }: any) {
+function MultiSelectQuestion({ question, value, onChange }: Record<string, unknown>) {
   const selectedValues = value || []
   
   const toggleSelection = (optionValue: string) => {
@@ -319,7 +319,7 @@ function MultiSelectQuestion({ question, value, onChange }: any) {
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-      {question.options?.map((option: any) => (
+      {question.options?.map((option: Record<string, unknown>) => (
         <motion.button
           key={option.value}
           whileHover={{ scale: 1.02 }}
@@ -339,7 +339,7 @@ function MultiSelectQuestion({ question, value, onChange }: any) {
   )
 }
 
-function EmojiScaleQuestion({ question, value, onChange }: any) {
+function EmojiScaleQuestion({ question, value, onChange }: Record<string, unknown>) {
   const ratings = value || {}
   
   const handleRating = (optionValue: string, rating: number) => {
@@ -350,7 +350,7 @@ function EmojiScaleQuestion({ question, value, onChange }: any) {
 
   return (
     <div className="space-y-6">
-      {question.options?.map((option: any) => (
+      {question.options?.map((option: Record<string, unknown>) => (
         <div key={option.value} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
           <div className="flex items-center gap-3">
             <span className="text-xl">{option.emoji}</span>
@@ -375,10 +375,10 @@ function EmojiScaleQuestion({ question, value, onChange }: any) {
   )
 }
 
-function BinaryQuestion({ question, value, onChange }: any) {
+function BinaryQuestion({ question, value, onChange }: Record<string, unknown>) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {question.options?.map((option: any) => (
+      {question.options?.map((option: Record<string, unknown>) => (
         <motion.button
           key={option.value}
           whileHover={{ scale: 1.02 }}
@@ -398,7 +398,7 @@ function BinaryQuestion({ question, value, onChange }: any) {
   )
 }
 
-function PreferenceRankingQuestion({ question, value, onChange }: any) {
+function PreferenceRankingQuestion({ question, value, onChange }: Record<string, unknown>) {
   const [rankings, setRankings] = useState(value || [])
   
   const handleRank = (optionValue: string, rank: number) => {
@@ -416,14 +416,14 @@ function PreferenceRankingQuestion({ question, value, onChange }: any) {
   }
 
   const getRank = (optionValue: string) => {
-    const item = rankings.find((r: any) => r.value === optionValue)
+    const item = rankings.find((r: Record<string, unknown>) => r.value === optionValue)
     return item?.rank || 0
   }
 
   return (
     <div className="space-y-4">
       <p className="text-sm text-gray-600 mb-4">Click the stars to rank from 1 (favorite) to 5 (least favorite)</p>
-      {question.options?.map((option: any) => (
+      {question.options?.map((option: Record<string, unknown>) => (
         <div key={option.value} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
           <div className="flex items-center gap-3">
             <span className="text-xl">{option.emoji}</span>

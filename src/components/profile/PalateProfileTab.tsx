@@ -22,7 +22,7 @@ interface TasteProfile {
   chewy_preference: number | null;
   hot_food_preference: number | null;
   cold_food_preference: number | null;
-  cuisine_preferences: any;
+  cuisine_preferences: Record<string, unknown>;
   culinary_adventurousness: number;
 }
 
@@ -133,7 +133,7 @@ const PalateProfileTab: React.FC<PalateProfileTabProps> = ({
     .sort(([,a], [,b]) => (b as number) - (a as number))
     .slice(0, 5);
 
-  const RadarChart: React.FC<{ data: any[]; title: string }> = ({ data, title }) => {
+  const RadarChart: React.FC<{ data: Record<string, unknown>[]; title: string }> = ({ data, title }) => {
     const size = 200;
     const center = size / 2;
     const radius = 70;

@@ -4,13 +4,14 @@ import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { UserPlus, CheckCircle, XCircle, ArrowLeft } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import Image from 'next/image'
 
 function AddFriendContent() {
   const { user } = useAuth()
   const searchParams = useSearchParams()
   const router = useRouter()
   const [loading, setLoading] = useState(true)
-  const [friendUser, setFriendUser] = useState<any>(null)
+  const [friendUser, setFriendUser] = useState<Record<string, unknown> | null>(null)
   const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'self' | 'already_friends'>('loading')
   const [message, setMessage] = useState('')
 
@@ -45,7 +46,7 @@ function AddFriendContent() {
       }
 
       const searchData = await searchResponse.json()
-      const foundUser = searchData.users?.find((u: any) => u.id === friendUserId)
+      const foundUser = searchData.users?.find((u: Record<string, unknown>) => u.id === friendUserId)
 
       if (!foundUser) {
         throw new Error('User not found')
@@ -143,17 +144,19 @@ function AddFriendContent() {
           <div className="text-center mb-6">
             <div className="w-20 h-20 bg-gray-200 rounded-full mx-auto mb-3 flex items-center justify-center overflow-hidden">
               {friendUser.profileImage ? (
-                <img 
-                  src={friendUser.profileImage} 
-                  alt={friendUser.displayName}
+                <Image 
+                  src={friendUser.profileImage as string} 
+                  alt={friendUser.displayName as string}
+                  width={80}
+                  height={80}
                   className="w-full h-full object-cover"
                 />
               ) : (
                 <span className="text-2xl">👤</span>
               )}
             </div>
-            <h3 className="text-lg font-semibold text-gray-800">{friendUser.displayName}</h3>
-            <p className="text-sm text-gray-600">{friendUser.email}</p>
+            <h3 className="text-lg font-semibold text-gray-800">{friendUser.displayName as string}</h3>
+            <p className="text-sm text-gray-600">{friendUser.email as string}</p>
           </div>
         )}
 

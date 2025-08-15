@@ -36,7 +36,7 @@ export interface EmotionalResponse {
  * Core Taste Vector Processing Engine
  * Handles 11-dimensional taste space mathematics
  */
-export class TasteVector {
+export class TasteVectorProcessor {
   private static readonly DIMENSION_NAMES: (keyof TasteVector)[] = [
     'sweet', 'salty', 'sour', 'bitter', 'umami',
     'spicy', 'crunchy', 'creamy', 'chewy', 'hot', 'cold'
@@ -467,7 +467,7 @@ export class TasteVector {
   /**
    * Convert from database format to taste vector
    */
-  static deserialize(data: Record<string, any>): TasteVector {
+  static deserialize(data: Record<string, unknown>): TasteVector {
     return this.createVector(data)
   }
 

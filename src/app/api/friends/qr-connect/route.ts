@@ -152,8 +152,8 @@ async function markTokenAsUsed(token: string): Promise<void> {
 }
 
 async function sendFriendRequestNotification(
-  requester: any, 
-  targetUser: any, 
+  requester: Record<string, unknown>, 
+  targetUser: Record<string, unknown>, 
   connectionMethod: string
 ): Promise<void> {
   try {

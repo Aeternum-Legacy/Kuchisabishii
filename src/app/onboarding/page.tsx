@@ -44,7 +44,7 @@ export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState<'questionnaire' | 'results' | 'complete'>('questionnaire')
   const [tasteProfile, setTasteProfile] = useState<TasteProfileData | null>(null)
   const [insights, setInsights] = useState<string[]>([])
-  const [recommendations, setRecommendations] = useState<any[]>([])
+  const [recommendations, setRecommendations] = useState<Record<string, unknown>[]>([])
 
   const handleQuestionnaireComplete = async (profile: TasteProfileData, profileInsights: string[]) => {
     try {

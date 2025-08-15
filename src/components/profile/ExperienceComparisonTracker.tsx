@@ -90,7 +90,7 @@ export default function ExperienceComparisonTracker({ userId }: ExperienceCompar
     return `${prefix}${change.toFixed(1)}`
   }
 
-  const ExperienceChart = ({ experiences }: { experiences: any[] }) => {
+  const ExperienceChart = ({ experiences }: { experiences: Record<string, unknown>[] }) => {
     if (experiences.length < 2) return null
     
     const chartData = experiences.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())

@@ -45,7 +45,7 @@ export function successResponse<T = any>(
 export function errorResponse(
   error: string,
   status: number = 400,
-  details?: any
+  details?: Record<string, unknown>
 ): NextResponse<ApiResponse> {
   const response: ApiResponse = {
     success: false,
@@ -315,7 +315,7 @@ export function calculateDistance(
 /**
  * Debounce function for API calls
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: Record<string, unknown>[]) => void>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {

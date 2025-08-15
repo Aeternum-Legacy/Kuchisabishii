@@ -102,7 +102,7 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({
     );
   };
 
-  const renderTasteProfile = (taste: any) => {
+  const renderTasteProfile = (taste: Record<string, unknown>) => {
     if (!taste) return null;
     
     const tasteMap = {

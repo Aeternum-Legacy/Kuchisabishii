@@ -145,7 +145,7 @@ export default function FoodHistoryTabs({ userId }: FoodHistoryTabsProps) {
   }
 
   const getFilteredItems = () => {
-    let items: any[] = []
+    let items: Record<string, unknown>[] = []
     
     switch (activeTab) {
       case 'recent':
@@ -205,7 +205,7 @@ export default function FoodHistoryTabs({ userId }: FoodHistoryTabsProps) {
     </div>
   )
 
-  const FoodHistoryCard = ({ item, type }: { item: any, type: 'recent' | 'favorites' | 'to_try' }) => {
+  const FoodHistoryCard = ({ item, type }: { item: Record<string, unknown>, type: 'recent' | 'favorites' | 'to_try' }) => {
     const isToTry = type === 'to_try'
     
     return (

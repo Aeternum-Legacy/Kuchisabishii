@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-function calculateUserStatistics(experiences: any[]) {
+function calculateUserStatistics(experiences: Record<string, unknown>[]) {
   const totalReviews = experiences.length;
   const totalPhotos = experiences.reduce((sum, exp) => sum + (exp.photos?.length || 0), 0);
   
@@ -130,7 +130,7 @@ function calculateUserStatistics(experiences: any[]) {
   };
 }
 
-function calculateMonthlyTrends(experiences: any[]) {
+function calculateMonthlyTrends(experiences: Record<string, unknown>[]) {
   const monthlyData: Record<string, { reviews: number; ratings: number[] }> = {};
   
   experiences.forEach(exp => {
@@ -217,7 +217,7 @@ function calculateAchievements(totalReviews: number, totalRestaurants: number, t
   return achievements;
 }
 
-function calculateTasteEvolution(experiences: any[]) {
+function calculateTasteEvolution(experiences: Record<string, unknown>[]) {
   // Simplified calculation - in a real app, this would be more sophisticated
   const monthlyData: Record<string, { adventurousness: number[]; consistency: number[] }> = {};
   

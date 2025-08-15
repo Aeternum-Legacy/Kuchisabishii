@@ -199,9 +199,9 @@ export async function GET(request: NextRequest) {
 
 // Calculate similarity score between two users based on taste preferences and dietary restrictions
 function calculateSimilarityScore(
-  currentUserTaste: any,
+  currentUserTaste: Record<string, unknown>,
   currentUserDietary: string[],
-  otherUserTaste: any,
+  otherUserTaste: Record<string, unknown>,
   otherUserDietary: string[]
 ): number {
   let score = 0
@@ -254,7 +254,7 @@ function calculateSimilarityScore(
 }
 
 // Sort search results based on the specified criteria
-function sortSearchResults(results: any[], sortBy: 'relevance' | 'similarity' | 'mutual' | 'recent'): any[] {
+function sortSearchResults(results: Record<string, unknown>[], sortBy: 'relevance' | 'similarity' | 'mutual' | 'recent'): Record<string, unknown>[] {
   const sorted = [...results]
 
   switch (sortBy) {

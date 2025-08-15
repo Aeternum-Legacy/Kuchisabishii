@@ -6,8 +6,8 @@ import { useAuth } from '@/hooks/useAuth'
 
 interface FoodExperienceFormProps {
   onClose: () => void
-  onSave: (data: any) => void
-  prefillData?: any
+  onSave: (data: Record<string, unknown>) => void
+  prefillData?: Record<string, unknown>
 }
 
 export default function FoodExperienceForm({ onClose, onSave, prefillData }: FoodExperienceFormProps) {
@@ -107,7 +107,7 @@ export default function FoodExperienceForm({ onClose, onSave, prefillData }: Foo
     }
   }
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: Record<string, unknown>) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 

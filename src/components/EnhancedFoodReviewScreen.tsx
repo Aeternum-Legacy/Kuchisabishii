@@ -5,7 +5,7 @@ import { ArrowLeft, Camera, Star, MapPin, Clock, DollarSign } from 'lucide-react
 
 interface EnhancedFoodReviewScreenProps {
   onBack: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: Record<string, unknown>) => void;
 }
 
 const EnhancedFoodReviewScreen: React.FC<EnhancedFoodReviewScreenProps> = ({ onBack, onSubmit }) => {

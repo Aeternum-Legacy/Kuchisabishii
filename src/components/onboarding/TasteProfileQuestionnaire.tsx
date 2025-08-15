@@ -283,7 +283,7 @@ export default function TasteProfileQuestionnaire({
     setConfidenceScore(confidence)
   }
 
-  const handleAnswer = (questionId: string, value: any) => {
+  const handleAnswer = (questionId: string, value: Record<string, unknown>) => {
     const updatedAnswers = { ...answers, [questionId]: value }
     setAnswers(updatedAnswers)
   }
@@ -559,7 +559,7 @@ export default function TasteProfileQuestionnaire({
 }
 
 // Question Component Types with Enhanced UI
-function SliderQuestion({ question, value, onChange }: any) {
+function SliderQuestion({ question, value, onChange }: Record<string, unknown>) {
   const currentValue = value || Math.floor((question.min + question.max) / 2)
   
   return (
@@ -611,7 +611,7 @@ function SliderQuestion({ question, value, onChange }: any) {
   )
 }
 
-function MultiSelectQuestion({ question, value, onChange }: any) {
+function MultiSelectQuestion({ question, value, onChange }: Record<string, unknown>) {
   const selectedValues = value || []
   
   const toggleSelection = (optionValue: string) => {
@@ -623,7 +623,7 @@ function MultiSelectQuestion({ question, value, onChange }: any) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {question.options?.map((option: any) => (
+      {question.options?.map((option: Record<string, unknown>) => (
         <motion.button
           key={option.value}
           whileHover={{ scale: 1.02, y: -2 }}
@@ -655,13 +655,13 @@ function MultiSelectQuestion({ question, value, onChange }: any) {
   )
 }
 
-function EmojiRatingQuestion({ question, value, onChange }: any) {
+function EmojiRatingQuestion({ question, value, onChange }: Record<string, unknown>) {
   const currentValue = value || '3'
   
   return (
     <div className="space-y-8">
       <div className="flex justify-center gap-4">
-        {question.options?.map((option: any) => (
+        {question.options?.map((option: Record<string, unknown>) => (
           <motion.button
             key={option.value}
             whileHover={{ scale: 1.1 }}
@@ -682,7 +682,7 @@ function EmojiRatingQuestion({ question, value, onChange }: any) {
   )
 }
 
-function RankingQuestion({ question, value, onChange }: any) {
+function RankingQuestion({ question, value, onChange }: Record<string, unknown>) {
   const [rankings, setRankings] = useState(value || [])
   
   const handleRank = (optionValue: string, rank: number) => {
@@ -701,7 +701,7 @@ function RankingQuestion({ question, value, onChange }: any) {
   }
 
   const getRank = (optionValue: string) => {
-    const item = rankings.find((r: any) => r.value === optionValue)
+    const item = rankings.find((r: Record<string, unknown>) => r.value === optionValue)
     return item?.rank || 0
   }
 
@@ -711,7 +711,7 @@ function RankingQuestion({ question, value, onChange }: any) {
         Click the stars to rank from 1 (most favorite) to 5 (least favorite)
       </p>
       
-      {question.options?.map((option: any) => {
+      {question.options?.map((option: Record<string, unknown>) => {
         const rank = getRank(option.value)
         return (
           <motion.div
@@ -753,10 +753,10 @@ function RankingQuestion({ question, value, onChange }: any) {
   )
 }
 
-function ComparisonQuestion({ question, value, onChange }: any) {
+function ComparisonQuestion({ question, value, onChange }: Record<string, unknown>) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {question.options?.map((option: any) => (
+      {question.options?.map((option: Record<string, unknown>) => (
         <motion.button
           key={option.value}
           whileHover={{ scale: 1.02, y: -4 }}
@@ -777,10 +777,10 @@ function ComparisonQuestion({ question, value, onChange }: any) {
   )
 }
 
-function ScenarioQuestion({ question, value, onChange }: any) {
+function ScenarioQuestion({ question, value, onChange }: Record<string, unknown>) {
   return (
     <div className="space-y-6">
-      {question.scenarios?.map((scenario: any, scenarioIndex: number) => (
+      {question.scenarios?.map((scenario: Record<string, unknown>, scenarioIndex: number) => (
         <div key={scenarioIndex} className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl">
           <h3 className="font-semibold text-gray-800 mb-4">
             Scenario: {scenario.situation}

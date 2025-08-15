@@ -7,7 +7,7 @@ import { X, Camera, Upload, CheckCircle, AlertCircle, Loader, ZoomIn, RotateCcw 
 interface QRScannerProps {
   onScan: (data: string) => void
   onClose: () => void
-  onUserFound?: (user: any) => void
+  onUserFound?: (user: Record<string, unknown>) => void
 }
 
 export default function QRScanner({ onScan, onClose, onUserFound }: QRScannerProps) {

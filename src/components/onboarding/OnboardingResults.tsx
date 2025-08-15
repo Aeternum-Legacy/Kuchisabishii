@@ -13,9 +13,9 @@ import {
 } from 'lucide-react'
 
 interface OnboardingResultsProps {
-  tasteProfile: any
+  tasteProfile: Record<string, unknown>
   insights: string[]
-  recommendations: any[]
+  recommendations: Record<string, unknown>[]
   onContinue: () => void
   onRetake?: () => void
 }
@@ -48,12 +48,12 @@ export default function OnboardingResults({
     ]
   }
 
-  const RadarChart = ({ data, title }: any) => {
+  const RadarChart = ({ data, title }: Record<string, unknown>) => {
     const size = 300
     const center = size / 2
     const radius = 100
     
-    const points = data.map((_: any, index: number) => {
+    const points = data.map((_: Record<string, unknown>, index: number) => {
       const angle = (index * 2 * Math.PI) / data.length - Math.PI / 2
       return {
         x: center + radius * Math.cos(angle),
@@ -61,7 +61,7 @@ export default function OnboardingResults({
       }
     })
 
-    const dataPoints = data.map((item: any, index: number) => {
+    const dataPoints = data.map((item: Record<string, unknown>, index: number) => {
       const angle = (index * 2 * Math.PI) / data.length - Math.PI / 2
       const dataRadius = (item.value / 10) * radius
       return {
@@ -133,7 +133,7 @@ export default function OnboardingResults({
             ))}
             
             {/* Labels */}
-            {data.map((item: any, index: number) => {
+            {data.map((item: Record<string, unknown>, index: number) => {
               const angle = (index * 2 * Math.PI) / data.length - Math.PI / 2
               const labelRadius = radius + 30
               const labelX = center + labelRadius * Math.cos(angle)
@@ -157,7 +157,7 @@ export default function OnboardingResults({
         
         {/* Legend */}
         <div className="grid grid-cols-2 gap-4">
-          {data.map((item: any, index: number) => (
+          {data.map((item: Record<string, unknown>, index: number) => (
             <div key={index} className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-purple-500" />

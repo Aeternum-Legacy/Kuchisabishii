@@ -10,7 +10,7 @@ export interface AuthenticatedRequest extends NextRequest {
   user?: {
     id: string
     email: string
-    user_metadata?: Record<string, any>
+    user_metadata?: Record<string, unknown>
   }
 }
 
@@ -38,7 +38,7 @@ export async function authenticateRequest(request: NextRequest) {
  * Wrapper for API routes that require authentication
  */
 export function withAuth<T extends any[]>(
-  handler: (request: NextRequest, user: any, ...args: T) => Promise<Response>
+  handler: (request: NextRequest, user: Record<string, unknown>, ...args: T) => Promise<Response>
 ) {
   return async (request: NextRequest, ...args: T) => {
     try {
@@ -82,7 +82,7 @@ export async function isAdmin(userId: string): Promise<boolean> {
  * Middleware for admin-only routes
  */
 export function withAdminAuth<T extends any[]>(
-  handler: (request: NextRequest, user: any, ...args: T) => Promise<Response>
+  handler: (request: NextRequest, user: Record<string, unknown>, ...args: T) => Promise<Response>
 ) {
   return async (request: NextRequest, ...args: T) => {
     try {

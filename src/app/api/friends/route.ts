@@ -49,11 +49,11 @@ export async function GET(request: NextRequest) {
       return {
         friendshipId: friendship.id,
         friend: {
-          id: friend.id,
-          displayName: friend.display_name,
-          firstName: friend.first_name,
-          lastName: friend.last_name,
-          profileImage: friend.profile_image_url
+          id: friend?.[0]?.id,
+          displayName: friend?.[0]?.display_name,
+          firstName: friend?.[0]?.first_name,
+          lastName: friend?.[0]?.last_name,
+          profileImage: friend?.[0]?.profile_image_url
         },
         friendsSince: friendship.created_at
       }

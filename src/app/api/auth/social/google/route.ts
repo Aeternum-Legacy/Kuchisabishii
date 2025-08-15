@@ -2,43 +2,27 @@ import { NextRequest, NextResponse } from 'next/server'
 import { socialAuthRateLimit } from '@/lib/middleware/rateLimit'
 
 export async function POST(request: NextRequest) {
-  console.log('Google OAuth endpoint hit:', new Date().toISOString())
-  
   try {
-    // TEMPORARILY DISABLED: Rate limiting is blocking OAuth
-    // const rateLimitResult = socialAuthRateLimit(request)
-    // if (!rateLimitResult.allowed) {
-    //   return NextResponse.json(...)
-    // }
-
-    // Create direct Google OAuth URL for professional appearance
+    // Simple response to test if POST method works
     const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
     const clientId = process.env.GOOGLE_CLIENT_ID
-    const redirectUri = `${baseUrl}/api/auth/callback/google`
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET
     
-    console.log('Environment check:', {
-      baseUrl,
-      clientId: clientId ? 'SET' : 'MISSING',
-      redirectUri
-    })
-    
-    if (!clientId) {
-      console.error('Google Client ID is missing from environment variables')
+    if (!clientId || !clientSecret) {
       return NextResponse.json(
         { 
           error: 'Google OAuth not configured',
-          debug: {
-            baseUrl,
-            clientId: clientId ? 'SET' : 'MISSING',
-            allEnvVars: Object.keys(process.env).filter(key => key.includes('GOOGLE'))
-          }
+          hasClientId: !!clientId,
+          hasClientSecret: !!clientSecret,
+          baseUrl
         },
         { status: 500 }
       )
     }
     
-    // Build Google OAuth URL manually for better control
-    const googleOAuthUrl = new URL('https://accounts.google.com/oauth/authorize')
+    // Build Google OAuth URL
+    const redirectUri = `${baseUrl}/api/auth/callback/google`
+    const googleOAuthUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth')
     googleOAuthUrl.searchParams.set('client_id', clientId)
     googleOAuthUrl.searchParams.set('redirect_uri', redirectUri)
     googleOAuthUrl.searchParams.set('response_type', 'code')
@@ -49,16 +33,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       url: googleOAuthUrl.toString(),
       provider: 'google',
+      redirectUri,
       message: 'Redirecting to Google OAuth'
     })
-
   } catch (error) {
-    console.error('Google auth API error:', error)
     return NextResponse.json(
       { 
         error: 'Failed to initiate Google authentication',
-        details: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined
+        details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
     )

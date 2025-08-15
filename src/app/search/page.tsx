@@ -28,7 +28,7 @@ export default function SearchPage() {
   const [searchType, setSearchType] = useState<'food' | 'restaurant' | 'user'>('restaurant');
   const [activeTab, setActiveTab] = useState('search');
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
-  const [map, setMap] = useState<google.maps.Map | null>(null);
+  const [map, setMap] = useState<any>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [restaurants] = useState<Restaurant[]>(mockShops as Restaurant[]);
   const [filteredRestaurants, setFilteredRestaurants] = useState<Restaurant[]>(mockShops as Restaurant[]);
@@ -36,11 +36,11 @@ export default function SearchPage() {
 
   // Navigation tabs configuration
   const navigationTabs = [
-    { id: 'home', label: 'Home', icon: '🏠', badge: 0 },
-    { id: 'search', label: 'Search', icon: '🔍', badge: 0 },
-    { id: 'add', label: 'Add', icon: '➕', badge: 0, highlight: true },
-    { id: 'social', label: 'Social', icon: '👥', badge: 3 },
-    { id: 'profile', label: 'Profile', icon: '👤', badge: 0 }
+    { id: 'home', label: 'Home', icon: '🏠', badge: 0, route: '/app' },
+    { id: 'search', label: 'Search', icon: '🔍', badge: 0, route: '/search' },
+    { id: 'add', label: 'Add', icon: '➕', badge: 0, highlight: true, route: '/add-food' },
+    { id: 'social', label: 'Social', icon: '👥', badge: 3, route: '/social' },
+    { id: 'profile', label: 'Profile', icon: '👤', badge: 0, route: '/profile' }
   ];
 
   // Handle navigation
@@ -80,7 +80,7 @@ export default function SearchPage() {
           await loader.load();
           setMapLoaded(true);
 
-          const mapOptions: google.maps.MapOptions = {
+          const mapOptions: any = {
             center: { lat: 53.5461, lng: -113.4937 }, // Edmonton, AB
             zoom: 12,
             mapTypeControl: false,
@@ -90,12 +90,12 @@ export default function SearchPage() {
 
           const mapElement = document.getElementById('map');
           if (mapElement) {
-            const googleMap = new google.maps.Map(mapElement, mapOptions);
+            const googleMap = new (window as any).google.maps.Map(mapElement, mapOptions);
             setMap(googleMap);
             
             // Add markers for restaurants
             filteredRestaurants.forEach((restaurant) => {
-              const marker = new google.maps.Marker({
+              const marker = new (window as any).google.maps.Marker({
                 position: restaurant.coordinates,
                 map: googleMap,
                 title: restaurant.name,
@@ -106,8 +106,8 @@ export default function SearchPage() {
                       <text x="16" y="20" text-anchor="middle" fill="white" font-size="16">🍽️</text>
                     </svg>
                   `),
-                  scaledSize: new google.maps.Size(32, 32),
-                  anchor: new google.maps.Point(16, 16)
+                  scaledSize: new (window as any).google.maps.Size(32, 32),
+                  anchor: new (window as any).google.maps.Point(16, 16)
                 }
               });
 

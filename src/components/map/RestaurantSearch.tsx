@@ -36,7 +36,7 @@ export default function RestaurantSearch({
   const [error, setError] = useState<string | null>(null)
 
   const searchNearbyRestaurants = async (query: string = '') => {
-    if (!window.google?.maps) {
+    if (!(window as any).google?.maps) {
       setError('Google Maps not loaded')
       return
     }
@@ -45,20 +45,20 @@ export default function RestaurantSearch({
     setError(null)
 
     try {
-      const service = new google.maps.places.PlacesService(
+      const service = new (window as any).google.maps.places.PlacesService(
         document.createElement('div')
       )
 
-      const request: google.maps.places.TextSearchRequest = {
+      const request: any = {
         query: query || 'restaurants',
-        location: new google.maps.LatLng(center.lat, center.lng),
+        location: new (window as any).google.maps.LatLng(center.lat, center.lng),
         radius,
         type: 'restaurant'
       }
 
-      service.textSearch(request, (results, status) => {
-        if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-          const formattedResults: Restaurant[] = results.slice(0, 20).map(place => ({
+      service.textSearch(request, (results: any, status: any) => {
+        if (status === (window as any).google.maps.places.PlacesServiceStatus.OK && results) {
+          const formattedResults: Restaurant[] = results.slice(0, 20).map((place: any) => ({
             id: place.place_id || '',
             name: place.name || '',
             address: place.formatted_address || '',
@@ -68,7 +68,7 @@ export default function RestaurantSearch({
             priceLevel: place.price_level,
             openNow: place.opening_hours?.open_now,
             cuisine: place.types?.[0]?.replace('_', ' '),
-            photos: place.photos?.slice(0, 3).map(photo => 
+            photos: place.photos?.slice(0, 3).map((photo: any) => 
               photo.getUrl({ maxWidth: 400, maxHeight: 300 })
             )
           }))

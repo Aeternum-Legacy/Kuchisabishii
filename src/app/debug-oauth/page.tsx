@@ -220,12 +220,12 @@ export default function DebugOAuthPage() {
             <div className="space-y-2">
               {authFlow.map((step, index) => (
                 <div key={index} className="flex items-center space-x-2 p-2 border-l-4 border-blue-400 bg-blue-50">
-                  <span className="font-medium">{step.step}:</span>
+                  <span className="font-medium">{String(step.step)}:</span>
                   <span className={step.status === 'success' ? 'text-green-600' : step.status === 'failed' ? 'text-red-600' : 'text-yellow-600'}>
-                    {step.status}
+                    {String(step.status)}
                   </span>
-                  <span className="text-sm text-gray-500">{step.timestamp}</span>
-                  {step.error && <span className="text-red-600">- {step.error}</span>}
+                  <span className="text-sm text-gray-500">{String(step.timestamp)}</span>
+                  {step.error ? <span className="text-red-600">- {String(step.error)}</span> : null}
                 </div>
               ))}
             </div>
@@ -240,25 +240,25 @@ export default function DebugOAuthPage() {
               {diagnostics.map((result: Record<string, unknown>, index: number) => (
                 <div key={index} className="border p-4 rounded">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-medium">{result.test}</h3>
+                    <h3 className="font-medium">{String(result.test)}</h3>
                     <span className={`px-2 py-1 rounded text-sm ${
                       result.status === 'PASS' ? 'bg-green-100 text-green-800' :
                       result.status === 'AUTHENTICATED' ? 'bg-green-100 text-green-800' :
                       result.status === 'LOADING' ? 'bg-yellow-100 text-yellow-800' :
                       'bg-red-100 text-red-800'
                     }`}>
-                      {result.status}
+                      {String(result.status)}
                     </span>
                   </div>
-                  {result.details && <p className="text-sm text-gray-600 mb-2">{result.details}</p>}
-                  {result.data && (
+                  {result.details ? <p className="text-sm text-gray-600 mb-2">{String(result.details)}</p> : null}
+                  {result.data ? (
                     <pre className="text-xs bg-gray-100 p-2 rounded overflow-x-auto">
                       {JSON.stringify(result.data, null, 2)}
                     </pre>
-                  )}
-                  {result.error && (
-                    <p className="text-sm text-red-600 mt-2">Error: {result.error}</p>
-                  )}
+                  ) : null}
+                  {result.error ? (
+                    <p className="text-sm text-red-600 mt-2">Error: {String(result.error)}</p>
+                  ) : null}
                 </div>
               ))}
             </div>

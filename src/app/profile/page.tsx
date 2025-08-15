@@ -35,11 +35,11 @@ const ProfilePage: React.FC = () => {
 
   // Navigation tabs configuration
   const navigationTabs = [
-    { id: 'home', label: 'Home', icon: '🏠', badge: 0 },
-    { id: 'search', label: 'Search', icon: '🔍', badge: 0 },
-    { id: 'add', label: 'Add', icon: '➕', badge: 0, highlight: true },
-    { id: 'social', label: 'Social', icon: '👥', badge: 3 },
-    { id: 'profile', label: 'Profile', icon: '👤', badge: 0 }
+    { id: 'home', label: 'Home', icon: '🏠', badge: 0, route: '/app' },
+    { id: 'search', label: 'Search', icon: '🔍', badge: 0, route: '/search' },
+    { id: 'add', label: 'Add', icon: '➕', badge: 0, highlight: true, route: '/add-food' },
+    { id: 'social', label: 'Social', icon: '👥', badge: 3, route: '/social' },
+    { id: 'profile', label: 'Profile', icon: '👤', badge: 0, route: '/profile' }
   ];
 
   return (

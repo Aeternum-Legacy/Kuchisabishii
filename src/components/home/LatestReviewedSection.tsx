@@ -139,7 +139,7 @@ export const LatestReviewedSection: React.FC<LatestReviewedSectionProps> = ({
       x: 0,
       opacity: 1,
       transition: {
-        type: "spring",
+        type: "spring" as const,
         stiffness: 100
       }
     }
@@ -209,13 +209,13 @@ export const LatestReviewedSection: React.FC<LatestReviewedSectionProps> = ({
                     <div className="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center text-2xl border border-orange-300">
                       {review.image}
                     </div>
-                    {review.previousReviews > 0 && (
+                    {(review.previousReviews ?? 0) > 0 && (
                       <motion.div 
                         className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold"
                         animate={{ scale: [1, 1.1, 1] }}
                         transition={{ repeat: Infinity, duration: 2 }}
                       >
-                        {review.previousReviews + 1}
+                        {(review.previousReviews ?? 0) + 1}
                       </motion.div>
                     )}
                   </div>
@@ -290,9 +290,9 @@ export const LatestReviewedSection: React.FC<LatestReviewedSectionProps> = ({
                           <span className="text-gray-500">Price:</span>
                           <span className="ml-2 text-gray-700">{'$'.repeat(review.priceRange)}</span>
                         </div>
-                        {review.previousReviews > 0 && (
+                        {(review.previousReviews ?? 0) > 0 && (
                           <div className="col-span-2">
-                            <span className="text-gray-500">Average across {review.previousReviews + 1} visits:</span>
+                            <span className="text-gray-500">Average across {(review.previousReviews ?? 0) + 1} visits:</span>
                             <span className="ml-2 text-gray-700 font-medium">{review.averageRating?.toFixed(1)} ⭐</span>
                           </div>
                         )}

@@ -31,10 +31,10 @@ export default function OnboardingResults({
     const { sweet, salty, spicy, adventurousness } = tasteProfile
     
     let personality = "Balanced Eater"
-    if (adventurousness >= 8) personality = "Culinary Explorer"
-    else if (sweet >= 8) personality = "Sweet Tooth"
-    else if (spicy >= 8) personality = "Heat Seeker"
-    else if (salty >= 8) personality = "Savory Lover"
+    if (Number(adventurousness) >= 8) personality = "Culinary Explorer"
+    else if (Number(sweet) >= 8) personality = "Sweet Tooth"
+    else if (Number(spicy) >= 8) personality = "Heat Seeker"
+    else if (Number(salty) >= 8) personality = "Savory Lover"
     
     return personality
   }
@@ -53,17 +53,17 @@ export default function OnboardingResults({
     const center = size / 2
     const radius = 100
     
-    const points = data.map((_: Record<string, unknown>, index: number) => {
-      const angle = (index * 2 * Math.PI) / data.length - Math.PI / 2
+    const points = (data as any[]).map((_: Record<string, unknown>, index: number) => {
+      const angle = (index * 2 * Math.PI) / (data as any[]).length - Math.PI / 2
       return {
         x: center + radius * Math.cos(angle),
         y: center + radius * Math.sin(angle)
       }
     })
 
-    const dataPoints = data.map((item: Record<string, unknown>, index: number) => {
-      const angle = (index * 2 * Math.PI) / data.length - Math.PI / 2
-      const dataRadius = (item.value / 10) * radius
+    const dataPoints = (data as any[]).map((item: Record<string, unknown>, index: number) => {
+      const angle = (index * 2 * Math.PI) / (data as any[]).length - Math.PI / 2
+      const dataRadius = (Number(item.value) / 10) * radius
       return {
         x: center + dataRadius * Math.cos(angle),
         y: center + dataRadius * Math.sin(angle)
@@ -74,7 +74,7 @@ export default function OnboardingResults({
       <div className="bg-white rounded-2xl shadow-lg p-8">
         <h3 className="text-xl font-bold text-center mb-6 flex items-center justify-center gap-2">
           <Target className="text-purple-500" size={24} />
-          {title}
+          {String(title)}
         </h3>
         
         <div className="flex justify-center mb-6">
@@ -133,8 +133,8 @@ export default function OnboardingResults({
             ))}
             
             {/* Labels */}
-            {data.map((item: Record<string, unknown>, index: number) => {
-              const angle = (index * 2 * Math.PI) / data.length - Math.PI / 2
+            {(data as any[]).map((item: Record<string, unknown>, index: number) => {
+              const angle = (index * 2 * Math.PI) / (data as any[]).length - Math.PI / 2
               const labelRadius = radius + 30
               const labelX = center + labelRadius * Math.cos(angle)
               const labelY = center + labelRadius * Math.sin(angle)
@@ -148,7 +148,7 @@ export default function OnboardingResults({
                   dominantBaseline="middle"
                   className="text-sm font-semibold fill-gray-700"
                 >
-                  {item.label}
+                  {String(item.label)}
                 </text>
               )
             })}
@@ -157,13 +157,13 @@ export default function OnboardingResults({
         
         {/* Legend */}
         <div className="grid grid-cols-2 gap-4">
-          {data.map((item: Record<string, unknown>, index: number) => (
+          {(data as any[]).map((item: Record<string, unknown>, index: number) => (
             <div key={index} className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-purple-500" />
-                <span className="text-sm font-medium">{item.label}</span>
+                <span className="text-sm font-medium">{String(item.label)}</span>
               </div>
-              <span className="font-bold text-purple-600">{item.value}/10</span>
+              <span className="font-bold text-purple-600">{Number(item.value)}/10</span>
             </div>
           ))}
         </div>
@@ -238,20 +238,20 @@ export default function OnboardingResults({
               
               <div className="flex items-center gap-4">
                 <div className="text-4xl font-bold text-green-500">
-                  {tasteProfile.adventurousness}/10
+                  {Number(tasteProfile.adventurousness)}/10
                 </div>
                 <div className="flex-1">
                   <div className="w-full bg-gray-200 rounded-full h-3">
                     <motion.div
                       initial={{ width: 0 }}
-                      animate={{ width: `${(tasteProfile.adventurousness / 10) * 100}%` }}
+                      animate={{ width: `${(Number(tasteProfile.adventurousness) / 10) * 100}%` }}
                       transition={{ delay: 1, duration: 1 }}
                       className="bg-gradient-to-r from-green-400 to-blue-500 h-3 rounded-full"
                     />
                   </div>
                   <p className="text-sm text-gray-600 mt-2">
-                    {tasteProfile.adventurousness >= 8 ? "Loves trying new cuisines" :
-                     tasteProfile.adventurousness >= 5 ? "Open to new experiences" :
+                    {Number(tasteProfile.adventurousness) >= 8 ? "Loves trying new cuisines" :
+                     Number(tasteProfile.adventurousness) >= 5 ? "Open to new experiences" :
                      "Prefers familiar foods"}
                   </p>
                 </div>

@@ -26,7 +26,7 @@ export default function GoogleMap({
   className = "w-full h-96"
 }: GoogleMapProps) {
   const mapRef = useRef<HTMLDivElement>(null)
-  const [map, setMap] = useState<google.maps.Map | null>(null)
+  const [map, setMap] = useState<any>(null)
   const [isLoaded, setIsLoaded] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -50,7 +50,7 @@ export default function GoogleMap({
         
         if (!mapRef.current) return
 
-        const mapInstance = new google.maps.Map(mapRef.current, {
+        const mapInstance = new (window as any).google.maps.Map(mapRef.current, {
           center,
           zoom,
           styles: [
@@ -67,13 +67,13 @@ export default function GoogleMap({
 
         // Add click listener if onLocationSelect is provided
         if (onLocationSelect) {
-          mapInstance.addListener('click', async (event: google.maps.MapMouseEvent) => {
+          mapInstance.addListener('click', async (event: any) => {
             if (event.latLng) {
               const lat = event.latLng.lat()
               const lng = event.latLng.lng()
               
               // Reverse geocode to get address
-              const geocoder = new google.maps.Geocoder()
+              const geocoder = new (window as any).google.maps.Geocoder()
               try {
                 const response = await geocoder.geocode({ location: { lat, lng } })
                 const address = response.results[0]?.formatted_address || `${lat}, ${lng}`
@@ -101,7 +101,7 @@ export default function GoogleMap({
 
     // Clear existing markers (you might want to store these in state for cleanup)
     restaurants.forEach(restaurant => {
-      const marker = new google.maps.Marker({
+      const marker = new (window as any).google.maps.Marker({
         position: { lat: restaurant.lat, lng: restaurant.lng },
         map,
         title: restaurant.name,
@@ -112,12 +112,12 @@ export default function GoogleMap({
               <text x="12" y="16" text-anchor="middle" fill="white" font-size="12" font-weight="bold">🍜</text>
             </svg>
           `),
-          scaledSize: new google.maps.Size(32, 32)
+          scaledSize: new (window as any).google.maps.Size(32, 32)
         }
       })
 
       // Add info window
-      const infoWindow = new google.maps.InfoWindow({
+      const infoWindow = new (window as any).google.maps.InfoWindow({
         content: `
           <div class="p-2">
             <h3 class="font-semibold text-gray-800">${restaurant.name}</h3>

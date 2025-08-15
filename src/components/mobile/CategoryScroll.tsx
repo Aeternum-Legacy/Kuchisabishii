@@ -81,7 +81,7 @@ export const CategoryScroll: React.FC<CategoryScrollProps> = ({
     });
     
     if (closestElement) {
-      closestElement.scrollIntoView({
+      (closestElement as Element).scrollIntoView({
         behavior: 'smooth',
         block: 'nearest',
         inline: 'center',

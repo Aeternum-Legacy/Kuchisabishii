@@ -175,7 +175,7 @@ export default function OnboardingPage() {
               transition={{ duration: 0.3 }}
             >
               <OnboardingResults
-                tasteProfile={tasteProfile}
+                tasteProfile={tasteProfile as unknown as Record<string, unknown>}
                 insights={insights}
                 recommendations={recommendations}
                 onContinue={handleOnboardingComplete}

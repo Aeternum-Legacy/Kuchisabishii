@@ -560,7 +560,7 @@ export default function TasteProfileQuestionnaire({
 
 // Question Component Types with Enhanced UI
 function SliderQuestion({ question, value, onChange }: Record<string, unknown>) {
-  const currentValue = value || Math.floor((question.min + question.max) / 2)
+  const currentValue = value || Math.floor(((question as any).min + (question as any).max) / 2)
   
   return (
     <div className="space-y-6">

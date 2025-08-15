@@ -16,10 +16,10 @@ export default function FoodExperienceForm({ onClose, onSave, prefillData }: Foo
   const [error, setError] = useState('')
 
   const [formData, setFormData] = useState({
-    foodName: prefillData?.name || '',
-    restaurantName: prefillData?.restaurant?.name || prefillData?.location || '',
-    location: prefillData?.restaurant?.address || prefillData?.restaurant?.name || '',
-    cuisineType: prefillData?.cuisineType || '',
+    foodName: (prefillData?.name as string) || '',
+    restaurantName: ((prefillData?.restaurant as any)?.name as string) || (prefillData?.location as string) || '',
+    location: ((prefillData?.restaurant as any)?.address as string) || ((prefillData?.restaurant as any)?.name as string) || '',
+    cuisineType: (prefillData?.cuisineType as string) || '',
     foodType: '',
     mealTime: 'lunch',
     diningMethod: 'dine-in',
@@ -107,7 +107,7 @@ export default function FoodExperienceForm({ onClose, onSave, prefillData }: Foo
     }
   }
 
-  const handleInputChange = (field: string, value: Record<string, unknown>) => {
+  const handleInputChange = (field: string, value: unknown) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
@@ -267,13 +267,13 @@ export default function FoodExperienceForm({ onClose, onSave, prefillData }: Foo
               {tasteRatings.map(taste => (
                 <div key={taste.key}>
                   <label className={`block text-sm font-medium mb-2 px-2 py-1 rounded-full text-center ${taste.color}`}>
-                    {taste.label}: {formData[taste.key]}/10
+                    {taste.label}: {(formData as any)[taste.key]}/10
                   </label>
                   <input
                     type="range"
                     min="0"
                     max="10"
-                    value={formData[taste.key]}
+                    value={(formData as any)[taste.key]}
                     onChange={(e) => handleInputChange(taste.key, parseInt(e.target.value))}
                     className="w-full accent-orange-500"
                   />

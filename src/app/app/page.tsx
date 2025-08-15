@@ -63,11 +63,11 @@ export default function AuthenticatedApp() {
 
   // Navigation tabs configuration
   const navigationTabs = [
-    { id: 'home', label: 'Home', icon: '🏠', badge: 0 },
-    { id: 'search', label: 'Search', icon: '🔍', badge: 0 },
-    { id: 'add', label: 'Add', icon: '➕', badge: 0, highlight: true },
-    { id: 'social', label: 'Social', icon: '👥', badge: 3 },
-    { id: 'profile', label: 'Profile', icon: '👤', badge: 0 }
+    { id: 'home', label: 'Home', icon: '🏠', badge: 0, route: '/app' },
+    { id: 'search', label: 'Search', icon: '🔍', badge: 0, route: '/search' },
+    { id: 'add', label: 'Add', icon: '➕', badge: 0, highlight: true, route: '/add-food' },
+    { id: 'social', label: 'Social', icon: '👥', badge: 3, route: '/social' },
+    { id: 'profile', label: 'Profile', icon: '👤', badge: 0, route: '/profile' }
   ];
 
   // Let AuthWrapper handle the authentication and loading states
@@ -205,7 +205,7 @@ export default function AuthenticatedApp() {
                           <Star
                             key={i}
                             className={`w-4 h-4 ${
-                              i < Math.floor(Number(food.experience.rating) || 0)
+                              i < Math.floor(Number(food.kuchisabishiRating) || 0)
                                 ? 'text-yellow-400 fill-current'
                                 : 'text-gray-300'
                             }`}
@@ -213,7 +213,7 @@ export default function AuthenticatedApp() {
                         ))}
                       </div>
                       <span className="text-sm text-gray-600 ml-2">
-                        {food.experience.rating}/5
+                        {food.kuchisabishiRating}/5
                       </span>
                     </div>
                   </div>

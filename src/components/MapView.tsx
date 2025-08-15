@@ -88,7 +88,7 @@ const mockShops: Shop[] = [
 
 export default function MapView() {
   const mapRef = useRef<HTMLDivElement>(null);
-  const [map, setMap] = useState<google.maps.Map | null>(null);
+  const [map, setMap] = useState<any>(null);
   const [selectedShop, setSelectedShop] = useState<Shop | null>(null);
   const [showShopDetails, setShowShopDetails] = useState(false);
 

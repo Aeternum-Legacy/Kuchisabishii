@@ -155,7 +155,7 @@ export const HallOfFameSection: React.FC<HallOfFameSectionProps> = ({
       scale: 1,
       opacity: 1,
       transition: {
-        type: "spring",
+        type: "spring" as const,
         stiffness: 100
       }
     }

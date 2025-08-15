@@ -71,13 +71,13 @@ export default function AIOnboardingFlow({ onComplete, onSkip }: OnboardingProps
   const updatePalateInsights = () => {
     const insights: string[] = []
     
-    if (answers.taste_sensitivity >= 8) {
+    if (Number(answers.taste_sensitivity) >= 8) {
       insights.push("🌶️ Bold flavor adventurer")
-    } else if (answers.taste_sensitivity <= 3) {
+    } else if (Number(answers.taste_sensitivity) <= 3) {
       insights.push("🏠 Comfort food lover")
     }
     
-    if (answers.cuisine_preferences?.length > 3) {
+    if (Array.isArray(answers.cuisine_preferences) && answers.cuisine_preferences.length > 3) {
       insights.push("🌍 Global cuisine explorer")
     }
     
@@ -293,46 +293,49 @@ function SliderQuestion({ question, value, onChange }: Record<string, unknown>) 
       </div>
       <input
         type="range"
-        min={question.min || 1}
-        max={question.max || 10}
-        value={value || 5}
-        onChange={(e) => onChange(question.id, parseInt(e.target.value))}
+        min={(question as any).min || 1}
+        max={(question as any).max || 10}
+        value={Number(value) || 5}
+        onChange={(e) => (onChange as any)((question as any).id, parseInt(e.target.value))}
         className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
       />
       <div className="text-center">
-        <span className="text-2xl font-bold text-orange-500">{value || 5}</span>
-        <span className="text-gray-500"> / {question.max || 10}</span>
+        <span className="text-2xl font-bold text-orange-500">{Number(value) || 5}</span>
+        <span className="text-gray-500"> / {(question as any).max || 10}</span>
       </div>
     </div>
   )
 }
 
 function MultiSelectQuestion({ question, value, onChange }: Record<string, unknown>) {
-  const selectedValues = value || []
+  const selectedValues = (value as string[]) || []
   
   const toggleSelection = (optionValue: string) => {
-    const newSelection = selectedValues.includes(optionValue)
-      ? selectedValues.filter((v: string) => v !== optionValue)
-      : [...selectedValues, optionValue]
-    onChange(question.id, newSelection)
+    let newSelection: string[]
+    if (selectedValues.includes(optionValue)) {
+      newSelection = selectedValues.filter((v: string) => v !== optionValue)
+    } else {
+      newSelection = [...selectedValues, optionValue]
+    }
+    (onChange as any)((question as any).id, newSelection)
   }
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-      {question.options?.map((option: Record<string, unknown>) => (
+      {(question as any).options?.map((option: Record<string, unknown>) => (
         <motion.button
-          key={option.value}
+          key={(option.value as string)}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => toggleSelection(option.value)}
+          onClick={() => toggleSelection((option.value as string))}
           className={`p-4 rounded-lg border-2 transition-all ${
-            selectedValues.includes(option.value)
+            selectedValues.includes((option.value as string))
               ? 'border-orange-400 bg-orange-50 text-orange-700'
               : 'border-gray-200 hover:border-gray-300'
           }`}
         >
-          <div className="text-2xl mb-2">{option.emoji}</div>
-          <div className="text-sm font-medium">{option.label}</div>
+          <div className="text-2xl mb-2">{String(String(option.emoji))}</div>
+          <div className="text-sm font-medium">{(option.label as string)}</div>
         </motion.button>
       ))}
     </div>
@@ -340,29 +343,29 @@ function MultiSelectQuestion({ question, value, onChange }: Record<string, unkno
 }
 
 function EmojiScaleQuestion({ question, value, onChange }: Record<string, unknown>) {
-  const ratings = value || {}
+  const ratings = (value as Record<string, number>) || {}
   
   const handleRating = (optionValue: string, rating: number) => {
-    onChange(question.id, { ...ratings, [optionValue]: rating })
+    (onChange as any)((question as any).id, { ...ratings, [optionValue]: rating })
   }
 
   const emojiScale = ['😡', '😞', '😐', '😊', '😍']
 
   return (
     <div className="space-y-6">
-      {question.options?.map((option: Record<string, unknown>) => (
-        <div key={option.value} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+      {(question as any).options?.map((option: Record<string, unknown>) => (
+        <div key={(option.value as string)} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
           <div className="flex items-center gap-3">
-            <span className="text-xl">{option.emoji}</span>
-            <span className="font-medium">{option.label}</span>
+            <span className="text-xl">{String(option.emoji)}</span>
+            <span className="font-medium">{(option.label as string)}</span>
           </div>
           <div className="flex gap-2">
             {emojiScale.map((emoji, index) => (
               <button
                 key={index}
-                onClick={() => handleRating(option.value, index + 1)}
+                onClick={() => handleRating((option.value as string), index + 1)}
                 className={`text-2xl p-2 rounded transition-transform hover:scale-110 ${
-                  ratings[option.value] === index + 1 ? 'bg-orange-100 scale-110' : ''
+                  ratings[(option.value as string)] === index + 1 ? 'bg-orange-100 scale-110' : ''
                 }`}
               >
                 {emoji}
@@ -378,20 +381,20 @@ function EmojiScaleQuestion({ question, value, onChange }: Record<string, unknow
 function BinaryQuestion({ question, value, onChange }: Record<string, unknown>) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {question.options?.map((option: Record<string, unknown>) => (
+      {(question as any).options?.map((option: Record<string, unknown>) => (
         <motion.button
-          key={option.value}
+          key={(option.value as string)}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => onChange(question.id, option.value)}
+          onClick={() => (onChange as any)((question as any).id, (option.value as string))}
           className={`p-6 rounded-lg border-2 transition-all ${
-            value === option.value
+            value === (option.value as string)
               ? 'border-orange-400 bg-orange-50 text-orange-700'
               : 'border-gray-200 hover:border-gray-300'
           }`}
         >
-          <div className="text-4xl mb-3">{option.emoji}</div>
-          <div className="font-medium">{option.label}</div>
+          <div className="text-4xl mb-3">{String(option.emoji)}</div>
+          <div className="font-medium">{(option.label as string)}</div>
         </motion.button>
       ))}
     </div>
@@ -399,7 +402,7 @@ function BinaryQuestion({ question, value, onChange }: Record<string, unknown>) 
 }
 
 function PreferenceRankingQuestion({ question, value, onChange }: Record<string, unknown>) {
-  const [rankings, setRankings] = useState(value || [])
+  const [rankings, setRankings] = useState<any[]>((value as any[]) || [])
   
   const handleRank = (optionValue: string, rank: number) => {
     const newRankings = [...rankings]
@@ -411,8 +414,8 @@ function PreferenceRankingQuestion({ question, value, onChange }: Record<string,
       newRankings.push({ value: optionValue, rank })
     }
     
-    setRankings(newRankings)
-    onChange(question.id, newRankings.sort((a, b) => a.rank - b.rank))
+    (setRankings as any)(newRankings)
+    (onChange as any)((question as any).id, newRankings.sort((a, b) => a.rank - b.rank))
   }
 
   const getRank = (optionValue: string) => {
@@ -423,18 +426,18 @@ function PreferenceRankingQuestion({ question, value, onChange }: Record<string,
   return (
     <div className="space-y-4">
       <p className="text-sm text-gray-600 mb-4">Click the stars to rank from 1 (favorite) to 5 (least favorite)</p>
-      {question.options?.map((option: Record<string, unknown>) => (
-        <div key={option.value} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+      {(question as any).options?.map((option: Record<string, unknown>) => (
+        <div key={(option.value as string)} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
           <div className="flex items-center gap-3">
-            <span className="text-xl">{option.emoji}</span>
-            <span className="font-medium">{option.label}</span>
+            <span className="text-xl">{String(option.emoji)}</span>
+            <span className="font-medium">{(option.label as string)}</span>
           </div>
           <div className="flex gap-1">
             {[1, 2, 3, 4, 5].map((rank) => (
               <button
                 key={rank}
-                onClick={() => handleRank(option.value, rank)}
-                className={`p-1 ${getRank(option.value) >= rank ? 'text-yellow-400' : 'text-gray-300'} hover:text-yellow-400 transition-colors`}
+                onClick={() => handleRank((option.value as string), rank)}
+                className={`p-1 ${getRank((option.value as string)) >= rank ? 'text-yellow-400' : 'text-gray-300'} hover:text-yellow-400 transition-colors`}
               >
                 <Star size={20} fill="currentColor" />
               </button>

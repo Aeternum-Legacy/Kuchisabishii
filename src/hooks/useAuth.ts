@@ -46,7 +46,18 @@ export function useAuth() {
           window.history.replaceState({}, '', window.location.pathname)
         }
         
-        const { data: { session }, error } = await supabase.auth.getSession()
+        // Try to restore session from cookies first
+        let { data: { session }, error } = await supabase.auth.getSession()
+        
+        // If no session from Supabase, check if we need to refresh
+        if (!session) {
+          const { error: refreshError } = await supabase.auth.refreshSession()
+          if (!refreshError) {
+            const result = await supabase.auth.getSession()
+            session = result.data.session
+            error = result.error
+          }
+        }
         
         if (error) {
           console.error('Session error:', error)

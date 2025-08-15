@@ -56,123 +56,99 @@ export async function GET(request: NextRequest) {
     // Create Supabase client
     const supabase = await createClient()
     
-    // Use Supabase OAuth to sign in the user directly
-    const { data, error: supabaseError } = await supabase.auth.signInWithIdToken({
-      provider: 'google',
-      token: tokens.id_token,
-      access_token: tokens.access_token
+    // Generate a temporary password for the OAuth user
+    const tempPassword = crypto.randomUUID() + crypto.randomUUID()
+    
+    // Try to sign up first (will fail if user exists)
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      email: googleUser.email,
+      password: tempPassword,
+      options: {
+        data: {
+          display_name: googleUser.name,
+          first_name: googleUser.given_name,
+          last_name: googleUser.family_name,
+          profile_image_url: googleUser.picture,
+          provider: 'google',
+          google_id: googleUser.id
+        }
+      }
     })
     
-    if (supabaseError) {
-      console.error('Supabase OAuth error:', supabaseError)
-      
-      // Fallback: Create user manually
-      const randomPassword = crypto.randomUUID()
-      
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: googleUser.email,
-        password: randomPassword,
-        options: {
-          data: {
-            display_name: googleUser.name,
-            first_name: googleUser.given_name,
-            last_name: googleUser.family_name,
-            profile_image_url: googleUser.picture,
-            provider: 'google'
-          }
-        }
-      })
-      
-      if (!signUpError && signUpData.user) {
-        // Create profile
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .upsert({
-            id: signUpData.user.id,
-            email: googleUser.email,
-            display_name: googleUser.name || '',
-            first_name: googleUser.given_name || '',
-            last_name: googleUser.family_name || '',
-            profile_image_url: googleUser.picture,
-            email_verified: true,
-            privacy_level: 'friends',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          })
-        
-        if (profileError) {
-          console.error('Profile creation error:', profileError)
-        }
-        
-        // Sign in the user
-        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-          email: googleUser.email,
-          password: randomPassword
-        })
-        
-        if (signInData?.session) {
-          // Set session cookies and redirect
-          const response = NextResponse.redirect(new URL('/', requestUrl.origin))
-          response.cookies.set('sb-access-token', signInData.session.access_token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 60 * 60 * 24 * 7
-          })
-          response.cookies.set('sb-refresh-token', signInData.session.refresh_token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 60 * 60 * 24 * 30
-          })
-          return response
+    let userId = signUpData?.user?.id
+    
+    // If signup failed because user exists, get existing user
+    if (signUpError?.message.includes('already registered')) {
+      // Get existing user by email
+      const { data: { users }, error: listError } = await supabase.auth.admin.listUsers()
+      if (!listError) {
+        const existingUser = users?.find(u => u.email === googleUser.email)
+        if (existingUser) {
+          userId = existingUser.id
+          // Update the user's password
+          await supabase.auth.admin.updateUserById(userId, { password: tempPassword })
         }
       }
-      
-      return NextResponse.redirect(new URL('/?error=auth_failed', requestUrl.origin))
     }
     
-    // If Supabase OAuth worked, create/update profile
-    if (data?.user) {
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert({
-          id: data.user.id,
-          email: googleUser.email,
-          display_name: googleUser.name || '',
-          first_name: googleUser.given_name || '',
-          last_name: googleUser.family_name || '',
-          profile_image_url: googleUser.picture,
-          email_verified: true,
-          privacy_level: 'friends',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'id'
-        })
-      
-      if (profileError) {
-        console.error('Profile upsert error:', profileError)
-      }
-      
-      // Set session cookies and redirect
-      if (data.session) {
-        const response = NextResponse.redirect(new URL('/', requestUrl.origin))
-        response.cookies.set('sb-access-token', data.session.access_token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          maxAge: 60 * 60 * 24 * 7
-        })
-        response.cookies.set('sb-refresh-token', data.session.refresh_token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          maxAge: 60 * 60 * 24 * 30
-        })
-        return response
-      }
+    if (!userId) {
+      throw new Error('Failed to create or find user')
     }
+    
+    // Create/update profile in database
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .upsert({
+        id: userId,
+        email: googleUser.email,
+        display_name: googleUser.name || '',
+        first_name: googleUser.given_name || '',
+        last_name: googleUser.family_name || '',
+        profile_image_url: googleUser.picture,
+        email_verified: true,
+        privacy_level: 'friends',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'id'
+      })
+    
+    if (profileError) {
+      console.error('Profile upsert error:', profileError)
+    }
+    
+    // Now sign in the user with the temporary password
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      email: googleUser.email,
+      password: tempPassword
+    })
+    
+    if (signInError || !signInData.session) {
+      console.error('Sign in failed:', signInError)
+      throw new Error('Failed to create session')
+    }
+    
+    // Success! Set cookies and redirect
+    const response = NextResponse.redirect(new URL('/', requestUrl.origin))
+    
+    // Set Supabase auth cookies manually
+    response.cookies.set('sb-access-token', signInData.session.access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/'
+    })
+    
+    response.cookies.set('sb-refresh-token', signInData.session.refresh_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+      path: '/'
+    })
+    
+    return response
     
     // Fallback redirect
     return NextResponse.redirect(new URL('/?auth=success', requestUrl.origin))

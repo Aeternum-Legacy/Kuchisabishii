@@ -205,7 +205,7 @@ export default function AuthenticatedApp() {
                           <Star
                             key={i}
                             className={`w-4 h-4 ${
-                              i < Math.floor(food.experience.rating)
+                              i < Math.floor(Number(food.experience.rating) || 0)
                                 ? 'text-yellow-400 fill-current'
                                 : 'text-gray-300'
                             }`}

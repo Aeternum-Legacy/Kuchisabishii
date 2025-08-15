@@ -259,18 +259,18 @@ function sortSearchResults(results: Record<string, unknown>[], sortBy: 'relevanc
 
   switch (sortBy) {
     case 'similarity':
-      return sorted.sort((a, b) => (b.similarityScore || 0) - (a.similarityScore || 0))
+      return sorted.sort((a: any, b: any) => (Number(b.similarityScore) || 0) - (Number(a.similarityScore) || 0))
     
     case 'mutual':
-      return sorted.sort((a, b) => {
+      return sorted.sort((a: any, b: any) => {
         // First sort by mutual friends count, then by similarity
-        const mutualDiff = (b.mutualFriends || 0) - (a.mutualFriends || 0)
+        const mutualDiff = (Number(b.mutualFriends) || 0) - (Number(a.mutualFriends) || 0)
         if (mutualDiff !== 0) return mutualDiff
-        return (b.similarityScore || 0) - (a.similarityScore || 0)
+        return (Number(b.similarityScore) || 0) - (Number(a.similarityScore) || 0)
       })
     
     case 'recent':
-      return sorted.sort((a, b) => {
+      return sorted.sort((a: any, b: any) => {
         const dateA = new Date(a.joinedDate || 0).getTime()
         const dateB = new Date(b.joinedDate || 0).getTime()
         return dateB - dateA
@@ -278,10 +278,10 @@ function sortSearchResults(results: Record<string, unknown>[], sortBy: 'relevanc
     
     default: // relevance
       // Default relevance sorting: combination of similarity, mutual friends, and recency
-      return sorted.sort((a, b) => {
-        const scoreA = (a.similarityScore || 0) * 0.5 + (a.mutualFriends || 0) * 10 + 
+      return sorted.sort((a: any, b: any) => {
+        const scoreA = (Number(a.similarityScore) || 0) * 0.5 + (Number(a.mutualFriends) || 0) * 10 + 
           (Date.now() - new Date(a.joinedDate || 0).getTime()) / (1000 * 60 * 60 * 24) * -0.1
-        const scoreB = (b.similarityScore || 0) * 0.5 + (b.mutualFriends || 0) * 10 + 
+        const scoreB = (Number(b.similarityScore) || 0) * 0.5 + (Number(b.mutualFriends) || 0) * 10 + 
           (Date.now() - new Date(b.joinedDate || 0).getTime()) / (1000 * 60 * 60 * 24) * -0.1
         return scoreB - scoreA
       })

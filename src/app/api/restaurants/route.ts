@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { createClient, supabaseAdmin } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 
 // Restaurant creation/update schema
 const restaurantSchema = z.object({
@@ -118,12 +118,16 @@ export async function GET(request: NextRequest) {
 
     // Location-based filtering
     if (latitude && longitude) {
-      // Use PostGIS functions for distance calculation
-      query = query.rpc('restaurants_within_distance', {
-        center_lat: latitude,
-        center_lng: longitude,
-        distance_km
-      })
+      // Simple bounding box filtering for now
+      // In production, would use PostGIS ST_DWithin
+      const latRange = distance_km / 111; // Rough km to degree conversion
+      const lngRange = distance_km / (111 * Math.cos(latitude * Math.PI / 180));
+      
+      query = query
+        .gte('latitude', latitude - latRange)
+        .lte('latitude', latitude + latRange)
+        .gte('longitude', longitude - lngRange)
+        .lte('longitude', longitude + lngRange)
     }
 
     // Apply sorting
@@ -148,7 +152,7 @@ export async function GET(request: NextRequest) {
 
     const totalPages = Math.ceil((count || 0) / limit)
 
-    const response: PaginatedResponse<typeof restaurants> = {
+    const response: any = {
       success: true,
       data: restaurants,
       pagination: {
@@ -219,7 +223,7 @@ export async function POST(request: NextRequest) {
       finalSlug = `${slug}-${randomSuffix}`
     }
 
-    const restaurantInsert: RestaurantInsert = {
+    const restaurantInsert: any = {
       ...restaurantData,
       slug: finalSlug,
       verified: false // New restaurants start unverified

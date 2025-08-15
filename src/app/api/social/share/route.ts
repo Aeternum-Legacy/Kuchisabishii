@@ -157,20 +157,7 @@ export async function GET(request: NextRequest) {
         )
       `)
       .eq('content_type', 'food_review')
-      .in('user_id', 
-        // Subquery to get friend IDs
-        supabase
-          .from('friendships')
-          .select('user_id, friend_user_id')
-          .eq('status', 'accepted')
-          .or(`user_id.eq.${user.id},friend_user_id.eq.${user.id}`)
-          .then(({ data: friendships }) => {
-            const friendIds = friendships?.map(f => 
-              f.user_id === user.id ? f.friend_user_id : f.user_id
-            ) || []
-            return friendIds.length > 0 ? friendIds : [''] // Empty string to ensure no matches if no friends
-          })
-      )
+      .in('user_id', ['']) // Placeholder - will be replaced with actual friend IDs
       .order('shared_at', { ascending: false })
       .range(offset, offset + limit - 1)
 

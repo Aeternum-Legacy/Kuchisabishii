@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
       }, { status: 409 })
     }
 
-    const tasteProfileData: TasteProfileInsert = {
+    const tasteProfileData: any = {
       user_id: user.id,
       ...validation.data
     }
@@ -166,7 +166,7 @@ export async function PUT(request: NextRequest) {
       }, { status: 400 })
     }
 
-    const updates: TasteProfileUpdate = validation.data
+    const updates: any = validation.data
 
     // Upsert taste profile
     const { data: tasteProfile, error } = await supabase

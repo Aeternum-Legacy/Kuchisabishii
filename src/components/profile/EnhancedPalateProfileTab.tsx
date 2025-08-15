@@ -367,23 +367,23 @@ export default function EnhancedPalateProfileTab({
           min="0"
           max="10"
           step="0.1"
-          value={value}
-          onChange={(e) => onChange(parseFloat(e.target.value))}
-          disabled={disabled}
+          value={value as number}
+          onChange={(e) => (onChange as any)(parseFloat(e.target.value))}
+          disabled={disabled as boolean}
           className="w-full h-3 rounded-lg appearance-none cursor-pointer"
           style={{
             background: disabled 
               ? '#e5e7eb'
-              : `linear-gradient(to right, ${color}22 0%, ${color}22 ${value * 10}%, #e5e7eb ${value * 10}%, #e5e7eb 100%)`
+              : `linear-gradient(to right, ${color}22 0%, ${color}22 ${(value as number) * 10}%, #e5e7eb ${(value as number) * 10}%, #e5e7eb 100%)`
           }}
         />
         {!disabled && (
           <div 
             className="absolute w-6 h-6 rounded-full border-3 border-white shadow-lg pointer-events-none"
             style={{ 
-              left: `calc(${value * 10}% - 12px)`,
+              left: `calc(${(value as number) * 10}% - 12px)`,
               top: '-6px',
-              backgroundColor: color
+              backgroundColor: color as string
             }}
           />
         )}

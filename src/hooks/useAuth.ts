@@ -39,9 +39,9 @@ export function useAuth() {
     // Get initial session
     const getInitialSession = async () => {
       try {
-        // Check for Google OAuth success
+        // Check for OAuth success/error in URL
         const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
-        if (urlParams?.get('auth') === 'google_success') {
+        if (urlParams?.get('auth') === 'success') {
           // Remove the query parameter
           window.history.replaceState({}, '', window.location.pathname)
         }

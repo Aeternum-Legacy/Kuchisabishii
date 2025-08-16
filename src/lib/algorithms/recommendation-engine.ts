@@ -5,7 +5,7 @@
 
 import { supabase } from '@/lib/supabase/client'
 import { CollaborativeFiltering } from './collaborative-filtering'
-import { TasteVector } from './taste-vectors'
+import { TasteVector, TasteVectorProcessor } from './taste-vectors'
 import { ALGORITHM_CONFIG, PalateProfile, FoodExperience, UserSimilarity } from './palate-matching'
 
 export interface RecommendationRequest {
@@ -222,7 +222,7 @@ export class RecommendationEngine {
     preferences: RecommendationRequest['preferences'] = {}
   ): Promise<RecommendationResult> {
     // Core algorithm components
-    const tasteScore = TasteVector.calculateSimilarity(profile.palate_vector, item.palate_profile)
+    const tasteScore = TasteVectorProcessor.calculateSimilarity(profile.palate_vector, item.palate_profile)
     const emotionalScore = this.predictEmotionalSatisfaction(profile, item)
     const contextScore = this.calculateContextRelevance(item.context, context)
     const collaborativeScore = await this.collaborativeFilter.calculateScore(item, similarUsers)
@@ -264,7 +264,7 @@ export class RecommendationEngine {
    */
   private predictEmotionalSatisfaction(profile: PalateProfile, item: FoodExperience): number {
     // Simple emotional prediction based on taste alignment
-    const tasteAlignment = TasteVector.calculateSimilarity(profile.palate_vector, item.palate_profile)
+    const tasteAlignment = TasteVectorProcessor.calculateSimilarity(profile.palate_vector, item.palate_profile)
     
     // Use emotional response from the item if available
     if (item.emotional_response?.overall_rating) {
@@ -425,7 +425,7 @@ export class RecommendationEngine {
       filtered_candidates: recommendations.length,
       processing_time_ms: processingTime,
       algorithm_version: ALGORITHM_CONFIG.VERSION,
-      confidence_distribution,
+      confidence_distribution: confidenceDistribution,
       diversity_score: diversityScore,
       novelty_score: avgNovelty
     }
@@ -469,6 +469,8 @@ export class RecommendationEngine {
   // Database operations
   private async getUserPalateProfile(userId: string): Promise<PalateProfile | null> {
     try {
+      if (!supabase) return null
+      
       const { data, error } = await supabase
         .from('user_palate_profiles')
         .select('*')
@@ -496,6 +498,8 @@ export class RecommendationEngine {
 
   private async findSimilarUsers(userId: string): Promise<UserSimilarity[]> {
     try {
+      if (!supabase) return []
+      
       const { data, error } = await supabase
         .from('user_similarity_cache')
         .select('*')
@@ -528,6 +532,8 @@ export class RecommendationEngine {
     profile: PalateProfile
   ): Promise<FoodExperience[]> {
     try {
+      if (!supabase) return []
+      
       let query = supabase
         .from('food_experiences_detailed')
         .select('*')
@@ -568,6 +574,24 @@ export class RecommendationEngine {
     startTime: number
   ): Promise<RecommendationResponse> {
     try {
+      if (!supabase) {
+        return {
+          recommendations: [],
+          metrics: {
+            total_candidates: 0,
+            filtered_candidates: 0,
+            processing_time_ms: Date.now() - startTime,
+            algorithm_version: ALGORITHM_CONFIG.VERSION,
+            confidence_distribution: { high: 0, medium: 0, low: 0 },
+            diversity_score: 0,
+            novelty_score: 0
+          },
+          explanations: new Map(),
+          fallback_used: true,
+          cache_hit: false
+        }
+      }
+      
       const { data } = await supabase
         .from('food_experiences_detailed')
         .select('*')

@@ -1,5 +1,5 @@
 // Social Components Exports
-export { ActivityFeed, sampleActivityFeedItems } from './ActivityFeed';
+export { default as ActivityFeed } from './ActivityFeed';
 export { FriendSuggestions, sampleFriendSuggestions } from './FriendSuggestions';
 
 // Re-export types

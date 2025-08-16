@@ -180,7 +180,13 @@ export default function RecommendationFeedbackLearning({
     }
   }
 
-  const StarRating = ({ value, onChange, size = 24 }: Record<string, unknown>) => (
+  interface StarRatingProps {
+    value: number;
+    onChange: (rating: number) => void;
+    size?: number;
+  }
+
+  const StarRating = ({ value, onChange, size = 24 }: StarRatingProps) => (
     <div className="flex gap-2">
       {[1, 2, 3, 4, 5].map(star => (
         <button

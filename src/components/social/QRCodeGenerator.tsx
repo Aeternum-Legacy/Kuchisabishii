@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import QRCode from 'react-qr-code'
-import { Share, Download, Copy, Refresh, Settings, Sparkles } from 'lucide-react'
+import { Share, Download, Copy, RefreshCw, Settings, Sparkles } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 
 interface QRCodeGeneratorProps {
@@ -32,13 +32,13 @@ export default function QRCodeGenerator({ onClose }: QRCodeGeneratorProps) {
       
       // Create a shareable URL with verification token
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
-      const userShareUrl = `${baseUrl}/add-friend?user=${user.id}&token=${token}&type=qr`
+      const userShareUrl = `${baseUrl}/add-friend?user=${user?.id}&token=${token}&type=qr`
       setShareUrl(userShareUrl)
     } catch (error) {
       console.error('Failed to generate QR code:', error)
       // Fallback to simple URL
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
-      const userShareUrl = `${baseUrl}/add-friend?user=${user.id}`
+      const userShareUrl = `${baseUrl}/add-friend?user=${user?.id}`
       setShareUrl(userShareUrl)
     }
   }
@@ -59,7 +59,7 @@ export default function QRCodeGenerator({ onClose }: QRCodeGeneratorProps) {
     }
     
     // Fallback: generate a simple timestamp-based token
-    return btoa(`${user.id}-${Date.now()}`)
+    return btoa(`${user?.id}-${Date.now()}`)
   }
 
   const handleCopyUrl = async () => {
@@ -139,16 +139,15 @@ export default function QRCodeGenerator({ onClose }: QRCodeGeneratorProps) {
           value={shareUrl}
           size={200}
           level="H"
-          includeMargin={true}
           fgColor={qrStyle === 'colorful' ? '#ea580c' : '#000000'}
           bgColor="#ffffff"
         />
-        {user.profileImage && qrStyle === 'branded' && (
+        {user?.profileImage && qrStyle === 'branded' && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-12 h-12 bg-white rounded-full p-1 shadow-lg">
               <img
-                src={user.profileImage}
-                alt={user.displayName}
+                src={user?.profileImage}
+                alt={user?.displayName}
                 className="w-full h-full rounded-full object-cover"
               />
             </div>
@@ -192,7 +191,7 @@ export default function QRCodeGenerator({ onClose }: QRCodeGeneratorProps) {
                 className="text-gray-400 hover:text-gray-600 p-1"
                 title="Refresh QR Code"
               >
-                <Refresh className="w-4 h-4" />
+                <RefreshCw className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setShowStyleOptions(!showStyleOptions)}
@@ -244,18 +243,18 @@ export default function QRCodeGenerator({ onClose }: QRCodeGeneratorProps) {
         {/* User Info */}
         <div className="text-center mb-6">
           <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-3 flex items-center justify-center">
-            {user.profileImage ? (
+            {user?.profileImage ? (
               <img
-                src={user.profileImage}
-                alt={user.displayName}
+                src={user?.profileImage}
+                alt={user?.displayName}
                 className="w-full h-full rounded-full object-cover"
               />
             ) : (
               <span className="text-2xl">👤</span>
             )}
           </div>
-          <h3 className="font-semibold text-gray-800">{user.displayName}</h3>
-          <p className="text-sm text-gray-600">{user.email}</p>
+          <h3 className="font-semibold text-gray-800">{user?.displayName}</h3>
+          <p className="text-sm text-gray-600">{user?.email}</p>
         </div>
 
         {/* Action Buttons */}

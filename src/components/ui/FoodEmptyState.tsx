@@ -194,20 +194,19 @@ export const FoodEmptyState: React.FC<FoodEmptyStateProps> = ({
   const displayDescription = description || config.description;
   const displayActionText = actionText || config.actionText;
 
-  const containerVariants = {
+  const containerVariants: any = {
     hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
         duration: 0.4,
-        ease: 'easeOut',
-        staggerChildren: 0.1
+        ease: "easeOut"
       }
     }
   };
 
-  const itemVariants = {
+  const itemVariants: any = {
     hidden: { opacity: 0, y: 10 },
     visible: {
       opacity: 1,
@@ -216,12 +215,12 @@ export const FoodEmptyState: React.FC<FoodEmptyStateProps> = ({
     }
   };
 
-  const pulseVariants = {
+  const pulseVariants: any = {
     scale: [1, 1.05, 1],
     transition: {
       duration: 2,
       repeat: Infinity,
-      ease: 'easeInOut'
+      ease: "easeInOut"
     }
   };
 

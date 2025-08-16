@@ -79,7 +79,7 @@ export function useAuth() {
         }
         
         // Try to restore session from cookies first
-        let { data: { session }, error } = await supabase.auth.getSession()
+        let { data: { session }, error } = await supabase?.auth.getSession() || { data: { session: null }, error: null }
         
         // If no session from Supabase, try to recover from existing cookies
         if (!session && typeof window !== 'undefined') {
@@ -97,17 +97,17 @@ export function useAuth() {
           
           if (authCookie && cookies[authCookie]) {
             try {
-              const authData = JSON.parse(decodeURIComponent(cookies[authCookie]))
+              const authData = JSON.parse(decodeURIComponent(cookies[authCookie] as string))
               if (authData.access_token) {
                 console.log('🔄 Found existing auth cookie, attempting to restore session')
                 // Set the session manually and refresh
-                await supabase.auth.setSession({
+                await supabase?.auth.setSession({
                   access_token: authData.access_token,
                   refresh_token: authData.refresh_token
                 })
                 
                 // Get the restored session
-                const result = await supabase.auth.getSession()
+                const result = await supabase?.auth.getSession() || { data: { session: null }, error: null }
                 session = result.data.session
                 error = result.error
               }
@@ -119,9 +119,9 @@ export function useAuth() {
         
         // If still no session, try refresh
         if (!session) {
-          const { error: refreshError } = await supabase.auth.refreshSession()
+          const { error: refreshError } = await supabase?.auth.refreshSession() || { error: 'No Supabase client' }
           if (!refreshError) {
-            const result = await supabase.auth.getSession()
+            const result = await supabase?.auth.getSession() || { data: { session: null }, error: null }
             session = result.data.session
             error = result.error
           }
@@ -186,7 +186,7 @@ export function useAuth() {
     }, timeoutDuration)
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    const { data: { subscription } } = supabase?.auth.onAuthStateChange(
       async (event, session) => {
         if (event === 'SIGNED_IN' && session?.user) {
           try {

@@ -89,7 +89,7 @@ const UserProfileTabs: React.FC = () => {
         updated_at: '2024-08-13T00:00:00Z',
         username: 'foodie_explorer',
         display_name: 'Demo Food Explorer',
-        avatar_url: undefined,
+        avatar_url: null,
         bio: 'Passionate food lover always seeking new culinary adventures! Love discovering hidden gems and sharing amazing food experiences with fellow foodies.',
         location: 'Demo City, Demo State',
         dietary_restrictions: [],

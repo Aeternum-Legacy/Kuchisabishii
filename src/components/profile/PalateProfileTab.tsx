@@ -7,24 +7,9 @@ import {
   Zap, Heart, Gauge, Star
 } from 'lucide-react';
 
-interface TasteProfile {
-  id: string;
-  user_id: string;
-  created_at: string;
-  updated_at: string;
-  salty_preference: number | null;
-  sweet_preference: number | null;
-  sour_preference: number | null;
-  bitter_preference: number | null;
-  umami_preference: number | null;
-  crunchy_preference: number | null;
-  creamy_preference: number | null;
-  chewy_preference: number | null;
-  hot_food_preference: number | null;
-  cold_food_preference: number | null;
-  cuisine_preferences: Record<string, unknown>;
-  culinary_adventurousness: number;
-}
+import { Database } from '@/lib/supabase/types';
+
+type TasteProfile = Database['public']['Tables']['taste_profiles']['Row'];
 
 interface PalateProfileTabProps {
   tasteProfile: TasteProfile;

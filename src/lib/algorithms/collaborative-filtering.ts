@@ -6,7 +6,7 @@
  */
 
 import { supabase } from '@/lib/supabase/client'
-import { TasteVector } from './taste-vectors'
+import { TasteVector, TasteVectorProcessor } from './taste-vectors'
 import { ALGORITHM_CONFIG, UserSimilarity, FoodExperience, PalateProfile } from './palate-matching'
 
 export interface CollaborativeScore {
@@ -199,7 +199,7 @@ export class CollaborativeFiltering {
   async findSimilarItems(targetItem: FoodExperience): Promise<ItemSimilarity[]> {
     try {
       // Get items with similar taste profiles
-      const { data: candidateItems, error } = await supabase
+      const { data: candidateItems, error } = await supabase!!
         .from('food_experiences_detailed')
         .select('*')
         .neq('id', targetItem.id)
@@ -211,7 +211,7 @@ export class CollaborativeFiltering {
       const similarities: ItemSimilarity[] = []
 
       for (const candidate of candidateItems) {
-        const similarity = TasteVector.calculateSimilarity(
+        const similarity = TasteVectorProcessor.calculateSimilarity(
           targetItem.palate_profile,
           candidate.palate_profile
         )
@@ -242,7 +242,7 @@ export class CollaborativeFiltering {
    */
   private async getItemRatings(itemId: string, userIds: string[] = []): Promise<UserRating[]> {
     try {
-      let query = supabase
+      let query = supabase!
         .from('food_experiences_detailed')
         .select('user_id, emotional_response, created_at, confidence')
         .eq('id', itemId)
@@ -276,7 +276,7 @@ export class CollaborativeFiltering {
     userIds: string[]
   ): Promise<UserRating[]> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabase!
         .from('food_experiences_detailed')
         .select('*')
         .in('user_id', userIds)
@@ -290,7 +290,7 @@ export class CollaborativeFiltering {
       const ratings: UserRating[] = []
 
       for (const item of data) {
-        const similarity = TasteVector.calculateSimilarity(
+        const similarity = TasteVectorProcessor.calculateSimilarity(
           targetItem.palate_profile,
           item.palate_profile
         )
@@ -318,7 +318,7 @@ export class CollaborativeFiltering {
    */
   private async getCuisineRatings(cuisineType: string, userIds: string[]): Promise<UserRating[]> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabase!
         .from('food_experiences_detailed')
         .select('*')
         .in('user_id', userIds)
@@ -349,12 +349,12 @@ export class CollaborativeFiltering {
     try {
       // This would be implemented with a more complex query in production
       // For now, return a simplified count
-      const { data: ratersA, error: errorA } = await supabase
+      const { data: ratersA, error: errorA } = await supabase!
         .from('food_experiences_detailed')
         .select('user_id')
         .eq('id', itemA)
 
-      const { data: ratersB, error: errorB } = await supabase
+      const { data: ratersB, error: errorB } = await supabase!
         .from('food_experiences_detailed')
         .select('user_id')
         .eq('id', itemB)
@@ -481,7 +481,7 @@ export class CollaborativeFiltering {
       // This would trigger recalculation of user similarities
       // For now, we'll mark related similarity cache entries as stale
       
-      const { error } = await supabase
+      const { error } = await supabase!
         .from('user_similarity_cache')
         .update({ expires_at: new Date().toISOString() })
         .or(`user_a.eq.${userId},user_b.eq.${userId}`)
@@ -538,7 +538,7 @@ export class CollaborativeFiltering {
     try {
       const cutoffDate = new Date(Date.now() - (timeRangeHours * 60 * 60 * 1000))
 
-      const { data, error } = await supabase
+      const { data, error } = await supabase!
         .from('food_experiences_detailed')
         .select('*')
         .neq('user_id', userId)
@@ -634,13 +634,13 @@ export class CollaborativeFiltering {
       cutoffDate.setDate(cutoffDate.getDate() - this.RATING_DECAY_DAYS * 2)
 
       // Clean expired similarity cache
-      await supabase
+      await supabase!
         .from('user_similarity_cache')
         .delete()
         .lt('expires_at', new Date().toISOString())
 
       // Clean old recommendation cache
-      await supabase
+      await supabase!
         .from('recommendation_cache')
         .delete()
         .lt('expires_at', new Date().toISOString())

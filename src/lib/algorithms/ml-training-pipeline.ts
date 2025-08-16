@@ -205,7 +205,7 @@ export class MLTrainingPipeline {
   private async collectTrainingData(): Promise<TrainingData[]> {
     try {
       // Get recommendation interactions with actual outcomes
-      const { data: interactions, error } = await supabase
+      const { data: interactions, error } = await supabase!!
         .from('recommendation_interactions')
         .select(`
           *,
@@ -328,7 +328,7 @@ export class MLTrainingPipeline {
     validationSet: TrainingData[]
   ): Promise<any> {
     let bestAccuracy = 0
-    let bestWeights: Record<string, unknown> = null
+    let bestWeights: Record<string, unknown> | null = null
     let patienceCounter = 0
 
     // Simulate training epochs
@@ -536,7 +536,7 @@ export class MLTrainingPipeline {
    */
   private async recordModelPerformance(performance: ModelPerformance): Promise<void> {
     try {
-      const { error } = await supabase
+      const { error } = await supabase!
         .from('algorithm_performance_metrics')
         .insert([
           {
@@ -582,7 +582,7 @@ export class MLTrainingPipeline {
       }
 
       // Record parameter update
-      const { error } = await supabase
+      const { error } = await supabase!
         .from('ml_training_data')
         .insert([{
           data: {
@@ -610,7 +610,7 @@ export class MLTrainingPipeline {
    */
   private async getRecentPerformanceMetrics(): Promise<ModelPerformance | null> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabase!
         .from('algorithm_performance_metrics')
         .select('*')
         .eq('algorithm_name', 'palate_matching')
@@ -643,7 +643,7 @@ export class MLTrainingPipeline {
    */
   private async getNewTrainingDataCount(since: Date): Promise<number> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabase!
         .from('recommendation_interactions')
         .select('id', { count: 'exact' })
         .gte('shown_at', since.toISOString())
@@ -669,7 +669,7 @@ export class MLTrainingPipeline {
     itemId: string
   ): Promise<number | null> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabase!
         .from('recommendation_cache')
         .select('recommendation_score')
         .eq('user_id', userId)
@@ -694,7 +694,7 @@ export class MLTrainingPipeline {
     userB: string
   ): Promise<UserSimilarity | null> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabase!
         .from('user_similarity_cache')
         .select('*')
         .or(`and(user_a.eq.${userA},user_b.eq.${userB}),and(user_a.eq.${userB},user_b.eq.${userA})`)
@@ -843,7 +843,7 @@ export class MLTrainingPipeline {
       const cutoffDate = new Date()
       cutoffDate.setDate(cutoffDate.getDate() - 180) // Keep 6 months
 
-      const { error } = await supabase
+      const { error } = await supabase!
         .from('ml_training_data')
         .delete()
         .lt('created_at', cutoffDate.toISOString())

@@ -7,27 +7,29 @@ import {
   AlertTriangle, Check, X, Info, Users,
   Database, Share2, Camera, MapPin, TrendingUp, LogOut
 } from 'lucide-react';
+import {
+  StandardComponentProps,
+  PrivacySettingKey,
+  PrivacySettingValue,
+  DataSettingKey,
+  DataSettingValue,
+  NotificationType,
+  UserNotificationSettings,
+  UserPrivacySettings,
+  UserDataSettings
+} from '@/types/base';
+import { Database as SupabaseDatabase } from '@/lib/supabase/types';
 
-interface UserProfile {
-  id: string;
-  username: string | null;
-  display_name: string | null;
-  bio: string | null;
-  location: string | null;
-  dietary_restrictions: string[];
-  allergies: string[];
-  profile_visibility: 'public' | 'friends' | 'private';
-  allow_recommendations: boolean;
-  share_analytics: boolean;
-}
+// Use Supabase user profile type for consistency
+type UserProfile = SupabaseDatabase['public']['Tables']['user_profiles']['Row'];
 
-interface SettingsTabProps {
+interface SettingsTabProps extends StandardComponentProps<UserProfile> {
   userProfile: UserProfile;
   setUserProfile: (profile: UserProfile) => void;
 }
 
-const SettingsTab: React.FC<SettingsTabProps> = ({ userProfile, setUserProfile }) => {
-  const [notifications, setNotifications] = useState({
+const SettingsTab: React.FC<SettingsTabProps> = ({ userProfile, setUserProfile, className, testId, ariaLabel }) => {
+  const [notifications, setNotifications] = useState<UserNotificationSettings>({
     food_recommendations: true,
     friend_activity: true,
     new_followers: false,
@@ -37,7 +39,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({ userProfile, setUserProfile }
     push_notifications: true
   });
 
-  const [privacy, setPrivacy] = useState({
+  const [privacy, setPrivacy] = useState<UserPrivacySettings>({
     profile_visibility: userProfile.profile_visibility,
     show_location: true,
     show_activity: true,
@@ -46,20 +48,23 @@ const SettingsTab: React.FC<SettingsTabProps> = ({ userProfile, setUserProfile }
     allow_recommendations: userProfile.allow_recommendations
   });
 
-  const [dataSettings, setDataSettings] = useState({
+  const [dataSettings, setDataSettings] = useState<UserDataSettings>({
     auto_backup: true,
-    photo_quality: 'high' as 'low' | 'medium' | 'high',
+    photo_quality: 'high',
     offline_mode: false
   });
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
-  const updateNotification = (key: string, value: boolean) => {
+  const updateNotification = (key: NotificationType, value: boolean) => {
     setNotifications(prev => ({ ...prev, [key]: value }));
   };
 
-  const updatePrivacy = (key: string, value: Record<string, unknown>) => {
+  const updatePrivacy = <K extends keyof UserPrivacySettings>(
+    key: K,
+    value: UserPrivacySettings[K]
+  ) => {
     setPrivacy(prev => ({ ...prev, [key]: value }));
     
     // Update main profile for relevant settings
@@ -71,7 +76,10 @@ const SettingsTab: React.FC<SettingsTabProps> = ({ userProfile, setUserProfile }
     }
   };
 
-  const updateDataSetting = (key: string, value: Record<string, unknown>) => {
+  const updateDataSetting = <K extends keyof UserDataSettings>(
+    key: K,
+    value: UserDataSettings[K]
+  ) => {
     setDataSettings(prev => ({ ...prev, [key]: value }));
   };
 
@@ -128,7 +136,11 @@ const SettingsTab: React.FC<SettingsTabProps> = ({ userProfile, setUserProfile }
   );
 
   return (
-    <div className="space-y-6">
+    <div 
+      className={`space-y-6 ${className || ''}`}
+      data-testid={testId}
+      aria-label={ariaLabel}
+    >
       {/* Account Settings */}
       <div className="bg-white rounded-xl shadow-sm p-6">
         <h3 className="text-lg font-semibold mb-6 flex items-center">
@@ -198,7 +210,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({ userProfile, setUserProfile }
             </div>
             <select
               value={privacy.profile_visibility}
-              onChange={(e) => updatePrivacy('profile_visibility', e.target.value)}
+              onChange={(e) => updatePrivacy('profile_visibility', e.target.value as 'public' | 'friends' | 'private')}
               className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             >
               <option value="public">Public</option>
@@ -214,7 +226,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({ userProfile, setUserProfile }
             </div>
             <ToggleSwitch
               enabled={privacy.show_location}
-              onChange={(value) => updatePrivacy('show_location', { show_location: value } as Record<string, unknown>)}
+              onChange={(value) => updatePrivacy('show_location', value)}
             />
           </div>
 
@@ -366,7 +378,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({ userProfile, setUserProfile }
             </div>
             <select
               value={dataSettings.photo_quality}
-              onChange={(e) => updateDataSetting('photo_quality', e.target.value)}
+              onChange={(e) => updateDataSetting('photo_quality', e.target.value as 'low' | 'medium' | 'high')}
               className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             >
               <option value="low">Low (Faster upload)</option>

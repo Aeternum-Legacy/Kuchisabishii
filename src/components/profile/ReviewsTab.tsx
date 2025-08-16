@@ -6,6 +6,7 @@ import {
   Calendar, DollarSign, Camera, Eye, Share2, 
   Clock, Users, Utensils, Thermometer
 } from 'lucide-react';
+import { TasteExperience, StandardComponentProps } from '@/types/base';
 
 interface ReviewWithDetails {
   id: string;
@@ -23,13 +24,7 @@ interface ReviewWithDetails {
     name: string;
     cuisine_types: string[];
   };
-  taste_experience?: {
-    saltiness: number | null;
-    sweetness: number | null;
-    sourness: number | null;
-    bitterness: number | null;
-    umami: number | null;
-  };
+  taste_experience?: TasteExperience;
 }
 
 interface FilterOptions {
@@ -40,7 +35,7 @@ interface FilterOptions {
   sortOrder: 'asc' | 'desc';
 }
 
-interface ReviewsTabProps {
+interface ReviewsTabProps extends StandardComponentProps<ReviewWithDetails[]> {
   reviews: ReviewWithDetails[];
   searchQuery: string;
   setSearchQuery: (query: string) => void;
@@ -55,7 +50,10 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({
   setSearchQuery,
   filters,
   setFilters,
-  exportReviews
+  exportReviews,
+  className,
+  testId,
+  ariaLabel
 }) => {
   const [showFilters, setShowFilters] = React.useState(false);
 
@@ -102,7 +100,7 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({
     );
   };
 
-  const renderTasteProfile = (taste: Record<string, unknown>) => {
+  const renderTasteProfile = (taste: TasteExperience | null) => {
     if (!taste) return null;
     
     const tasteMap = {
@@ -116,22 +114,26 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({
     return (
       <div className="flex space-x-2 mt-2">
         {Object.entries(tasteMap).map(([key, { label, color }]) => {
-          const value = taste[key];
+          const value = taste[key as keyof TasteExperience];
           if (!value || value === 0) return null;
           
           return (
             <div key={key} className="text-xs">
               <div className={`w-2 h-2 ${color} rounded-full inline-block mr-1`}></div>
-              <span className="text-gray-600">{label}: {value}</span>
+              <span className="text-gray-600">{label}: {String(value)}</span>
             </div>
           );
-        }) as React.ReactNode}
+        })}
       </div>
     );
   };
 
   return (
-    <div className="space-y-6">
+    <div 
+      className={`space-y-6 ${className || ''}`}
+      data-testid={testId}
+      aria-label={ariaLabel}
+    >
       {/* Search and Filter Bar */}
       <div className="bg-white rounded-xl shadow-sm p-4">
         <div className="flex flex-col lg:flex-row space-y-3 lg:space-y-0 lg:space-x-4">
@@ -368,7 +370,7 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({
                   )}
 
                   {/* Taste Profile */}
-                  {renderTasteProfile(review.taste_experience || {})}
+                  {renderTasteProfile(review.taste_experience || null)}
 
                   {/* Actions */}
                   <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">

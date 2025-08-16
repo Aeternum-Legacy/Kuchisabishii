@@ -8,7 +8,7 @@
  */
 
 import { supabase } from '@/lib/supabase/client'
-import { TasteVector } from './taste-vectors'
+import { TasteVector, TasteVectorProcessor } from './taste-vectors'
 import { CollaborativeFiltering } from './collaborative-filtering'
 import { RecommendationEngine } from './recommendation-engine'
 
@@ -133,12 +133,12 @@ export interface RecommendationResult {
  */
 export class PalateMatchingAlgorithm {
   private static instance: PalateMatchingAlgorithm
-  private tasteVectorEngine: TasteVector
+  private tasteVectorEngine: TasteVectorProcessor
   private collaborativeEngine: CollaborativeFiltering
   private recommendationEngine: RecommendationEngine
   
   private constructor() {
-    this.tasteVectorEngine = new TasteVector()
+    this.tasteVectorEngine = new TasteVectorProcessor()
     this.collaborativeEngine = new CollaborativeFiltering()
     this.recommendationEngine = new RecommendationEngine()
   }
@@ -278,7 +278,7 @@ export class PalateMatchingAlgorithm {
     const contextWeight = this.calculateContextWeight(experience.context, profile)
     
     // Core innovation: Emotional Gradient Descent
-    const updatedVector = this.tasteVectorEngine.applyEmotionalGradientDescent(
+    const updatedVector = TasteVectorProcessor.applyEmotionalGradientDescent(
       profile.palate_vector,
       experience.palate_profile,
       experience.emotional_response,
@@ -319,7 +319,7 @@ export class PalateMatchingAlgorithm {
     includeNovelty: boolean
   ): Promise<RecommendationResult> {
     // Taste alignment score
-    const tasteScore = this.tasteVectorEngine.calculateSimilarity(
+    const tasteScore = TasteVectorProcessor.calculateSimilarity(
       profile.palate_vector,
       item.palate_profile
     )

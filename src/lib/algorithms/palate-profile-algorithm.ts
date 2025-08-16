@@ -16,11 +16,18 @@ const EMOTIONAL_WEIGHTS = {
   nostalgia: 0.05
 };
 
-const LEARNING_RATES = {
-  initial: 0.8,
+// Define enum type first
+type ProfileMaturity = 'novice' | 'developing' | 'established' | 'expert';
+
+// Create type-safe mapping
+type LearningRateMap = Record<ProfileMaturity, number>;
+
+const LEARNING_RATES: LearningRateMap = {
+  novice: 0.8,
+  developing: 0.5,    // Add missing value
   established: 0.3,
   expert: 0.1
-};
+} as const;
 
 const SIMILARITY_THRESHOLD = 0.90; // 90%+ matching requirement
 
@@ -208,7 +215,7 @@ export class PalateProfileAlgorithm {
    * Adaptive learning rate based on profile maturity and confidence
    */
   private static calculateAdaptiveLearningRate(profile: UserPalateProfile): number {
-    const baseRate = LEARNING_RATES[profile.profile_maturity] || LEARNING_RATES.initial;
+    const baseRate = LEARNING_RATES[profile.profile_maturity]; // Type-safe, no fallback
     const confidenceAdjustment = 1 - (profile.confidence_score / 100);
     
     return baseRate * (1 + confidenceAdjustment);

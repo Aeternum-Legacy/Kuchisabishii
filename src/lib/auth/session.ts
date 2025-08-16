@@ -42,7 +42,7 @@ export async function getServerSession(): Promise<SessionInfo> {
         lastName: profile?.last_name || user.user_metadata?.last_name
       },
       isAuthenticated: true,
-      expiresAt: user.session?.expires_at
+      expiresAt: undefined
     }
   } catch (error) {
     console.error('Error getting server session:', error)
@@ -73,7 +73,7 @@ export function requireAuth() {
 
       return {
         authorized: true,
-        user
+        user: user as any
       }
     } catch (error) {
       console.error('Auth guard error:', error)

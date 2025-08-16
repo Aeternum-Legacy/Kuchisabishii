@@ -65,7 +65,7 @@ export function validationErrorResponse(
   return errorResponse(
     'Validation failed',
     400,
-    errors
+    errors as any
   )
 }
 
@@ -112,7 +112,7 @@ export function validateQueryParams<T>(
       response: errorResponse(
         'Invalid query parameters',
         400,
-        validation.error.errors
+        validation.error.errors as any
       )
     }
   }

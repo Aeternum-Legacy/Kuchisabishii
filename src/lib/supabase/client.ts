@@ -23,9 +23,7 @@ function getSupabaseClient() {
       // Configure OAuth flow for proper redirect handling
       flowType: 'pkce',
       // Set storage options for better session management
-      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-      // Google OAuth configuration - use dynamic port detection
-      redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : 'http://localhost:3006/auth/callback'
+      storage: typeof window !== 'undefined' ? window.localStorage : undefined
     },
     // Enhanced global options
     global: {

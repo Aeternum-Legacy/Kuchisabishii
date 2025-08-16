@@ -507,7 +507,7 @@ export class TasteVectorUtils {
    * Generate random taste vector for testing
    */
   static generateRandom(): TasteVector {
-    return TasteVector.createVector({
+    return TasteVectorProcessor.createVector({
       sweet: Math.random() * 10,
       salty: Math.random() * 10,
       sour: Math.random() * 10,
@@ -527,7 +527,7 @@ export class TasteVectorUtils {
    */
   static fromFoodDescription(description: string, cuisineType: string = ''): TasteVector {
     // This would be enhanced with ML/NLP in production
-    const vector = TasteVector.createVector({})
+    const vector = TasteVectorProcessor.createVector({})
     
     // Simple keyword-based extraction (would be ML-powered in production)
     const text = (description + ' ' + cuisineType).toLowerCase()
@@ -569,7 +569,7 @@ export class TasteVectorUtils {
   static interpolate(vectorA: TasteVector, vectorB: TasteVector, factor: number): TasteVector {
     const interpolated: TasteVector = {} as TasteVector
     
-    TasteVector['DIMENSION_NAMES'].forEach(dimension => {
+    TasteVectorProcessor['DIMENSION_NAMES'].forEach(dimension => {
       interpolated[dimension] = vectorA[dimension] * (1 - factor) + vectorB[dimension] * factor
     })
     
@@ -594,6 +594,6 @@ export class TasteVectorUtils {
       'mediterranean': { salty: 6, sour: 6, umami: 6, hot: 6 }
     }
     
-    return TasteVector.createVector(cuisineProfiles[cuisine] || {})
+    return TasteVectorProcessor.createVector(cuisineProfiles[cuisine] || {})
   }
 }

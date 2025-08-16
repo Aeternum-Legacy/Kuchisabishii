@@ -1,8 +1,8 @@
-import { NextAuthConfig } from 'next-auth'
+import type { NextAuthOptions } from 'next-auth'
 import Google from 'next-auth/providers/google'
 import { createClient } from '@/lib/supabase/server'
 
-export const authConfig: NextAuthConfig = {
+export const authConfig: NextAuthOptions = {
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -72,11 +72,11 @@ export const authConfig: NextAuthConfig = {
             .single()
           
           if (profile) {
-            session.user.id = profile.id
-            session.user.displayName = profile.display_name
-            session.user.firstName = profile.first_name
-            session.user.lastName = profile.last_name
-            session.user.profileImage = profile.profile_image_url
+            (session.user as any).id = profile.id
+            (session.user as any).displayName = profile.display_name
+            (session.user as any).firstName = profile.first_name
+            (session.user as any).lastName = profile.last_name
+            (session.user as any).profileImage = profile.profile_image_url
           }
         } catch (error) {
           console.error('Session callback error:', error)

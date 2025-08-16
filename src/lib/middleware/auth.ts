@@ -4,7 +4,7 @@
  */
 
 import { NextRequest } from 'next/server'
-import { createServerClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 
 export interface AuthenticatedRequest extends NextRequest {
   user?: {
@@ -19,7 +19,7 @@ export interface AuthenticatedRequest extends NextRequest {
  * Returns user data if authenticated, throws error if not
  */
 export async function authenticateRequest(request: NextRequest) {
-  const supabase = createServerClient()
+  const supabase = await createClient()
   
   try {
     const { data: { user }, error } = await supabase.auth.getUser()
@@ -43,7 +43,7 @@ export function withAuth<T extends any[]>(
   return async (request: NextRequest, ...args: T) => {
     try {
       const user = await authenticateRequest(request)
-      return await handler(request, user, ...args)
+      return await handler(request, user as any, ...args)
     } catch (error) {
       return new Response(JSON.stringify({
         success: false,
@@ -62,7 +62,7 @@ export function withAuth<T extends any[]>(
  * Check if user has admin privileges
  */
 export async function isAdmin(userId: string): Promise<boolean> {
-  const supabase = createServerClient()
+  const supabase = await createClient()
   
   try {
     const { data: profile, error } = await supabase
@@ -101,7 +101,7 @@ export function withAdminAuth<T extends any[]>(
         })
       }
 
-      return await handler(request, user, ...args)
+      return await handler(request, user as any, ...args)
     } catch (error) {
       return new Response(JSON.stringify({
         success: false,

@@ -163,7 +163,7 @@ function extractProfessionalTitle(title: string): string {
 /**
  * Validate LinkedIn profile data structure
  */
-export function validateLinkedInData(data: Record<string, unknown>): data is LinkedInProfileData {
+export function validateLinkedInData(data: any): data is LinkedInProfileData {
   return (
     data &&
     typeof data.fullName === 'string' &&

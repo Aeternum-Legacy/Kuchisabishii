@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import TasteProfileQuestionnaire from '@/components/onboarding/TasteProfileQuestionnaire'
 import OnboardingResults from '@/components/onboarding/OnboardingResults'
-// Removed AuthWrapper - no auth required in simplified mode
+import AuthWrapper from '@/components/auth/AuthWrapper'
 
 interface TasteProfileData {
   sweet: number
@@ -149,6 +149,7 @@ export default function OnboardingPage() {
   }
 
   return (
+    <AuthWrapper>
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
         <AnimatePresence mode="wait">
           {currentStep === 'questionnaire' && (
@@ -241,5 +242,6 @@ export default function OnboardingPage() {
           )}
         </AnimatePresence>
       </div>
+    </AuthWrapper>
   )
 }

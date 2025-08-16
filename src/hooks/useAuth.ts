@@ -12,6 +12,7 @@ interface UserProfile {
   bio?: string
   location?: string
   dietaryRestrictions?: string[]
+  onboardingCompleted?: boolean
   createdAt?: string
   updatedAt?: string
 }
@@ -160,7 +161,8 @@ export function useAuth() {
                 email: session.user.email || '',
                 displayName: session.user.user_metadata?.display_name,
                 firstName: session.user.user_metadata?.first_name,
-                lastName: session.user.user_metadata?.last_name
+                lastName: session.user.user_metadata?.last_name,
+                onboardingCompleted: false // Default to false for fallback
               },
               loading: false,
               error: null
@@ -201,7 +203,8 @@ export function useAuth() {
                   email: session.user.email || '',
                   displayName: session.user.user_metadata?.display_name,
                   firstName: session.user.user_metadata?.first_name,
-                  lastName: session.user.user_metadata?.last_name
+                  lastName: session.user.user_metadata?.last_name,
+                  onboardingCompleted: false // Default to false for fallback
                 },
                 loading: false,
                 error: null
@@ -215,7 +218,8 @@ export function useAuth() {
                 email: session.user.email || '',
                 displayName: session.user.user_metadata?.display_name,
                 firstName: session.user.user_metadata?.first_name,
-                lastName: session.user.user_metadata?.last_name
+                lastName: session.user.user_metadata?.last_name,
+                onboardingCompleted: false // Default to false for fallback
               },
               loading: false,
               error: null

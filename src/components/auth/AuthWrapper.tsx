@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import LoginForm from './LoginForm'
 import RegisterForm from './RegisterForm'
@@ -16,12 +17,15 @@ interface AuthWrapperProps {
 
 export default function AuthWrapper({ children, onAuthSuccess }: AuthWrapperProps) {
   const { user, loading } = useAuth()
+  const router = useRouter()
+  const pathname = usePathname()
   const [authMode, setAuthMode] = useState<'login' | 'register' | 'forgot-password' | 'email-confirmation' | 'email-verification-required'>('login')
   const [previousUser, setPreviousUser] = useState<typeof user>(null)
   const [confirmationEmail, setConfirmationEmail] = useState<string>('')
   const [verificationEmail, setVerificationEmail] = useState<string>('')
   const [forceShowAuth, setForceShowAuth] = useState(false)
   const [emergencyMode, setEmergencyMode] = useState(false)
+  const [onboardingCheckDone, setOnboardingCheckDone] = useState(false)
 
   // Handle auth success when user state changes from null to authenticated
   useEffect(() => {
@@ -30,6 +34,25 @@ export default function AuthWrapper({ children, onAuthSuccess }: AuthWrapperProp
     }
     setPreviousUser(user)
   }, [user, previousUser, onAuthSuccess])
+
+  // Handle onboarding redirect logic
+  useEffect(() => {
+    if (user && !loading) {
+      // Only check onboarding status for pages that require it (like /app)
+      const requiresOnboarding = pathname === '/app' || pathname?.startsWith('/app/')
+      
+      if (requiresOnboarding && user.onboardingCompleted === false) {
+        console.log('🔄 User needs onboarding, redirecting to /onboarding')
+        router.push('/onboarding')
+        return
+      }
+      
+      setOnboardingCheckDone(true)
+    } else if (!user && !loading) {
+      // User is not authenticated
+      setOnboardingCheckDone(true)
+    }
+  }, [user, loading, pathname, router])
 
   // Add timeout to prevent infinite loading - more aggressive
   useEffect(() => {
@@ -55,7 +78,7 @@ export default function AuthWrapper({ children, onAuthSuccess }: AuthWrapperProp
   }, [loading, user])
 
   // Show loading state (but not if timeout has occurred)
-  if (loading && !forceShowAuth) {
+  if ((loading || !onboardingCheckDone) && !forceShowAuth) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center">
         <StaggeredFadeIn className="text-center">

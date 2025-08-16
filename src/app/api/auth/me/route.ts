@@ -31,7 +31,8 @@ export async function GET(request: NextRequest) {
           email: user.email,
           displayName: user.user_metadata?.display_name,
           firstName: user.user_metadata?.first_name,
-          lastName: user.user_metadata?.last_name
+          lastName: user.user_metadata?.last_name,
+          onboardingCompleted: false // Default to false if profile not found
         }
       })
     }
@@ -47,6 +48,7 @@ export async function GET(request: NextRequest) {
         bio: profile.bio,
         location: profile.location,
         dietaryRestrictions: profile.dietary_restrictions,
+        onboardingCompleted: profile.onboarding_completed || false,
         createdAt: profile.created_at,
         updatedAt: profile.updated_at
       }

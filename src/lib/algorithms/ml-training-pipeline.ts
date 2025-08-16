@@ -205,7 +205,7 @@ export class MLTrainingPipeline {
   private async collectTrainingData(): Promise<TrainingData[]> {
     try {
       // Get recommendation interactions with actual outcomes
-      const { data: interactions, error } = await supabase!!
+      const { data: interactions, error } = await supabase!
         .from('recommendation_interactions')
         .select(`
           *,

@@ -199,7 +199,7 @@ export class CollaborativeFiltering {
   async findSimilarItems(targetItem: FoodExperience): Promise<ItemSimilarity[]> {
     try {
       // Get items with similar taste profiles
-      const { data: candidateItems, error } = await supabase!!
+      const { data: candidateItems, error } = await supabase!
         .from('food_experiences_detailed')
         .select('*')
         .neq('id', targetItem.id)

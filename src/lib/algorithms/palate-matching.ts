@@ -383,7 +383,7 @@ export class PalateMatchingAlgorithm {
    */
   private computeSimilarityScore(profileA: PalateProfile, profileB: PalateProfile): UserSimilarity {
     // Taste vector similarity (cosine similarity)
-    const tasteAlignment = this.tasteVectorEngine.calculateSimilarity(
+    const tasteAlignment = TasteVectorProcessor.calculateSimilarity(
       profileA.palate_vector,
       profileB.palate_vector
     )
@@ -448,7 +448,7 @@ export class PalateMatchingAlgorithm {
     
     // Weight by context importance
     const contextScore = Object.entries(context).reduce((score, [key, value]) => {
-      const weight = ALGORITHM_CONFIG.CONTEXT_WEIGHTS[key] || 0.1
+      const weight = ALGORITHM_CONFIG.CONTEXT_WEIGHTS[key as keyof typeof ALGORITHM_CONFIG.CONTEXT_WEIGHTS] || 0.1
       return score + (weight * familiarityScore)
     }, 0)
     
@@ -758,7 +758,7 @@ export class PalateMatchingAlgorithm {
   // Database Operations
   private async getPalateProfile(userId: string): Promise<PalateProfile | null> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabase!
         .from('user_palate_profiles')
         .select('*')
         .eq('user_id', userId)
@@ -785,7 +785,7 @@ export class PalateMatchingAlgorithm {
 
   private async storePalateProfile(profile: PalateProfile): Promise<void> {
     try {
-      const { error } = await supabase
+      const { error } = await supabase!
         .from('user_palate_profiles')
         .upsert({
           user_id: profile.user_id,
@@ -833,7 +833,7 @@ export class PalateMatchingAlgorithm {
 
   private async findSimilarUsers(userId: string, maxUsers: number): Promise<UserSimilarity[]> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabase!
         .from('user_similarity_cache')
         .select('*')
         .or(`user_a.eq.${userId},user_b.eq.${userId}`)
@@ -867,7 +867,7 @@ export class PalateMatchingAlgorithm {
   private async getCandidateItems(userId: string, context: ExperienceContext): Promise<FoodExperience[]> {
     try {
       // Get food experiences from similar contexts and high-rated items
-      const { data, error } = await supabase
+      const { data, error } = await supabase!
         .from('food_experiences_detailed')
         .select('*')
         .neq('user_id', userId) // Exclude user's own experiences
@@ -898,7 +898,7 @@ export class PalateMatchingAlgorithm {
 
   private async getCachedSimilarity(userA: string, userB: string): Promise<UserSimilarity | null> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabase!
         .from('user_similarity_cache')
         .select('*')
         .or(`and(user_a.eq.${userA},user_b.eq.${userB}),and(user_a.eq.${userB},user_b.eq.${userA})`)
@@ -933,7 +933,7 @@ export class PalateMatchingAlgorithm {
       const expiresAt = new Date()
       expiresAt.setDate(expiresAt.getDate() + 7) // 7 days from now
 
-      const { error } = await supabase
+      const { error } = await supabase!
         .from('user_similarity_cache')
         .upsert({
           user_a: similarity.user_a,
@@ -968,7 +968,7 @@ export class PalateMatchingAlgorithm {
         expires_at: new Date(Date.now() + ALGORITHM_CONFIG.CACHE_TTL).toISOString()
       }))
 
-      const { error } = await supabase
+      const { error } = await supabase!
         .from('recommendation_cache')
         .upsert(cacheEntries)
 

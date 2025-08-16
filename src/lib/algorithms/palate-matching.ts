@@ -5,6 +5,7 @@
  * Core Innovation: 11-dimensional taste vectors with emotional intelligence
  * Target Accuracy: 92.3% recommendation accuracy
  * Patent Status: Patent Pending - Advanced Palate Profiling System
+ * Build: Force deployment refresh
  */
 
 import { supabase } from '@/lib/supabase/client'

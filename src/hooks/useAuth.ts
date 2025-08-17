@@ -23,6 +23,15 @@ interface AuthState {
   error: string | null
 }
 
+/**
+ * SPARC Architecture: Simplified Auth Hook
+ * 
+ * This hook uses ONLY Supabase's native session management:
+ * 1. Uses supabase.auth.getSession() for initial session
+ * 2. Uses supabase.auth.onAuthStateChange() for session monitoring
+ * 3. NO manual cookie parsing or session restoration
+ * 4. Relies on Supabase's built-in session persistence
+ */
 export function useAuth() {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
@@ -31,125 +40,16 @@ export function useAuth() {
   })
 
   useEffect(() => {
-    // Skip initialization if supabase client is not available (during SSR/build)
+    // Skip if no Supabase client (SSR/build)
     if (!supabase) {
       setAuthState({ user: null, loading: false, error: null })
       return
     }
 
-    // Get initial session
+    // Get initial session using Supabase's native method
     const getInitialSession = async () => {
       try {
-        // Check for OAuth success/error in URL and handle redirect
-        const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
-        if (urlParams?.get('auth') === 'success') {
-          // Remove the query parameter
-          window.history.replaceState({}, '', window.location.pathname)
-        }
-        
-        // Check for auth-success cookie from OAuth callback
-        if (typeof window !== 'undefined') {
-          const authSuccess = document.cookie.split(';').find(c => c.trim().startsWith('auth-success='))
-          if (authSuccess) {
-            console.log('✅ OAuth success detected from callback')
-            // Clear the cookie
-            document.cookie = 'auth-success=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
-          }
-        }
-        
-        // Quick check for existing session first
-        if (typeof window !== 'undefined') {
-          // Dynamically generate cookie name based on Supabase URL
-          const getProjectRef = () => {
-            const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-            if (!url) return 'unknown'
-            try {
-              const match = url.match(/https:\/\/([^.]+)\.supabase\.co/)
-              return match ? match[1] : 'unknown'
-            } catch {
-              return 'unknown'
-            }
-          }
-          
-          const projectRef = getProjectRef()
-          // Check multiple possible auth token locations
-          const tokenKeys = [
-            `sb-${projectRef}-auth-token`,
-            'supabase.auth.token'
-          ]
-          const hasToken = tokenKeys.some(key => {
-            const token = localStorage.getItem(key)
-            return token && token !== 'undefined' && token !== 'null'
-          })
-          
-          if (!hasToken) {
-            console.log('❌ No valid auth token found in localStorage, skipping session restore')
-            setAuthState({ user: null, loading: false, error: null })
-            return
-          } else {
-            console.log('✅ Auth token found, proceeding with session restore')
-          }
-        }
-        
-        // Check if we just completed onboarding and need session restoration priority
-        const justCompletedOnboarding = typeof window !== 'undefined' && 
-          (window.location.pathname === '/app' && localStorage.getItem('onboardingCompleted') === 'true')
-        
-        // For post-onboarding users, prioritize session restoration
-        if (justCompletedOnboarding) {
-          console.log('🔄 Post-onboarding user detected, prioritizing session restoration')
-          // Clear the onboarding flag to prevent repeated checks
-          localStorage.removeItem('onboardingCompleted')
-        }
-        
-        // Try to restore session from cookies first
-        let { data: { session }, error } = await supabase?.auth.getSession() || { data: { session: null }, error: null }
-        
-        // If no session from Supabase, try to recover from existing cookies
-        if (!session && typeof window !== 'undefined') {
-          // Check for existing Supabase auth cookies
-          const cookies = document.cookie.split(';').reduce((acc: Record<string, unknown>, cookie) => {
-            const [name, value] = cookie.trim().split('=')
-            acc[name] = value
-            return acc
-          }, {})
-          
-          // Look for Supabase auth token cookie
-          const authCookie = Object.keys(cookies).find(key => 
-            key.includes('sb-') && key.includes('auth-token')
-          )
-          
-          if (authCookie && cookies[authCookie]) {
-            try {
-              const authData = JSON.parse(decodeURIComponent(cookies[authCookie] as string))
-              if (authData.access_token) {
-                console.log('🔄 Found existing auth cookie, attempting to restore session')
-                // Set the session manually and refresh
-                await supabase?.auth.setSession({
-                  access_token: authData.access_token,
-                  refresh_token: authData.refresh_token
-                })
-                
-                // Get the restored session
-                const result = await supabase?.auth.getSession() || { data: { session: null }, error: null }
-                session = result.data.session
-                error = result.error
-              }
-            } catch (cookieError) {
-              console.warn('Failed to parse auth cookie:', cookieError)
-            }
-          }
-        }
-        
-        // If still no session, try refresh
-        if (!session) {
-          const { error: refreshError } = await supabase?.auth.refreshSession() || { error: 'No Supabase client' }
-          if (!refreshError) {
-            const result = await supabase?.auth.getSession() || { data: { session: null }, error: null }
-            session = result.data.session
-            error = result.error
-          }
-        }
+        const { data: { session }, error } = await supabase!.auth.getSession()
         
         if (error) {
           console.error('Session error:', error)
@@ -158,41 +58,10 @@ export function useAuth() {
         }
 
         if (session?.user) {
-          console.log('✅ Session found:', session.user.id, 'at', window.location.pathname)
-          try {
-            // Fetch user profile with timeout
-            const controller = new AbortController()
-            const timeoutId = setTimeout(() => controller.abort(), 3000) // 3 second timeout
-            
-            const response = await fetch('/api/auth/me', {
-              signal: controller.signal
-            })
-            clearTimeout(timeoutId)
-            
-            if (response.ok) {
-              const data = await response.json()
-              setAuthState({ user: data.user, loading: false, error: null })
-            } else {
-              throw new Error('Profile API failed')
-            }
-          } catch (error) {
-            // Fallback to basic user data if API fails
-            console.warn('Profile API error, using basic user data:', error)
-            setAuthState({
-              user: {
-                id: session.user.id,
-                email: session.user.email || '',
-                displayName: session.user.user_metadata?.display_name,
-                firstName: session.user.user_metadata?.first_name,
-                lastName: session.user.user_metadata?.last_name,
-                onboardingCompleted: null // Default to null to prevent false positives and redirect loops
-              },
-              loading: false,
-              error: null
-            })
-          }
+          console.log('✅ Session found:', session.user.id)
+          await loadUserProfile(session.user.id, session)
         } else {
-          console.log('❌ No session found at', typeof window !== 'undefined' ? window.location.pathname : 'server')
+          console.log('❌ No session found')
           setAuthState({ user: null, loading: false, error: null })
         }
       } catch (error) {
@@ -201,62 +70,76 @@ export function useAuth() {
       }
     }
 
+    // Load user profile from database
+    const loadUserProfile = async (userId: string, session: any) => {
+      try {
+        const response = await fetch('/api/auth/me')
+        if (response.ok) {
+          const data = await response.json()
+          setAuthState({ user: data.user, loading: false, error: null })
+        } else {
+          // Fallback to session user data
+          setAuthState({
+            user: {
+              id: session.user.id,
+              email: session.user.email || '',
+              displayName: session.user.user_metadata?.display_name || session.user.user_metadata?.full_name,
+              firstName: session.user.user_metadata?.first_name || session.user.user_metadata?.given_name,
+              lastName: session.user.user_metadata?.last_name || session.user.user_metadata?.family_name,
+              profileImage: session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture,
+              onboardingCompleted: null
+            },
+            loading: false,
+            error: null
+          })
+        }
+      } catch (error) {
+        console.warn('Profile fetch failed, using session data:', error)
+        setAuthState({
+          user: {
+            id: session.user.id,
+            email: session.user.email || '',
+            displayName: session.user.user_metadata?.display_name || session.user.user_metadata?.full_name,
+            firstName: session.user.user_metadata?.first_name || session.user.user_metadata?.given_name,
+            lastName: session.user.user_metadata?.last_name || session.user.user_metadata?.family_name,
+            profileImage: session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture,
+            onboardingCompleted: null
+          },
+          loading: false,
+          error: null
+        })
+      }
+    }
+
     getInitialSession()
 
-    // Add timeout to prevent infinite loading - more aggressive timeouts
-    const timeoutDuration = 3000 // 3 seconds max
-    const authTimeout = setTimeout(() => {
-      console.warn('Auth timeout - forcing no user state')
-      setAuthState({ user: null, loading: false, error: null })
-    }, timeoutDuration)
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase?.auth.onAuthStateChange(
+    // Listen for auth state changes using Supabase's native listener
+    const { data: { subscription } } = supabase!.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state change:', event)
+        
         if (event === 'SIGNED_IN' && session?.user) {
-          try {
-            const response = await fetch('/api/auth/me')
-            if (response.ok) {
-              const data = await response.json()
-              setAuthState({ user: data.user, loading: false, error: null })
-            } else {
-              setAuthState({
-                user: {
-                  id: session.user.id,
-                  email: session.user.email || '',
-                  displayName: session.user.user_metadata?.display_name,
-                  firstName: session.user.user_metadata?.first_name,
-                  lastName: session.user.user_metadata?.last_name,
-                  onboardingCompleted: null // Default to null to prevent false positives and redirect loops
-                },
-                loading: false,
-                error: null
-              })
-            }
-          } catch (error) {
-            console.error('User profile fetch error:', error)
-            setAuthState({
-              user: {
-                id: session.user.id,
-                email: session.user.email || '',
-                displayName: session.user.user_metadata?.display_name,
-                firstName: session.user.user_metadata?.first_name,
-                lastName: session.user.user_metadata?.last_name,
-                onboardingCompleted: null // Default to null to prevent false positives and redirect loops
-              },
-              loading: false,
-              error: null
-            })
-          }
+          await loadUserProfile(session.user.id, session)
         } else if (event === 'SIGNED_OUT') {
           setAuthState({ user: null, loading: false, error: null })
+        } else if (event === 'TOKEN_REFRESHED' && session?.user) {
+          // Session refreshed, reload profile if needed
+          await loadUserProfile(session.user.id, session)
         }
       }
     )
 
+    // Cleanup timeout for loading state
+    const loadingTimeout = setTimeout(() => {
+      if (authState.loading) {
+        console.warn('Auth loading timeout')
+        setAuthState(prev => ({ ...prev, loading: false }))
+      }
+    }, 5000)
+
     return () => {
       subscription.unsubscribe()
-      clearTimeout(authTimeout)
+      clearTimeout(loadingTimeout)
     }
   }, [])
 
@@ -295,7 +178,6 @@ export function useAuth() {
     try {
       setAuthState(prev => ({ ...prev, loading: true, error: null }))
       
-      // Use Supabase client directly for authentication
       if (!supabase) {
         throw new Error('Supabase client not available')
       }
@@ -306,7 +188,6 @@ export function useAuth() {
       })
 
       if (authError) {
-        // Check if it's an email not confirmed error
         if (authError.message.includes('Email not confirmed')) {
           const error = new Error('Email not verified')
           ;(error as any).code = 'EMAIL_NOT_VERIFIED'
@@ -320,8 +201,7 @@ export function useAuth() {
         throw new Error('Invalid credentials')
       }
 
-      // The auth state will be updated by the onAuthStateChange listener
-      // So we just need to wait a moment for it to trigger
+      // Auth state will be updated by onAuthStateChange listener
       setTimeout(() => {
         setAuthState(prev => ({ ...prev, loading: false }))
       }, 100)
@@ -331,7 +211,6 @@ export function useAuth() {
       const errorMessage = error instanceof Error ? error.message : 'Login failed'
       setAuthState(prev => ({ ...prev, loading: false, error: errorMessage }))
       
-      // Return additional error data if available
       return { 
         success: false, 
         error: errorMessage,
@@ -344,10 +223,14 @@ export function useAuth() {
 
   const signOut = async () => {
     try {
-      const response = await fetch('/api/auth/logout', { method: 'POST' })
+      if (!supabase) {
+        throw new Error('Supabase client not available')
+      }
+
+      const { error } = await supabase.auth.signOut()
       
-      if (!response.ok) {
-        throw new Error('Logout failed')
+      if (error) {
+        throw new Error(error.message)
       }
 
       setAuthState({ user: null, loading: false, error: null })
@@ -363,20 +246,23 @@ export function useAuth() {
     try {
       setAuthState(prev => ({ ...prev, loading: true, error: null }))
       
-      // Try GET instead of POST to work around deployment issue
-      const response = await fetch('/api/auth/social/google?action=signin', {
-        method: 'GET'
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Google sign-in failed')
+      if (!supabase) {
+        throw new Error('Supabase client not available')
       }
 
-      // Redirect to Google OAuth URL
-      window.location.href = data.url
-      
+      // Use Supabase's native OAuth method
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/api/auth/callback/google`
+        }
+      })
+
+      if (error) {
+        throw new Error(error.message)
+      }
+
+      // Supabase will handle the redirect automatically
       return { success: true, data }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Google sign-in failed'

@@ -1,344 +1,98 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+/**
+ * SPARC Architecture: Native Supabase OAuth Callback
+ * 
+ * This endpoint uses ONLY Supabase's native OAuth handling to:
+ * 1. Exchange the authorization code for tokens using Supabase's built-in methods
+ * 2. Create user profiles using the authenticated user data
+ * 3. Redirect users based on onboarding completion status
+ * 
+ * NO manual token generation, NO manual session management, NO manual cookies
+ */
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
   const error = requestUrl.searchParams.get('error')
   
-  console.log('🔍 OAuth Callback Started:', {
-    url: requestUrl.toString(),
+  console.log('🔍 Supabase Native OAuth Callback:', {
     hasCode: !!code,
     error,
     timestamp: new Date().toISOString()
   })
   
   if (error) {
-    console.error('❌ Google OAuth error:', error)
-    return NextResponse.redirect(new URL(`/debug-oauth?error=oauth_error&details=${encodeURIComponent(error)}`, requestUrl.origin))
+    console.error('❌ OAuth error:', error)
+    return NextResponse.redirect(new URL(`/?error=oauth_error&details=${encodeURIComponent(error)}`, requestUrl.origin))
   }
   
   if (!code) {
     console.error('❌ No authorization code received')
-    return NextResponse.redirect(new URL('/debug-oauth?error=no_code', requestUrl.origin))
+    return NextResponse.redirect(new URL('/?error=no_code', requestUrl.origin))
   }
 
   try {
-    console.log('🔄 Step 1: Starting token exchange with Google...')
-    
-    // Check environment variables first
-    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-      throw new Error(`Missing OAuth credentials: clientId=${!!process.env.GOOGLE_CLIENT_ID}, clientSecret=${!!process.env.GOOGLE_CLIENT_SECRET}`)
-    }
-    
-    // Exchange code for tokens
-    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        client_id: process.env.GOOGLE_CLIENT_ID!,
-        client_secret: process.env.GOOGLE_CLIENT_SECRET!,
-        code,
-        grant_type: 'authorization_code',
-        redirect_uri: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/auth/callback/google`,
-      }),
-    })
-    
-    console.log('🔄 Step 2: Token exchange response received:', {
-      status: tokenResponse.status,
-      ok: tokenResponse.ok
-    })
-
-    if (!tokenResponse.ok) {
-      const errorData = await tokenResponse.text()
-      console.error('Token exchange failed:', errorData)
-      throw new Error('Failed to exchange code for tokens')
-    }
-
-    const tokens = await tokenResponse.json()
-    
-    // Get user info from Google
-    const userResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-      headers: {
-        Authorization: `Bearer ${tokens.access_token}`,
-      },
-    })
-
-    if (!userResponse.ok) {
-      throw new Error('Failed to get user info')
-    }
-
-    const googleUser = await userResponse.json()
-    console.log('✅ Google user authenticated:', {
-      email: googleUser.email,
-      name: googleUser.name,
-      id: googleUser.id,
-      verified_email: googleUser.verified_email
-    })
-    
-    // Create Supabase client
+    // Create Supabase client and let it handle OAuth flow
     const supabase = await createClient()
-    console.log('🔗 Supabase client created')
     
-    // Check if user already has a valid session first
-    const { data: { session: existingSession } } = await supabase.auth.getSession()
+    // Use Supabase's native OAuth token exchange
+    const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
     
-    if (existingSession?.user?.email === googleUser.email) {
-      console.log('✅ User already has valid session, redirecting...')
-      
-      // Check if profile is complete
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('onboarding_completed')
-        .eq('id', existingSession?.user?.id)
-        .single()
-      
-      const redirectUrl = profile?.onboarding_completed ? '/app' : '/onboarding/intro'
-      console.log('🔄 Redirecting existing session to:', redirectUrl)
-      
-      return NextResponse.redirect(new URL(redirectUrl, requestUrl.origin))
+    if (exchangeError) {
+      console.error('❌ Supabase OAuth exchange failed:', exchangeError)
+      throw new Error(`OAuth exchange failed: ${exchangeError.message}`)
     }
     
-    console.log('🔄 Step 4: No existing session, handling OAuth user...')
-    
-    // Find existing user by email
-    const { data: { users }, error: listError } = await supabase.auth.admin.listUsers()
-    
-    let userId: string | undefined
-    let existingUser = null
-    
-    if (!listError && users) {
-      existingUser = users.find(u => u.email === googleUser.email)
-      if (existingUser) {
-        userId = existingUser.id
-        console.log('✅ Found existing user:', { id: existingUser.id, email: existingUser.email })
-      }
+    if (!data.session || !data.user) {
+      throw new Error('No session or user data received from OAuth')
     }
     
-    // Generate a temporary password for signing in
-    const tempPassword = crypto.randomUUID() + crypto.randomUUID()
+    console.log('✅ Supabase OAuth success:', {
+      userId: data.user.id,
+      email: data.user.email,
+      provider: data.user.app_metadata?.provider
+    })
     
-    if (existingUser) {
-      // Update existing user's password for sign-in
-      console.log('🔄 Updating existing user password...')
-      const { error: updateError } = await supabase.auth.admin.updateUserById(userId!, {
-        password: tempPassword,
-        user_metadata: {
-          ...existingUser.user_metadata,
-          display_name: googleUser.name,
-          first_name: googleUser.given_name,
-          last_name: googleUser.family_name,
-          profile_image_url: googleUser.picture,
-          provider: 'google',
-          google_id: googleUser.id
-        }
-      })
-      
-      if (updateError) {
-        console.error('Failed to update user:', updateError)
-        throw new Error('Failed to update user')
-      }
-    } else {
-      // Create new user
-      console.log('🔄 Creating new user...')
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: googleUser.email,
-        password: tempPassword,
-        options: {
-          data: {
-            display_name: googleUser.name,
-            first_name: googleUser.given_name,
-            last_name: googleUser.family_name,
-            profile_image_url: googleUser.picture,
-            provider: 'google',
-            google_id: googleUser.id
-          }
-        }
-      })
-      
-      if (signUpError) {
-        // If user already exists, that's ok - we'll sign them in instead
-        if (signUpError.message.includes('already registered') || signUpError.message.includes('already exists')) {
-          console.log('✅ User already exists, will sign in instead')
-          // Find the existing user by email
-          const { data: existingUsers } = await supabase.auth.admin.listUsers({
-            page: 1,
-            perPage: 1000
-          })
-          const foundUser = existingUsers?.users?.find(u => u.email === googleUser.email)
-          userId = foundUser?.id
-        } else {
-          console.error('Signup error:', signUpError)
-          throw new Error(`Failed to create user: ${signUpError.message}`)
-        }
-      } else {
-        userId = signUpData?.user?.id
-        console.log('✅ New user created:', userId)
-      }
-    }
-    
-    if (!userId) {
-      throw new Error('Failed to create or find user')
-    }
-    
-    // Create/update profile in database
+    // Create or update user profile with OAuth data
     const { error: profileError } = await supabase
       .from('profiles')
       .upsert({
-        id: userId,
-        email: googleUser.email,
-        display_name: googleUser.name || '',
-        first_name: googleUser.given_name || '',
-        last_name: googleUser.family_name || '',
-        profile_image_url: googleUser.picture,
-        email_verified: true,
+        id: data.user.id,
+        email: data.user.email || '',
+        display_name: data.user.user_metadata?.full_name || data.user.user_metadata?.name || '',
+        first_name: data.user.user_metadata?.given_name || '',
+        last_name: data.user.user_metadata?.family_name || '',
+        profile_image_url: data.user.user_metadata?.avatar_url || data.user.user_metadata?.picture,
+        email_verified: data.user.email_confirmed_at ? true : false,
         privacy_level: 'friends',
-        created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       }, {
         onConflict: 'id'
       })
     
     if (profileError) {
-      console.error('Profile upsert error:', profileError)
+      console.warn('Profile upsert warning:', profileError)
+      // Don't fail the authentication for profile errors
     }
     
-    // Now sign in the user - try multiple approaches
-    let signInData = null
-    let signInError = null
-    
-    // First try with the temp password
-    const signInResult = await supabase.auth.signInWithPassword({
-      email: googleUser.email,
-      password: tempPassword
-    })
-    
-    signInData = signInResult.data
-    signInError = signInResult.error
-    
-    // If that fails, try to create a new session directly using admin API
-    if (signInError || !signInData?.session) {
-      console.log('Standard sign-in failed, using admin API to create session')
-      
-      // Use admin API to create a session token directly
-      const { data: sessionData, error: sessionError } = await supabase.auth.admin.createUser({
-        email: googleUser.email,
-        email_confirm: true,
-        user_metadata: {
-          display_name: googleUser.name,
-          first_name: googleUser.given_name,
-          last_name: googleUser.family_name,
-          profile_image_url: googleUser.picture,
-          provider: 'google',
-          google_id: googleUser.id
-        }
-      })
-      
-      if (!sessionError && userId) {
-        // Generate access token for the user
-        const { data: newSession, error: tokenError } = await supabase.auth.admin.generateLink({
-          type: 'magiclink',
-          email: googleUser.email
-        })
-        
-        // Create a manual session
-        signInData = {
-          user: { id: userId, email: googleUser.email },
-          session: {
-            access_token: crypto.randomUUID(), // Generate a session token
-            refresh_token: crypto.randomUUID(),
-            expires_in: 3600,
-            user: { id: userId, email: googleUser.email }
-          }
-        }
-      }
-    }
-    
-    if (!signInData?.session) {
-      console.error('All sign-in methods failed')
-      throw new Error('Failed to create session after multiple attempts')
-    }
-    
-    // Success! Set cookies and redirect
-    console.log('🎉 OAuth Success! Creating session and redirecting:', {
-      userId: userId,
-      email: googleUser.email,
-      sessionExists: !!signInData.session,
-      accessToken: signInData.session.access_token ? 'SET' : 'MISSING'
-    })
-    
-    // Determine redirect URL based on profile completeness
-    let redirectUrl = '/onboarding/intro'
-    
-    // Check if profile is complete
+    // Check onboarding status to determine redirect
     const { data: profile } = await supabase
       .from('profiles')
       .select('onboarding_completed')
-      .eq('id', userId)
+      .eq('id', data.user.id)
       .single()
     
-    if (profile?.onboarding_completed) {
-      redirectUrl = '/app'
-    }
+    const redirectUrl = profile?.onboarding_completed ? '/app' : '/onboarding/intro'
     
     console.log('🔄 Redirecting to:', redirectUrl)
-    const response = NextResponse.redirect(new URL(redirectUrl, requestUrl.origin))
     
-    // Set proper Supabase auth cookies
-    const supabaseUrl = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL!)
-    const projectRef = supabaseUrl.hostname.split('.')[0]
-    
-    // Set both the Supabase cookie AND localStorage-compatible cookie
-    response.cookies.set(`sb-${projectRef}-auth-token`, JSON.stringify({
-      access_token: signInData.session.access_token,
-      refresh_token: signInData.session.refresh_token,
-      provider_token: null,
-      provider_refresh_token: null,
-      user: signInData.user
-    }), {
-      httpOnly: false, // Supabase client needs to read this
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-      path: '/'
-    })
-    
-    // Also set the refresh token separately for Supabase client
-    response.cookies.set(`sb-${projectRef}-auth-token-refresh`, signInData.session.refresh_token, {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-      path: '/'
-    })
-    
-    // Create a client-side script to store tokens in localStorage
-    const clientScript = `
-      <script>
-        localStorage.setItem('sb-${projectRef}-auth-token', '${JSON.stringify({
-          access_token: signInData.session.access_token,
-          refresh_token: signInData.session.refresh_token,
-          expires_at: Date.now() + (signInData.session.expires_in || 3600) * 1000
-        })}');
-        window.location.href = '${redirectUrl}';
-      </script>
-    `
-    
-    // Return HTML response with script to set localStorage
-    return new NextResponse(clientScript, {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/html',
-        'Set-Cookie': response.headers.get('Set-Cookie') || ''
-      }
-    })
+    // Supabase handles all session management automatically
+    return NextResponse.redirect(new URL(redirectUrl, requestUrl.origin))
     
   } catch (error) {
     console.error('💥 OAuth callback error:', {
       error: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined,
       timestamp: new Date().toISOString()
     })
     return NextResponse.redirect(new URL(`/?error=auth_failed&message=${encodeURIComponent(error instanceof Error ? error.message : 'Authentication failed')}`, requestUrl.origin))

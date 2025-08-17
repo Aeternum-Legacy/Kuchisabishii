@@ -298,7 +298,7 @@ async function updateTasteProfile(supabase: Awaited<ReturnType<typeof createClie
 async function generateTrainingData(supabase: Awaited<ReturnType<typeof createClient>>, userId: string, feedback: z.infer<typeof feedbackSchema>): Promise<TrainingData> {
   // Get user features
   const [userProfile, tasteProfile, recentExperiences] = await Promise.all([
-    supabase.from('user_profiles').select('*').eq('id', userId).single(),
+    supabase.from('profiles').select('*').eq('id', userId).single(),
     supabase.from('taste_profiles').select('*').eq('user_id', userId).single(),
     supabase.from('food_experiences').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(50)
   ])

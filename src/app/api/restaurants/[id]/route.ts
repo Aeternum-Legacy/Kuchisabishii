@@ -61,7 +61,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           atmosphere_rating,
           would_recommend,
           visit_date,
-          user_profiles (
+          profiles (
             display_name,
             avatar_url
           )
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           dish_name,
           overall_rating,
           experienced_at,
-          user_profiles (
+          profiles (
             display_name,
             avatar_url
           )
@@ -181,7 +181,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     // Check if user has permission to edit
     const { data: userProfile } = await supabase
-      .from('user_profiles')
+      .from('profiles')
       .select('id')
       .eq('id', user.id)
       .single()

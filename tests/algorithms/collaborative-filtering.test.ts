@@ -43,14 +43,16 @@ describe('CollaborativeFiltering', () => {
           excitement: 7,
           comfort: 9,
           surprise: 5,
-          nostalgia: 6
+          nostalgia: 6,
+          overall_rating: 8,
+          emotional_intensity: 7
         },
         context: {
-          time_of_day: 'dinner',
-          social_setting: 'friends',
-          mood_before: 'happy',
-          weather: 'mild',
-          location_type: 'restaurant'
+          time_of_day: 'dinner' as const,
+          social_setting: 'friends' as const,
+          mood_before: 'happy' as const,
+          weather: 'mild' as const,
+          location_type: 'restaurant' as const
         },
         timestamp: new Date(),
         confidence: 0.8,
@@ -87,11 +89,12 @@ describe('CollaborativeFiltering', () => {
           spicy: 4, crunchy: 6, creamy: 5, chewy: 6, hot: 7, cold: 2
         },
         emotional_response: {
-          satisfaction: 8, excitement: 7, comfort: 9, surprise: 5, nostalgia: 6
+          satisfaction: 8, excitement: 7, comfort: 9, surprise: 5, nostalgia: 6,
+          overall_rating: 8, emotional_intensity: 7
         },
         context: {
-          time_of_day: 'dinner', social_setting: 'friends', mood_before: 'happy',
-          weather: 'mild', location_type: 'restaurant'
+          time_of_day: 'dinner' as const, social_setting: 'friends' as const, mood_before: 'happy' as const,
+          weather: 'mild' as const, location_type: 'restaurant' as const
         },
         timestamp: new Date(),
         confidence: 0.8,
@@ -113,8 +116,8 @@ describe('CollaborativeFiltering', () => {
           sweet: 5, salty: 8, sour: 2, bitter: 3, umami: 7,
           spicy: 4, crunchy: 6, creamy: 5, chewy: 6, hot: 7, cold: 2
         },
-        emotional_response: { satisfaction: 8, excitement: 7, comfort: 9, surprise: 5, nostalgia: 6 },
-        context: { time_of_day: 'dinner', social_setting: 'friends', mood_before: 'happy', weather: 'mild', location_type: 'restaurant' },
+        emotional_response: { satisfaction: 8, excitement: 7, comfort: 9, surprise: 5, nostalgia: 6, overall_rating: 8, emotional_intensity: 7 },
+        context: { time_of_day: 'dinner' as const, social_setting: 'friends' as const, mood_before: 'happy' as const, weather: 'mild' as const, location_type: 'restaurant' as const },
         timestamp: new Date(), confidence: 0.8, overall_rating: 8
       }
       

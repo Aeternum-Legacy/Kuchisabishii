@@ -260,7 +260,7 @@ export async function POST(request: NextRequest) {
     }
 
     await supabase
-      .from('user_profiles')
+      .from('profiles')
       .update(profileUpdates)
       .eq('id', user.id)
 

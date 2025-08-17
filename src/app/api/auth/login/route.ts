@@ -91,8 +91,8 @@ export async function POST(request: NextRequest) {
       // Continue without profile data if fetch fails
     }
 
-    // Create a response with Set-Cookie headers for the session
-    const response = NextResponse.json({
+    // Return user data - Supabase handles session cookies automatically
+    return NextResponse.json({
       message: 'Login successful',
       user: {
         id: authData.user.id,
@@ -100,31 +100,10 @@ export async function POST(request: NextRequest) {
         displayName: profile?.display_name || authData.user.user_metadata?.display_name,
         firstName: profile?.first_name || authData.user.user_metadata?.first_name,
         lastName: profile?.last_name || authData.user.user_metadata?.last_name,
-        profileImage: profile?.profile_image_url
-      },
-      session: {
-        access_token: authData.session.access_token,
-        refresh_token: authData.session.refresh_token,
-        expires_at: authData.session.expires_at
+        profileImage: profile?.profile_image_url,
+        onboardingCompleted: profile?.onboarding_completed || false
       }
     })
-
-    // Set session cookies
-    response.cookies.set('sb-access-token', authData.session.access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: authData.session.expires_in
-    })
-    
-    response.cookies.set('sb-refresh-token', authData.session.refresh_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7 // 7 days
-    })
-
-    return response
 
   } catch (error) {
     console.error('Login error:', error)

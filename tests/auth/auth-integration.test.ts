@@ -3,7 +3,7 @@
  * Tests the complete authentication flow including registration, login, and social auth
  */
 
-import { describe, it, expect, beforeEach, afterEach } from '@jest/testing-library/jest-dom'
+import { describe, it, expect, beforeEach, afterEach } from '@jest/globals'
 import { createClient } from '@supabase/supabase-js'
 
 // Mock environment variables for testing

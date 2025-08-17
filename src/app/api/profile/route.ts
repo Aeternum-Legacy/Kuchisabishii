@@ -98,7 +98,7 @@ export async function PUT(request: NextRequest) {
     // Check if username is already taken (if updating username)
     if (updates.username) {
       const { data: existingUser } = await supabase
-        .from('user_profiles')
+        .from('profiles')
         .select('id')
         .eq('username', updates.username)
         .neq('id', user.id)

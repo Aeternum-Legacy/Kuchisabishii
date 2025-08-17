@@ -1,3 +1,6 @@
+// Export TasteVector type for backward compatibility
+export type { TasteVector } from './taste-vectors'
+
 /**
  * Kuchisabishii Patent-Pending Palate Matching Algorithm
  * Advanced AI-Powered Food Recommendation System
@@ -232,6 +235,41 @@ export class PalateMatchingAlgorithm {
       console.error('Error updating palate profile:', error)
       throw new Error('Failed to update palate profile')
     }
+  }
+
+  /**
+   * Calculate taste similarity between vectors (backward compatibility)
+   */
+  calculateTasteSimilarity(vectorA: TasteVector, vectorB: TasteVector): number {
+    return TasteVectorProcessor.calculateSimilarity(vectorA, vectorB)
+  }
+
+  /**
+   * Create taste vector (backward compatibility)
+   */
+  createTasteVector(input: Partial<TasteVector>): TasteVector {
+    return TasteVectorProcessor.createVector(input)
+  }
+
+  /**
+   * Apply emotional gradient descent (backward compatibility)
+   */
+  applyEmotionalGradientDescent(
+    currentVector: TasteVector,
+    experienceVector: TasteVector,
+    emotionalResponse: EmotionalResponse,
+    learningRate: number,
+    emotionalWeight: number,
+    contextualWeight: number
+  ): TasteVector {
+    return TasteVectorProcessor.applyEmotionalGradientDescent(
+      currentVector,
+      experienceVector,
+      emotionalResponse,
+      learningRate,
+      emotionalWeight,
+      contextualWeight
+    )
   }
 
   /**

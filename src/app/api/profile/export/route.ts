@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
 
     // Get user profile
     const { data: profile, error: profileError } = await supabase
-      .from('user_profiles')
+      .from('profiles')
       .select('*')
       .eq('id', user.id)
       .single();
@@ -47,8 +47,8 @@ export async function GET(request: NextRequest) {
       .from('friendships')
       .select(`
         *,
-        requester:user_profiles!friendships_requester_id_fkey(id, display_name, username),
-        addressee:user_profiles!friendships_addressee_id_fkey(id, display_name, username)
+        requester:profiles!friendships_requester_id_fkey(id, display_name, username),
+        addressee:profiles!friendships_addressee_id_fkey(id, display_name, username)
       `)
       .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
       .eq('status', 'accepted');

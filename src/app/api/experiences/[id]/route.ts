@@ -108,7 +108,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           allergens
         ),
         taste_experiences (*),
-        user_profiles!inner (
+        profiles!inner (
           id,
           display_name,
           avatar_url

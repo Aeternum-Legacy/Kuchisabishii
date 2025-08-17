@@ -499,6 +499,12 @@ export class TasteVectorProcessor {
   }
 }
 
+// Export individual functions for backward compatibility with tests
+export const calculateCosineSimilarity = TasteVectorProcessor.calculateSimilarity
+export const calculateEuclideanDistance = TasteVectorProcessor.calculateDistance
+export const normalizeTasteVector = TasteVectorProcessor.normalize
+export const calculateDiversityScore = TasteVectorProcessor.calculateDiversityScore
+
 /**
  * Taste Vector Utilities
  */

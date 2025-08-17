@@ -25,7 +25,9 @@ const mockEmotionalResponse: EmotionalResponse = {
   excitement: 7,
   comfort: 9,
   surprise: 5,
-  nostalgia: 6
+  nostalgia: 6,
+  overall_rating: 8,
+  emotional_intensity: 7
 }
 
 describe('PalateMatchingAlgorithm', () => {

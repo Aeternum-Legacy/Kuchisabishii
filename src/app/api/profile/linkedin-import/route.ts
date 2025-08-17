@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
 
     // Get current profile
     const { data: currentProfile, error: fetchError } = await supabase
-      .from('user_profiles')
+      .from('profiles')
       .select('*')
       .eq('id', user.id)
       .single();
@@ -163,7 +163,7 @@ export async function POST(request: NextRequest) {
 
     // Update user profile
     const { data: updatedProfile, error: updateError } = await supabase
-      .from('user_profiles')
+      .from('profiles')
       .upsert(profileUpdates)
       .eq('id', user.id)
       .select()
@@ -246,7 +246,7 @@ export async function PUT(request: NextRequest) {
 
     // Update the LinkedIn data in the profile
     const { data: updatedProfile, error: updateError } = await supabase
-      .from('user_profiles')
+      .from('profiles')
       .update({
         linkedin_data: linkedInData,
         updated_at: new Date().toISOString()
@@ -293,7 +293,7 @@ export async function DELETE(request: NextRequest) {
 
     // Remove LinkedIn data from profile
     const { data: updatedProfile, error: updateError } = await supabase
-      .from('user_profiles')
+      .from('profiles')
       .update({
         linkedin_imported: false,
         linkedin_data: null,

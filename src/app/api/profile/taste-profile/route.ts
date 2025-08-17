@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
 
     // Update user profile to mark taste profile as set up
     await supabase
-      .from('user_profiles')
+      .from('profiles')
       .update({ taste_profile_setup: true })
       .eq('id', user.id)
 
@@ -188,7 +188,7 @@ export async function PUT(request: NextRequest) {
 
     // Update user profile to mark taste profile as set up
     await supabase
-      .from('user_profiles')
+      .from('profiles')
       .update({ taste_profile_setup: true })
       .eq('id', user.id)
 

@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
 
     // Check if user has admin access or is viewing their own analytics
     const { data: userProfile } = await supabase
-      .from('user_profiles')
+      .from('profiles')
       .select('id')
       .eq('id', user.id)
       .single()

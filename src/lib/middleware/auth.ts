@@ -66,7 +66,7 @@ export async function isAdmin(userId: string): Promise<boolean> {
   
   try {
     const { data: profile, error } = await supabase
-      .from('user_profiles')
+      .from('profiles')
       .select('id') // Could add admin field later
       .eq('id', userId)
       .single()

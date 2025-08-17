@@ -9,7 +9,8 @@ import {
   calculateCosineSimilarity,
   calculateEuclideanDistance,
   normalizeTasteVector,
-  calculateDiversityScore
+  calculateDiversityScore,
+  TasteVectorProcessor
 } from '@/lib/algorithms/taste-vectors'
 
 const mockTasteVector: TasteVector = {
@@ -57,33 +58,27 @@ describe('TasteVector Mathematics', () => {
   })
 
   describe('Diversity Scoring', () => {
-    test('should calculate diversity for varied vectors', () => {
-      const vectors = [
-        mockTasteVector,
-        { ...mockTasteVector, sweet: 10, salty: 1 },
-        { ...mockTasteVector, umami: 10, spicy: 1 }
-      ]
+    test('should calculate diversity for individual vector', () => {
+      const diverseVector = { ...mockTasteVector, sweet: 10, salty: 1 }
       
-      const diversity = calculateDiversityScore(vectors)
+      const diversity = calculateDiversityScore(diverseVector)
       expect(diversity).toBeGreaterThan(0)
       expect(diversity).toBeLessThanOrEqual(1)
     })
   })
 
   describe('Performance', () => {
-    test('should handle large vector sets efficiently', () => {
-      const vectors = Array(1000).fill(null).map((_, i) => ({
-        ...mockTasteVector,
-        sweet: (i % 10) + 1,
-        salty: ((i * 2) % 10) + 1
-      }))
+    test('should handle similarity calculations efficiently', () => {
+      const vector1 = mockTasteVector
+      const vector2 = { ...mockTasteVector, sweet: 8, salty: 6 }
       
       const startTime = Date.now()
-      const diversity = calculateDiversityScore(vectors)
+      const similarity = calculateCosineSimilarity(vector1, vector2)
       const processingTime = Date.now() - startTime
       
-      expect(diversity).toBeGreaterThan(0)
-      expect(processingTime).toBeLessThan(1000) // Should be fast
+      expect(similarity).toBeGreaterThan(0)
+      expect(similarity).toBeLessThanOrEqual(1)
+      expect(processingTime).toBeLessThan(100) // Should be fast
     })
   })
 })

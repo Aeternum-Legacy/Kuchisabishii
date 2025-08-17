@@ -233,6 +233,7 @@ export async function GET(request: NextRequest) {
     const supabaseUrl = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL!)
     const projectRef = supabaseUrl.hostname.split('.')[0]
     
+    // Set both the Supabase cookie AND localStorage-compatible cookie
     response.cookies.set(`sb-${projectRef}-auth-token`, JSON.stringify({
       access_token: signInData.session.access_token,
       refresh_token: signInData.session.refresh_token,
@@ -247,8 +248,35 @@ export async function GET(request: NextRequest) {
       path: '/'
     })
     
-    console.log('🍪 Session cookies set, redirecting to:', redirectUrl)
-    return response
+    // Also set the refresh token separately for Supabase client
+    response.cookies.set(`sb-${projectRef}-auth-token-refresh`, signInData.session.refresh_token, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/'
+    })
+    
+    // Create a client-side script to store tokens in localStorage
+    const clientScript = `
+      <script>
+        localStorage.setItem('sb-${projectRef}-auth-token', '${JSON.stringify({
+          access_token: signInData.session.access_token,
+          refresh_token: signInData.session.refresh_token,
+          expires_at: Date.now() + (signInData.session.expires_in || 3600) * 1000
+        })}');
+        window.location.href = '${redirectUrl}';
+      </script>
+    `
+    
+    // Return HTML response with script to set localStorage
+    return new NextResponse(clientScript, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/html',
+        'Set-Cookie': response.headers.get('Set-Cookie') || ''
+      }
+    })
     
   } catch (error) {
     console.error('💥 OAuth callback error:', {

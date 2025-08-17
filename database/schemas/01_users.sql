@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS public.users (
     date_of_birth DATE,
     dietary_restrictions TEXT[],
     favorite_cuisines TEXT[],
+    onboarding_completed BOOLEAN DEFAULT true NOT NULL,
     privacy_level TEXT DEFAULT 'public' CHECK (privacy_level IN ('public', 'friends', 'private')),
     notification_preferences JSONB DEFAULT '{
         "food_recommendations": true,
@@ -28,6 +29,7 @@ CREATE TABLE IF NOT EXISTS public.users (
 CREATE INDEX IF NOT EXISTS idx_users_username ON public.users(username);
 CREATE INDEX IF NOT EXISTS idx_users_email ON public.users(email);
 CREATE INDEX IF NOT EXISTS idx_users_created_at ON public.users(created_at);
+CREATE INDEX IF NOT EXISTS idx_users_onboarding_completed ON public.users(onboarding_completed);
 
 -- Function to automatically update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()

@@ -41,10 +41,12 @@ export default function AuthWrapper({ children, onAuthSuccess }: AuthWrapperProp
       // Only check onboarding status for pages that require it (like /app)
       const requiresOnboarding = pathname === '/app' || pathname?.startsWith('/app/')
       
-      if (requiresOnboarding && user.onboardingCompleted === false) {
+      if (requiresOnboarding && user.onboardingCompleted !== true) {
         console.log('🔄 User needs onboarding, redirecting to /onboarding')
         router.push('/onboarding')
         return
+      } else if (requiresOnboarding && user.onboardingCompleted === true) {
+        console.log('✅ User has completed onboarding, allowing access to app')
       }
       
       setOnboardingCheckDone(true)

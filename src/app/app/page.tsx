@@ -12,7 +12,7 @@ import { transformedFoodReviews, recommendedFoods } from '@/data/seed-data';
 import AuthWrapper from '@/components/auth/AuthWrapper';
 
 // Main authenticated app component with proper navigation
-export default function AuthenticatedApp() {
+function AuthenticatedApp() {
   const { user, loading: authLoading, signOut } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('home');
@@ -74,7 +74,6 @@ export default function AuthenticatedApp() {
   // Remove the custom loading check here since AuthWrapper will handle it
 
   return (
-    <AuthWrapper>
       <div className="flex flex-col min-h-screen bg-gray-50">
       {/* Main Content Area */}
       <div className="flex-1 pb-20">
@@ -264,6 +263,14 @@ export default function AuthenticatedApp() {
         onTabChange={handleTabChange}
       />
     </div>
+  );
+}
+
+// Wrap with AuthWrapper to ensure authentication
+export default function AppPage() {
+  return (
+    <AuthWrapper>
+      <AuthenticatedApp />
     </AuthWrapper>
   );
 }

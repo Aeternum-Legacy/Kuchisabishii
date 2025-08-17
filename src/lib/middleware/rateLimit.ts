@@ -83,10 +83,36 @@ function getDefaultKey(request: NextRequest): string {
   return `ratelimit:${ip}`
 }
 
+// Get environment-aware rate limiting config
+function getAuthRateLimitConfig() {
+  const env = process.env.VERCEL_ENV || process.env.NODE_ENV
+  const isStaging = env === 'preview' || env === 'staging'
+  const isDevelopment = env === 'development'
+  
+  if (isStaging) {
+    return {
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      maxAttempts: 20, // 20 attempts for staging testing
+    }
+  }
+  
+  if (isDevelopment) {
+    return {
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      maxAttempts: 100, // Very lenient for development
+    }
+  }
+  
+  // Production settings
+  return {
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    maxAttempts: 5, // 5 attempts per 15 minutes
+  }
+}
+
 // Predefined rate limiters for common use cases
 export const authRateLimit = createRateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  maxAttempts: 5, // 5 attempts per 15 minutes
+  ...getAuthRateLimitConfig(),
   keyGenerator: (request) => {
     const ip = getDefaultKey(request)
     return `auth:${ip}`

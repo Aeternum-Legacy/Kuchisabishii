@@ -24,7 +24,7 @@ export default function AuthWrapper({ children, onAuthSuccess }: AuthWrapperProp
   const [confirmationEmail, setConfirmationEmail] = useState<string>('')
   const [verificationEmail, setVerificationEmail] = useState<string>('')
   const [forceShowAuth, setForceShowAuth] = useState(false)
-  const [emergencyMode, setEmergencyMode] = useState(false)
+  // const [emergencyMode, setEmergencyMode] = useState(false) // REMOVED: Security vulnerability
   const [onboardingCheckDone, setOnboardingCheckDone] = useState(false)
 
   // Handle auth success when user state changes from null to authenticated
@@ -61,19 +61,14 @@ export default function AuthWrapper({ children, onAuthSuccess }: AuthWrapperProp
         console.warn('Auth loading timeout - showing auth forms')
         setForceShowAuth(true)
       }
-    }, 1500) // 1.5 second timeout
+    }, 5000) // 5 second timeout for staging environment
 
-    // Emergency timeout - skip auth completely
-    const emergencyTimeout = setTimeout(() => {
-      if (loading) {
-        console.error('EMERGENCY: Auth completely stuck, rendering children anyway')
-        setEmergencyMode(true)
-      }
-    }, 3000) // 3 second emergency timeout
+    // Removed emergency timeout - security vulnerability
+    // Never bypass authentication
 
     return () => {
       clearTimeout(timeout)
-      clearTimeout(emergencyTimeout)
+      // clearTimeout(emergencyTimeout) // Removed with emergency mode
     }
   }, [loading, user])
 
@@ -96,8 +91,8 @@ export default function AuthWrapper({ children, onAuthSuccess }: AuthWrapperProp
     )
   }
 
-  // If user is authenticated OR emergency mode, render children
-  if (user || emergencyMode) {
+  // If user is authenticated, render children
+  if (user) {
     return <>{children}</>
   }
 

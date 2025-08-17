@@ -251,6 +251,7 @@ export function useAuth() {
       }
 
       // Use Supabase's native OAuth method
+      // Always use the current origin to avoid localhost/production mismatches
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {

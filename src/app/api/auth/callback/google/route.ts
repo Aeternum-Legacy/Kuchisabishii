@@ -162,13 +162,13 @@ export async function GET(request: NextRequest) {
         // If user already exists, that's ok - we'll sign them in instead
         if (signUpError.message.includes('already registered') || signUpError.message.includes('already exists')) {
           console.log('✅ User already exists, will sign in instead')
-          // Find the existing user
+          // Find the existing user by email
           const { data: existingUsers } = await supabase.auth.admin.listUsers({
-            filter: `email.eq.${googleUser.email}`,
             page: 1,
-            perPage: 1
+            perPage: 1000
           })
-          userId = existingUsers?.users?.[0]?.id
+          const foundUser = existingUsers?.users?.find(u => u.email === googleUser.email)
+          userId = foundUser?.id
         } else {
           console.error('Signup error:', signUpError)
           throw new Error(`Failed to create user: ${signUpError.message}`)

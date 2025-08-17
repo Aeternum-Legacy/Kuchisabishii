@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
   console.log('🔍 Supabase Native OAuth Callback:', {
     hasCode: !!code,
     error,
+    url: requestUrl.toString(),
     timestamp: new Date().toISOString()
   })
   
@@ -27,9 +28,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL(`/?error=oauth_error&details=${encodeURIComponent(error)}`, requestUrl.origin))
   }
   
+  // For implicit flow, tokens are in URL fragment, not query params
+  // Supabase handles this automatically, so we just redirect to success
   if (!code) {
-    console.error('❌ No authorization code received')
-    return NextResponse.redirect(new URL('/?error=no_code', requestUrl.origin))
+    console.log('✅ Implicit flow detected - redirecting to app')
+    return NextResponse.redirect(new URL('/app', requestUrl.origin))
   }
 
   try {

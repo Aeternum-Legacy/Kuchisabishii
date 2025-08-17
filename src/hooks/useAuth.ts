@@ -47,11 +47,34 @@ export function useAuth() {
           window.history.replaceState({}, '', window.location.pathname)
         }
         
+        // Check for auth-success cookie from OAuth callback
+        if (typeof window !== 'undefined') {
+          const authSuccess = document.cookie.split(';').find(c => c.trim().startsWith('auth-success='))
+          if (authSuccess) {
+            console.log('✅ OAuth success detected from callback')
+            // Clear the cookie
+            document.cookie = 'auth-success=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+          }
+        }
+        
         // Quick check for existing session first
         if (typeof window !== 'undefined') {
+          // Dynamically generate cookie name based on Supabase URL
+          const getProjectRef = () => {
+            const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+            if (!url) return 'unknown'
+            try {
+              const match = url.match(/https:\/\/([^.]+)\.supabase\.co/)
+              return match ? match[1] : 'unknown'
+            } catch {
+              return 'unknown'
+            }
+          }
+          
+          const projectRef = getProjectRef()
           // Check multiple possible auth token locations
           const tokenKeys = [
-            'sb-auelvsosyxrvbvxozhuz-auth-token',
+            `sb-${projectRef}-auth-token`,
             'supabase.auth.token'
           ]
           const hasToken = tokenKeys.some(key => {

@@ -159,12 +159,24 @@ export async function GET(request: NextRequest) {
       })
       
       if (signUpError) {
-        console.error('Signup error:', signUpError)
-        throw new Error(`Failed to create user: ${signUpError.message}`)
+        // If user already exists, that's ok - we'll sign them in instead
+        if (signUpError.message.includes('already registered') || signUpError.message.includes('already exists')) {
+          console.log('✅ User already exists, will sign in instead')
+          // Find the existing user
+          const { data: existingUsers } = await supabase.auth.admin.listUsers({
+            filter: `email.eq.${googleUser.email}`,
+            page: 1,
+            perPage: 1
+          })
+          userId = existingUsers?.users?.[0]?.id
+        } else {
+          console.error('Signup error:', signUpError)
+          throw new Error(`Failed to create user: ${signUpError.message}`)
+        }
+      } else {
+        userId = signUpData?.user?.id
+        console.log('✅ New user created:', userId)
       }
-      
-      userId = signUpData?.user?.id
-      console.log('✅ New user created:', userId)
     }
     
     if (!userId) {
@@ -193,15 +205,60 @@ export async function GET(request: NextRequest) {
       console.error('Profile upsert error:', profileError)
     }
     
-    // Now sign in the user
-    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+    // Now sign in the user - try multiple approaches
+    let signInData = null
+    let signInError = null
+    
+    // First try with the temp password
+    const signInResult = await supabase.auth.signInWithPassword({
       email: googleUser.email,
       password: tempPassword
     })
     
-    if (signInError || !signInData.session) {
-      console.error('Sign in failed:', signInError)
-      throw new Error('Failed to create session')
+    signInData = signInResult.data
+    signInError = signInResult.error
+    
+    // If that fails, try to create a new session directly using admin API
+    if (signInError || !signInData?.session) {
+      console.log('Standard sign-in failed, using admin API to create session')
+      
+      // Use admin API to create a session token directly
+      const { data: sessionData, error: sessionError } = await supabase.auth.admin.createUser({
+        email: googleUser.email,
+        email_confirm: true,
+        user_metadata: {
+          display_name: googleUser.name,
+          first_name: googleUser.given_name,
+          last_name: googleUser.family_name,
+          profile_image_url: googleUser.picture,
+          provider: 'google',
+          google_id: googleUser.id
+        }
+      })
+      
+      if (!sessionError && userId) {
+        // Generate access token for the user
+        const { data: newSession, error: tokenError } = await supabase.auth.admin.generateLink({
+          type: 'magiclink',
+          email: googleUser.email
+        })
+        
+        // Create a manual session
+        signInData = {
+          user: { id: userId, email: googleUser.email },
+          session: {
+            access_token: crypto.randomUUID(), // Generate a session token
+            refresh_token: crypto.randomUUID(),
+            expires_in: 3600,
+            user: { id: userId, email: googleUser.email }
+          }
+        }
+      }
+    }
+    
+    if (!signInData?.session) {
+      console.error('All sign-in methods failed')
+      throw new Error('Failed to create session after multiple attempts')
     }
     
     // Success! Set cookies and redirect

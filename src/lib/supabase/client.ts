@@ -24,7 +24,7 @@ function getSupabaseClient() {
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
-      flowType: 'pkce', // Use PKCE flow for OAuth security
+      flowType: 'implicit', // Use implicit flow instead of PKCE for web
       storage: typeof window !== 'undefined' ? window.localStorage : undefined,
       // Enable debug logging in development
       debug: process.env.NODE_ENV === 'development'

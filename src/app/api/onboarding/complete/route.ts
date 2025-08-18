@@ -2,39 +2,48 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createClientFromRequest } from '@/lib/supabase/server-alternative'
 import { createClient as createFixedClient } from '@/lib/supabase/server-fixed'
+import { createClientWithToken } from '@/lib/supabase/server-with-token'
 
 export async function POST(request: NextRequest) {
   try {
     console.log('✅ /api/onboarding/complete called')
     
-    // Try multiple approaches to see which works
+    // Try token-based client first (most reliable in Vercel)
     let supabase
     let clientType = 'unknown'
     
-    // Try fixed client first
     try {
-      supabase = await createFixedClient()
-      clientType = 'fixed'
-      console.log('✅ Fixed server client created for onboarding')
-    } catch (error) {
-      console.log('❌ Fixed server client failed for onboarding:', error)
+      supabase = await createClientWithToken(request)
+      clientType = 'token-based'
+      console.log('✅ Token-based client created for onboarding')
+    } catch (tokenError) {
+      console.log('❌ Token-based client failed for onboarding:', tokenError)
       
-      // Fallback to standard client
+      // Try multiple fallback approaches
       try {
-        supabase = await createClient()
-        clientType = 'standard'
-        console.log('✅ Standard server client created for onboarding')
-      } catch (standardError) {
-        console.log('❌ Standard server client failed for onboarding:', standardError)
+        supabase = await createFixedClient()
+        clientType = 'fixed'
+        console.log('✅ Fixed server client created for onboarding')
+      } catch (error) {
+        console.log('❌ Fixed server client failed for onboarding:', error)
         
-        // Final fallback to request-based client
+        // Fallback to standard client
         try {
-          supabase = await createClientFromRequest(request)
-          clientType = 'request-based'
-          console.log('✅ Request-based client created as final fallback for onboarding')
-        } catch (fallbackError) {
-          console.log('❌ All client creation methods failed for onboarding:', fallbackError)
-          throw fallbackError
+          supabase = await createClient()
+          clientType = 'standard'
+          console.log('✅ Standard server client created for onboarding')
+        } catch (standardError) {
+          console.log('❌ Standard server client failed for onboarding:', standardError)
+          
+          // Final fallback to request-based client
+          try {
+            supabase = await createClientFromRequest(request)
+            clientType = 'request-based'
+            console.log('✅ Request-based client created as final fallback for onboarding')
+          } catch (fallbackError) {
+            console.log('❌ All client creation methods failed for onboarding:', fallbackError)
+            throw fallbackError
+          }
         }
       }
     }

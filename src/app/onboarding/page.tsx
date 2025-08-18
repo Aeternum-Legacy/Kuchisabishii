@@ -7,6 +7,7 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { apiPost } from '@/lib/api-client'
 import { motion, AnimatePresence } from 'framer-motion'
 import TasteProfileQuestionnaire from '@/components/onboarding/TasteProfileQuestionnaire'
 import OnboardingResults from '@/components/onboarding/OnboardingResults'
@@ -88,16 +89,8 @@ export default function OnboardingPage() {
     
     try {
       // Mark onboarding as completed in database
-      const response = await fetch('/api/onboarding/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      })
-
-      if (response.ok) {
-        console.log('Onboarding completed successfully')
-      } else {
-        console.error('Failed to mark onboarding as completed')
-      }
+      await apiPost('/api/onboarding/complete')
+      console.log('Onboarding completed successfully')
     } catch (error) {
       console.error('Error completing onboarding:', error)
     }
@@ -129,14 +122,8 @@ export default function OnboardingPage() {
     
     try {
       // Mark onboarding as completed in database
-      const response = await fetch('/api/onboarding/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      })
-
-      if (response.ok) {
-        console.log('Onboarding skipped and marked as completed')
-      }
+      await apiPost('/api/onboarding/complete')
+      console.log('Onboarding skipped and marked as completed')
     } catch (error) {
       console.error('Error marking onboarding as completed:', error)
     }

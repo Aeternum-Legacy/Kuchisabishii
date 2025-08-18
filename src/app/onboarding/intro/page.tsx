@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { apiPost } from '@/lib/api-client';
 import { ChevronRight, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -45,14 +46,8 @@ export default function OnboardingIntro() {
   const skipOnboardingCompletely = async () => {
     try {
       // Mark onboarding as completed in database
-      const response = await fetch('/api/onboarding/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      })
-
-      if (response.ok) {
-        console.log('Onboarding skipped and marked as completed')
-      }
+      await apiPost('/api/onboarding/complete')
+      console.log('Onboarding skipped and marked as completed')
     } catch (error) {
       console.error('Error marking onboarding as completed:', error)
     }

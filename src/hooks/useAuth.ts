@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import { getOAuthRedirectUrl } from '@/lib/env'
+import { apiGet, apiPost } from '@/lib/api-client'
 import type { User } from '@supabase/supabase-js'
 
 interface UserProfile {
@@ -74,13 +75,12 @@ export function useAuth() {
     // Load user profile from database
     const loadUserProfile = async (userId: string, session: any) => {
       try {
-        const response = await fetch('/api/auth/me')
-        if (response.ok) {
-          const data = await response.json()
-          setAuthState({ user: data.user, loading: false, error: null })
-        } else {
-          // Fallback to session user data
-          setAuthState({
+        const data = await apiGet('/api/auth/me')
+        setAuthState({ user: data.user, loading: false, error: null })
+      } catch (error) {
+        console.warn('Failed to load user profile from API:', error)
+        // Fallback to session user data
+        setAuthState({
             user: {
               id: session.user.id,
               email: session.user.email || '',
@@ -92,22 +92,6 @@ export function useAuth() {
             },
             loading: false,
             error: null
-          })
-        }
-      } catch (error) {
-        console.warn('Profile fetch failed, using session data:', error)
-        setAuthState({
-          user: {
-            id: session.user.id,
-            email: session.user.email || '',
-            displayName: session.user.user_metadata?.display_name || session.user.user_metadata?.full_name,
-            firstName: session.user.user_metadata?.first_name || session.user.user_metadata?.given_name,
-            lastName: session.user.user_metadata?.last_name || session.user.user_metadata?.family_name,
-            profileImage: session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture,
-            onboardingCompleted: null
-          },
-          loading: false,
-          error: null
         })
       }
     }

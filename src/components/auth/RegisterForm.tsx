@@ -142,6 +142,7 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
               <User className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
               <input
                 type="text"
+                autoComplete="given-name"
                 value={formData.firstName}
                 onChange={(e) => handleInputChange('firstName', e.target.value)}
                 className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
@@ -163,6 +164,7 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
               <User className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
               <input
                 type="text"
+                autoComplete="family-name"
                 value={formData.lastName}
                 onChange={(e) => handleInputChange('lastName', e.target.value)}
                 className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
@@ -186,6 +188,7 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
             <User className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
             <input
               type="text"
+              autoComplete="nickname"
               value={formData.displayName}
               onChange={(e) => handleInputChange('displayName', e.target.value)}
               className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
@@ -208,6 +211,7 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
             <Mail className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
             <input
               type="email"
+              autoComplete="email"
               value={formData.email}
               onChange={(e) => handleInputChange('email', e.target.value)}
               className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
@@ -230,6 +234,7 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
             <Lock className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
             <input
               type={showPassword ? 'text' : 'password'}
+              autoComplete="new-password"
               value={formData.password}
               onChange={(e) => handleInputChange('password', e.target.value)}
               className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${

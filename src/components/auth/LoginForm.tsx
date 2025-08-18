@@ -86,6 +86,7 @@ export default function LoginForm({ onSuccess, onSwitchToRegister, onForgotPassw
             <Mail className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
             <input
               type="email"
+              autoComplete="email"
               value={formData.email}
               onChange={(e) => handleInputChange('email', e.target.value)}
               className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 ${
@@ -108,6 +109,7 @@ export default function LoginForm({ onSuccess, onSwitchToRegister, onForgotPassw
             <Lock className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
             <input
               type={showPassword ? 'text' : 'password'}
+              autoComplete="current-password"
               value={formData.password}
               onChange={(e) => handleInputChange('password', e.target.value)}
               className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 ${

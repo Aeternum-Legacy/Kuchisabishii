@@ -40,7 +40,7 @@ export const REQUIRED_ENV_VARS = {
 
 /**
  * Get the base URL for the current environment
- * Priority: NEXT_PUBLIC_APP_URL > VERCEL_URL > NEXTAUTH_URL > localhost fallback
+ * Priority: NEXT_PUBLIC_APP_URL > VERCEL_URL > window.origin > localhost fallback
  * 
  * CRITICAL: This function eliminates localhost hardcoding that causes OAuth failures
  */
@@ -65,13 +65,29 @@ export function getBaseUrl(): string {
     return vercelUrl
   }
   
-  // Priority 3: NextAuth URL (only if not localhost)
+  // Priority 3: Check if we're on Vercel (even without VERCEL_URL)
+  if (process.env.VERCEL === '1' || process.env.VERCEL_ENV) {
+    // For staging branch on Vercel
+    if (process.env.VERCEL_GIT_COMMIT_REF === 'staging') {
+      return 'https://kuchisabishii-app-git-staging-aeternum-legacys-projects.vercel.app'
+    }
+    // For production on Vercel
+    if (process.env.VERCEL_ENV === 'production') {
+      return 'https://kuchisabishii.io'
+    }
+    // For preview deployments, try to construct from Vercel project
+    if (process.env.VERCEL_PROJECT_NAME) {
+      return `https://${process.env.VERCEL_PROJECT_NAME}.vercel.app`
+    }
+  }
+  
+  // Priority 4: NextAuth URL (only if not localhost)
   if (process.env.NEXTAUTH_URL && !process.env.NEXTAUTH_URL.includes('localhost')) {
     return process.env.NEXTAUTH_URL
   }
   
-  // Priority 4: Development environment detection
-  if (getEnvironment() === 'development') {
+  // Priority 5: Development environment detection
+  if (process.env.NODE_ENV === 'development') {
     const port = process.env.PORT || '3000'
     return `http://localhost:${port}`
   }
@@ -87,7 +103,20 @@ export function getBaseUrl(): string {
  */
 export function getOAuthRedirectUrl(path: string = '/app'): string {
   const baseUrl = getBaseUrl()
-  return `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`
+  const redirectUrl = `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`
+  
+  // Debug logging for OAuth URL generation
+  if (typeof window !== 'undefined') {
+    console.log('🔍 OAuth Redirect URL Debug:', {
+      path,
+      baseUrl,
+      redirectUrl,
+      windowOrigin: window.location.origin,
+      environment: getEnvironment()
+    })
+  }
+  
+  return redirectUrl
 }
 
 /**

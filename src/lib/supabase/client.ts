@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { getBaseUrl } from '@/lib/env'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -18,6 +19,9 @@ function getSupabaseClient() {
     return null
   }
 
+  // Get the correct site URL for OAuth state
+  const siteUrl = getBaseUrl()
+
   return createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
       // SPARC Architecture: Native OAuth Configuration
@@ -26,7 +30,9 @@ function getSupabaseClient() {
       detectSessionInUrl: true,
       flowType: 'pkce', // Use PKCE flow for better security
       storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-      debug: false // Disable debug logging
+      debug: false, // Disable debug logging
+      // Set the correct site URL to prevent OAuth state mismatches
+      siteUrl: siteUrl
     },
     global: {
       headers: {

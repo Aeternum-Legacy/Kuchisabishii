@@ -98,7 +98,7 @@ export default function MapView() {
       // In production, you would add your Google Maps API key to environment variables
       
       // Simulated map loading
-      console.log('Google Maps would initialize here with API key');
+      // Google Maps initialization (production: remove debug statement)
       
       // Create a simple visual representation instead
       if (mapRef.current) {

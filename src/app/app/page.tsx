@@ -21,7 +21,7 @@ function AuthenticatedApp() {
   // Initialize app with authenticated user
   useEffect(() => {
     if (user) {
-      console.log('App initialized for user:', user.displayName);
+      // App initialized for user (production: remove debug log)
     }
   }, [user]);
 

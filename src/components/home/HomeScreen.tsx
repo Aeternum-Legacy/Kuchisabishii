@@ -197,7 +197,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onViewChange, user }) =>
           <RecommendedFoodsSection 
             onTryFood={(foodId) => {
               // Handle trying recommended food
-              console.log('Trying food:', foodId);
+              // Production: Remove console log - foodId interaction
             }}
             onBookmark={(foodId) => {
               // Handle bookmarking

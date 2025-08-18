@@ -109,6 +109,7 @@ export const CategoryScroll: React.FC<CategoryScrollProps> = ({
         style={{
           scrollBehavior: isScrolling ? 'auto' : 'smooth',
           WebkitOverflowScrolling: 'touch',
+          touchAction: 'pan-x', // Enable horizontal scrolling only
         }}
       >
         {categories.map((category) => {

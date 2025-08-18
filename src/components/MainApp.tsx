@@ -91,7 +91,7 @@ const MainApp: React.FC = () => {
         onBack={() => setCurrentTab('home')}
         onSubmit={(data) => {
           // Handle new food submission
-          console.log('New food submitted:', data);
+          // New food submitted (production: remove debug log)
           setCurrentTab('home');
         }}
       />

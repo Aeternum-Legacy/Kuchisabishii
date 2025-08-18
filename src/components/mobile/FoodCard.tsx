@@ -76,6 +76,7 @@ export const FoodCard: React.FC<FoodCardProps> = ({
       `}
       onTouchStart={() => setIsPressed(true)}
       onTouchEnd={() => setIsPressed(false)}
+      style={{ touchAction: 'manipulation' }} // Optimize touch performance
       onMouseDown={() => setIsPressed(true)}
       onMouseUp={() => setIsPressed(false)}
       onMouseLeave={() => setIsPressed(false)}
@@ -215,9 +216,9 @@ export const sampleFoodCards: FoodCardProps[] = [
       avatar: '/api/placeholder/40/40',
     },
     createdAt: '2 hours ago',
-    onLike: () => console.log('Liked ramen'),
-    onComment: () => console.log('Comment on ramen'),
-    onShare: () => console.log('Share ramen'),
+    onLike: () => {}, // Production: Remove console logs
+    onComment: () => {}, // Production: Remove console logs
+    onShare: () => {}, // Production: Remove console logs
   },
   {
     id: '2',
@@ -235,8 +236,8 @@ export const sampleFoodCards: FoodCardProps[] = [
       avatar: '/api/placeholder/40/40',
     },
     createdAt: '4 hours ago',
-    onLike: () => console.log('Liked burger'),
-    onComment: () => console.log('Comment on burger'),
-    onShare: () => console.log('Share burger'),
+    onLike: () => {}, // Production: Remove console logs
+    onComment: () => {}, // Production: Remove console logs
+    onShare: () => {}, // Production: Remove console logs
   },
 ];

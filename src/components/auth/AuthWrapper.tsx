@@ -60,10 +60,10 @@ export default function AuthWrapper({ children, onAuthSuccess }: AuthWrapperProp
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (loading && !user) {
-        console.warn('Auth loading timeout - showing auth forms')
+        // Auth loading timeout - showing auth forms (production: removed debug statement)
         setForceShowAuth(true)
       }
-    }, 5000) // 5 second timeout for staging environment
+    }, 8000) // 8 second timeout for better mobile compatibility
 
     // Removed emergency timeout - security vulnerability
     // Never bypass authentication

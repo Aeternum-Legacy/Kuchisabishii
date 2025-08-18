@@ -49,11 +49,13 @@ export const useSwipeGesture = (onSwipeLeft?: () => void, onSwipeRight?: () => v
   const { triggerHaptic } = useHapticFeedback();
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    // Ensure passive behavior for better scrolling performance
     touchStartX.current = e.touches[0].clientX;
     touchCurrentX.current = e.touches[0].clientX;
   }, []);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    // Non-blocking touch move for smooth scrolling
     touchCurrentX.current = e.touches[0].clientX;
     const deltaX = touchCurrentX.current - touchStartX.current;
     const progress = Math.min(Math.abs(deltaX) / 100, 1);
@@ -102,12 +104,14 @@ export const usePullToRefresh = (onRefresh: () => Promise<void>) => {
   const { triggerHaptic } = useHapticFeedback();
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    // Passive touch start for pull-to-refresh
     if (scrollElementRef.current?.scrollTop === 0) {
       touchStartY.current = e.touches[0].clientY;
     }
   }, []);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    // Passive touch move for pull-to-refresh
     if (scrollElementRef.current?.scrollTop === 0 && !isRefreshing) {
       const deltaY = e.touches[0].clientY - touchStartY.current;
       if (deltaY > 0) {

@@ -60,9 +60,12 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
                 ${isActive ? 'bg-orange-50' : 'bg-transparent'}
                 active:scale-95
               `}
-              style={{ minHeight: mobileTheme.touchTarget.minHeight }}
               onTouchStart={() => handleTouchStart(tab.id)}
               onTouchEnd={handleTouchEnd}
+              style={{ 
+                minHeight: mobileTheme.touchTarget.minHeight,
+                touchAction: 'manipulation' // Optimize touch performance
+              }}
               onClick={() => handleTabPress(tab.id)}
             >
               {/* Icon Container */}

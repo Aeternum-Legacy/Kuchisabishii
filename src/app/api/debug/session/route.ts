@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     // Test standard server client
     console.log('🧪 Testing standard server client...')
     const standardClient = await createClient()
-    const { data: standardUser, error: standardError } = await standardClient.auth.getUser()
+    const { data: { user: standardUser }, error: standardError } = await standardClient.auth.getUser()
     
     debugInfo.standardClient = {
       hasUser: !!standardUser,
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     // Test request-based client
     console.log('🧪 Testing request-based client...')
     const requestClient = await createClientFromRequest(request)
-    const { data: requestUser, error: requestError } = await requestClient.auth.getUser()
+    const { data: { user: requestUser }, error: requestError } = await requestClient.auth.getUser()
     
     debugInfo.requestClient = {
       hasUser: !!requestUser,

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase/client'
+import { getOAuthRedirectUrl } from '@/lib/env'
 import type { User } from '@supabase/supabase-js'
 
 interface UserProfile {
@@ -250,12 +251,16 @@ export function useAuth() {
         throw new Error('Supabase client not available')
       }
 
-      // Use Supabase's native OAuth method
-      // Always use the current origin to avoid localhost/production mismatches
+      // Get environment-aware redirect URL for OAuth callback
+      const redirectUrl = getOAuthRedirectUrl('/api/auth/callback/google')
+      
+      console.log('🔗 OAuth redirect URL:', redirectUrl)
+
+      // Use Supabase's native OAuth method with environment-aware redirect
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/app`,
+          redirectTo: redirectUrl,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent'

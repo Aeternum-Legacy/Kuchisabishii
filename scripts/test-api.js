@@ -3,7 +3,12 @@
  * Simple test script to validate backend API endpoints
  */
 
-const BASE_URL = 'http://localhost:3000/api';
+// Environment-aware base URL for testing
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL 
+  ? `${process.env.NEXT_PUBLIC_APP_URL}/api`
+  : (process.env.VERCEL_URL 
+    ? `https://${process.env.VERCEL_URL}/api`
+    : `http://localhost:${process.env.PORT || '3000'}/api`);
 
 // Test data
 const testUser = {

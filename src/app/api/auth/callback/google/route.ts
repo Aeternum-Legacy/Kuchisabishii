@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getBaseUrl, getEnvironmentInfo } from '@/lib/env'
 
 /**
  * SPARC Architecture: Native Supabase OAuth Callback

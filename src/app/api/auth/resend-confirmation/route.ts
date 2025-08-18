@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { emailResendRateLimit } from '@/lib/middleware/rateLimit'
 import { emailService } from '@/lib/email/service'
 import { getEmailVerificationTemplate } from '@/lib/email/templates'
+import { getBaseUrl } from '@/lib/env'
 
 const resendSchema = z.object({
   email: z.string().email('Invalid email address')
@@ -47,10 +48,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get the base URL - use production URL if available, fallback to localhost
-    const baseUrl = process.env.NEXTAUTH_URL || 
-                   process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 
-                   'http://localhost:3000'
+    // Use environment-aware base URL
+    const baseUrl = getBaseUrl()
     
     // Get user profile for personalized email
     const { data: profile } = await supabase

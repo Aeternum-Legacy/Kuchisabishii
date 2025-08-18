@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { socialAuthRateLimit } from '@/lib/middleware/rateLimit'
+import { getBaseUrl, getOAuthCallbackUrl } from '@/lib/env'
 
 export async function POST(request: NextRequest) {
   try {
-    // Simple response to test if POST method works
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+    // Use environment-aware base URL
+    const baseUrl = getBaseUrl()
     const clientId = process.env.GOOGLE_CLIENT_ID
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET
     
@@ -20,8 +21,8 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    // Build Google OAuth URL
-    const redirectUri = `${baseUrl}/api/auth/callback/google`
+    // Build Google OAuth URL with environment-aware callback
+    const redirectUri = getOAuthCallbackUrl('google')
     const googleOAuthUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth')
     googleOAuthUrl.searchParams.set('client_id', clientId)
     googleOAuthUrl.searchParams.set('redirect_uri', redirectUri)
@@ -54,7 +55,7 @@ export async function GET(request: NextRequest) {
   // If action=signin, handle OAuth flow
   if (action === 'signin') {
     try {
-      const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+      const baseUrl = getBaseUrl()
       const clientId = process.env.GOOGLE_CLIENT_ID
       const clientSecret = process.env.GOOGLE_CLIENT_SECRET
       
@@ -69,8 +70,8 @@ export async function GET(request: NextRequest) {
         )
       }
       
-      // Build Google OAuth URL
-      const redirectUri = `${baseUrl}/api/auth/callback/google`
+      // Build Google OAuth URL with environment-aware callback
+      const redirectUri = getOAuthCallbackUrl('google')
       const googleOAuthUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth')
       googleOAuthUrl.searchParams.set('client_id', clientId)
       googleOAuthUrl.searchParams.set('redirect_uri', redirectUri)
@@ -104,7 +105,7 @@ export async function GET(request: NextRequest) {
     env: {
       hasGoogleClientId: !!process.env.GOOGLE_CLIENT_ID,
       hasGoogleClientSecret: !!process.env.GOOGLE_CLIENT_SECRET,
-      nextAuthUrl: process.env.NEXTAUTH_URL || 'not set'
+      nextAuthUrl: getBaseUrl()
     }
   })
 }

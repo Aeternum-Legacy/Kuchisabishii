@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { emailService } from '@/lib/email/service'
 import { getPasswordResetTemplate } from '@/lib/email/templates'
+import { getBaseUrl } from '@/lib/env'
 
 const forgotPasswordSchema = z.object({
   email: z.string().email('Invalid email address')
@@ -27,12 +28,12 @@ export async function POST(request: NextRequest) {
       
       // Generate password reset token
       const { data, error } = await supabase.auth.resetPasswordForEmail(validatedData.email, {
-        redirectTo: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/auth/reset-password`
+        redirectTo: `${getBaseUrl()}/auth/reset-password`
       })
       
       if (!error) {
         // Send custom password reset email
-        const resetLink = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/auth/reset-password?email=${encodeURIComponent(validatedData.email)}`
+        const resetLink = `${getBaseUrl()}/auth/reset-password?email=${encodeURIComponent(validatedData.email)}`
         const emailTemplate = getPasswordResetTemplate(resetLink, displayName)
         
         try {

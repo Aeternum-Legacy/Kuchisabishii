@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { getBaseUrl } from "@/lib/env";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -12,7 +13,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Get the base URL for proper metadata resolution
+const baseUrl = getBaseUrl();
+
 export const metadata: Metadata = {
+  metadataBase: new URL(baseUrl),
   title: "Kuchisabishii - When Your Mouth is Lonely",
   description: "Food journaling app for emotional food experiences - Rate dishes, not just restaurants. Discover your taste profile and connect with food lovers.",
   keywords: ["food", "journaling", "taste", "restaurants", "AI recommendations", "social dining"],
@@ -30,7 +35,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Kuchisabishii - When Your Mouth is Lonely",
     description: "Food journaling app for emotional food experiences",
-    url: "https://kuchisabishii.com",
+    url: baseUrl,
     siteName: "Kuchisabishii",
     images: [
       {

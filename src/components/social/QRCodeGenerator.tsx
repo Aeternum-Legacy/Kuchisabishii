@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import QRCode from 'react-qr-code'
 import { Share, Download, Copy, RefreshCw, Settings, Sparkles } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import { getBaseUrl } from '@/lib/env'
 
 interface QRCodeGeneratorProps {
   onClose?: () => void
@@ -31,13 +32,13 @@ export default function QRCodeGenerator({ onClose }: QRCodeGeneratorProps) {
       setVerificationToken(token)
       
       // Create a shareable URL with verification token
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
+      const baseUrl = getBaseUrl()
       const userShareUrl = `${baseUrl}/add-friend?user=${user?.id}&token=${token}&type=qr`
       setShareUrl(userShareUrl)
     } catch (error) {
       console.error('Failed to generate QR code:', error)
       // Fallback to simple URL
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
+      const baseUrl = getBaseUrl()
       const userShareUrl = `${baseUrl}/add-friend?user=${user?.id}`
       setShareUrl(userShareUrl)
     }

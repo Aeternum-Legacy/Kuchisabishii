@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { authRateLimit } from '@/lib/middleware/rateLimit'
 import { emailService } from '@/lib/email/service'
 import { getEmailVerificationTemplate } from '@/lib/email/templates'
+import { getBaseUrl } from '@/lib/env'
 
 const registerSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -61,13 +62,13 @@ export async function POST(request: NextRequest) {
           first_name: validatedData.firstName,
           last_name: validatedData.lastName
         },
-        emailRedirectTo: `${process.env.NEXTAUTH_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')}/auth/callback`
+        emailRedirectTo: `${getBaseUrl()}/auth/callback`
       }
     })
 
     // Send custom verification email
     if (authData.user && !authData.user.email_confirmed_at) {
-      const verificationLink = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/auth/verify-email?token=${authData.user.id}&email=${encodeURIComponent(validatedData.email)}`
+      const verificationLink = `${getBaseUrl()}/auth/verify-email?token=${authData.user.id}&email=${encodeURIComponent(validatedData.email)}`
       const emailTemplate = getEmailVerificationTemplate(verificationLink, validatedData.displayName)
       
       try {

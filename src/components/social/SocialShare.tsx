@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Share2, Heart, MessageCircle, Users, Copy, Check } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import { getBaseUrl } from '@/lib/env'
 
 interface SocialShareProps {
   foodReview: {
@@ -23,7 +24,7 @@ export default function SocialShare({ foodReview, showShareOptions = false, onCl
   const [copied, setCopied] = useState(false)
   const [shared, setShared] = useState(false)
 
-  const shareUrl = `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/share/food/${foodReview.id}`
+  const shareUrl = `${getBaseUrl()}/share/food/${foodReview.id}`
   const shareText = `Check out this ${foodReview.kuchisabishiRating === 5 ? 'amazing' : 'great'} food I tried: ${foodReview.name} at ${foodReview.location}! ${foodReview.kuchisabishiRating}/5 stars ⭐`
 
   const handleCopyLink = async () => {

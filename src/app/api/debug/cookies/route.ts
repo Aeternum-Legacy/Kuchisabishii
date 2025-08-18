@@ -53,8 +53,8 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     return NextResponse.json({
       error: 'Cookie debug failed',
-      message: error.message,
-      stack: error.stack
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
     }, { status: 500 });
   }
 }

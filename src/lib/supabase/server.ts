@@ -20,7 +20,7 @@ export async function createClient() {
   try {
     cookieStore = await cookies()
   } catch (error) {
-    console.warn('⚠️ Cookie store access failed, using fallback:', error.message)
+    console.warn('⚠️ Cookie store access failed, using fallback:', error instanceof Error ? error.message : 'Unknown error')
     cookieStore = {
       getAll: () => [],
       set: () => {},
@@ -53,7 +53,7 @@ export async function createClient() {
               value: cookie.value
             }))
           } catch (error) {
-            console.error('❌ getAll() failed:', error.message)
+            console.error('❌ getAll() failed:', error instanceof Error ? error.message : 'Unknown error')
             return []
           }
         },
@@ -83,11 +83,11 @@ export async function createClient() {
                   console.log('✅ Cookie set:', name, 'with options:', vercelCookieOptions)
                 }
               } catch (setCookieError) {
-                console.warn('⚠️ Failed to set cookie:', name, setCookieError.message)
+                console.warn('⚠️ Failed to set cookie:', name, setCookieError instanceof Error ? setCookieError.message : 'Unknown error')
               }
             })
           } catch (error) {
-            console.warn('⚠️ setAll() failed (expected in Server Components):', error.message)
+            console.warn('⚠️ setAll() failed (expected in Server Components):', error instanceof Error ? error.message : 'Unknown error')
             // This is expected to fail in Server Components that don't handle responses
             // The cookies will be set by the client-side auth flow instead
           }

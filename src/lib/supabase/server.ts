@@ -1,12 +1,13 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { NextRequest } from 'next/server'
 
 /**
- * CRITICAL FIX: Cookie Architecture for Vercel Serverless
- * 
- * Addresses confirmed cookie domain/path mismatch causing 401 errors.
- * Key fixes: proper domain handling, secure attributes, fallback error handling.
+ * Unified Supabase Server Client
+ * Production-ready implementation with proper error handling and security
  */
+
+// Primary cookie-based client for Server Components
 export async function createClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -15,16 +16,116 @@ export async function createClient() {
     throw new Error('Missing Supabase environment variables')
   }
 
-  // Get cookie store with error handling for serverless environments
-  let cookieStore
+  const cookieStore = await cookies()
+
+  return createServerClient(
+    supabaseUrl,
+    supabaseAnonKey,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll()
+        },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options = {} }) => {
+              const vercelOptions = {
+                ...options,
+                domain: undefined, // Let Vercel handle domain
+                path: options.path || '/',
+                sameSite: (options.sameSite || 'lax') as 'lax' | 'strict' | 'none',
+                secure: process.env.NODE_ENV === 'production',
+                httpOnly: options.httpOnly ?? false
+              }
+              cookieStore.set(name, value, vercelOptions)
+            })
+          } catch {
+            // Expected to fail in Server Components - cookies handled by middleware
+          }
+        },
+      },
+    }
+  )
+}
+
+// Request-based client for API routes
+export async function createClientFromRequest(request: NextRequest) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Missing Supabase environment variables')
+  }
+
+  const cookieHeader = request.headers.get('cookie') || ''
+  
+  return createServerClient(
+    supabaseUrl,
+    supabaseAnonKey,
+    {
+      cookies: {
+        getAll() {
+          return cookieHeader
+            .split(';')
+            .filter(Boolean)
+            .map(cookie => {
+              const [name, ...rest] = cookie.trim().split('=')
+              return {
+                name: name.trim(),
+                value: rest.join('=').trim()
+              }
+            })
+        },
+        setAll() {
+          // Cannot set cookies in API routes - handled by NextResponse
+        },
+      },
+    }
+  )
+}
+
+// Token-based client for maximum compatibility
+export async function createClientWithToken(request: NextRequest) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Missing Supabase environment variables')
+  }
+
+  // Try to get cookies first
+  let cookieStore: any
   try {
     cookieStore = await cookies()
-  } catch (error) {
-    console.warn('⚠️ Cookie store access failed, using fallback:', error instanceof Error ? error.message : 'Unknown error')
-    cookieStore = {
-      getAll: () => [],
-      set: () => {},
-      delete: () => {}
+  } catch {
+    cookieStore = null
+  }
+
+  // Extract access token from various sources
+  let accessToken: string | null = null
+  
+  // Check Authorization header
+  const authHeader = request.headers.get('authorization')
+  if (authHeader?.startsWith('Bearer ')) {
+    accessToken = authHeader.substring(7)
+  }
+
+  // Check cookies for token
+  if (!accessToken) {
+    const cookieHeader = request.headers.get('cookie') || ''
+    const cookies = cookieHeader.split(';').map(c => {
+      const [name, ...value] = c.trim().split('=')
+      return { name: name.trim(), value: value.join('=').trim() }
+    })
+    
+    const authCookie = cookies.find(c => 
+      c.name === 'sb-access-token' || 
+      c.name.includes('auth-token') ||
+      (c.name.startsWith('sb-') && c.name.includes('auth'))
+    )
+    
+    if (authCookie) {
+      accessToken = authCookie.value
     }
   }
 
@@ -34,64 +135,44 @@ export async function createClient() {
     {
       cookies: {
         getAll() {
-          try {
-            const allCookies = cookieStore.getAll()
-            
-            // Debug logging for production troubleshooting
-            if (process.env.NODE_ENV === 'development' || process.env.ENABLE_DEBUG_MODE === 'true') {
-              console.log('🍪 Server cookies (Vercel-fixed):', {
-                total: allCookies.length,
-                supabaseCookies: allCookies.filter(c => 
-                  c.name.startsWith('sb-') || c.name.includes('supabase')
-                ).length,
-                cookieNames: allCookies.map(c => c.name).join(', ') || 'none'
-              })
+          if (cookieStore) {
+            try {
+              return cookieStore.getAll()
+            } catch {
+              // Fall through
             }
-            
-            return allCookies.map(cookie => ({
-              name: cookie.name,
-              value: cookie.value
-            }))
-          } catch (error) {
-            console.error('❌ getAll() failed:', error instanceof Error ? error.message : 'Unknown error')
-            return []
           }
+          
+          // Parse from request header
+          const cookieHeader = request.headers.get('cookie') || ''
+          return cookieHeader.split(';').filter(Boolean).map(cookie => {
+            const [name, ...value] = cookie.trim().split('=')
+            return { name: name.trim(), value: value.join('=').trim() }
+          })
         },
-        
         setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options = {} }) => {
-              // CRITICAL FIX: Proper cookie options for Vercel
-              const vercelCookieOptions = {
-                ...options,
-                // Don't set domain for Vercel - let it default to current domain
-                domain: undefined,
-                // Ensure proper path
-                path: options.path || '/',
-                // Proper sameSite for OAuth flows
-                sameSite: options.sameSite || 'lax',
-                // Secure in production
-                secure: process.env.NODE_ENV === 'production',
-                // Don't set httpOnly for auth tokens that client needs to read
-                httpOnly: options.httpOnly || false
-              }
-
-              try {
-                cookieStore.set(name, value, vercelCookieOptions)
-                
-                if (process.env.NODE_ENV === 'development' || process.env.ENABLE_DEBUG_MODE === 'true') {
-                  console.log('✅ Cookie set:', name, 'with options:', vercelCookieOptions)
-                }
-              } catch (setCookieError) {
-                console.warn('⚠️ Failed to set cookie:', name, setCookieError instanceof Error ? setCookieError.message : 'Unknown error')
-              }
-            })
-          } catch (error) {
-            console.warn('⚠️ setAll() failed (expected in Server Components):', error instanceof Error ? error.message : 'Unknown error')
-            // This is expected to fail in Server Components that don't handle responses
-            // The cookies will be set by the client-side auth flow instead
+          if (cookieStore) {
+            try {
+              cookiesToSet.forEach(({ name, value, options }) => {
+                cookieStore.set(name, value, {
+                  ...options,
+                  domain: undefined,
+                  path: '/',
+                  sameSite: 'lax' as const,
+                  secure: process.env.NODE_ENV === 'production'
+                })
+              })
+            } catch {
+              // Expected in some contexts
+            }
           }
         },
+      },
+      auth: {
+        ...(accessToken ? { persistSession: false } : {}),
+      },
+      global: {
+        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
       },
     }
   )

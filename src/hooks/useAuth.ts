@@ -60,14 +60,11 @@ export function useAuth() {
         }
 
         if (session?.user) {
-          console.log('✅ Session found:', session.user.id)
           await loadUserProfile(session.user.id, session)
         } else {
-          console.log('❌ No session found')
           setAuthState({ user: null, loading: false, error: null })
         }
       } catch (error) {
-        console.error('Auth initialization error:', error)
         setAuthState({ user: null, loading: false, error: 'Failed to initialize authentication' })
       }
     }
@@ -78,7 +75,6 @@ export function useAuth() {
         const data = await apiGet('/api/auth/me')
         setAuthState({ user: data.user, loading: false, error: null })
       } catch (error) {
-        console.warn('Failed to load user profile from API:', error)
         // Fallback to session user data
         setAuthState({
             user: {
@@ -101,14 +97,11 @@ export function useAuth() {
     // Listen for auth state changes using Supabase's native listener
     const { data: { subscription } } = supabase!.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state change:', event)
-        
         if (event === 'SIGNED_IN' && session?.user) {
           await loadUserProfile(session.user.id, session)
         } else if (event === 'SIGNED_OUT') {
           setAuthState({ user: null, loading: false, error: null })
         } else if (event === 'TOKEN_REFRESHED' && session?.user) {
-          // Session refreshed, reload profile if needed
           await loadUserProfile(session.user.id, session)
         }
       }
@@ -117,10 +110,9 @@ export function useAuth() {
     // Cleanup timeout for loading state
     const loadingTimeout = setTimeout(() => {
       if (authState.loading) {
-        console.warn('Auth loading timeout')
         setAuthState(prev => ({ ...prev, loading: false }))
       }
-    }, 5000)
+    }, 8000)
 
     return () => {
       subscription.unsubscribe()
@@ -187,9 +179,7 @@ export function useAuth() {
       }
 
       // Auth state will be updated by onAuthStateChange listener
-      setTimeout(() => {
-        setAuthState(prev => ({ ...prev, loading: false }))
-      }, 100)
+      setAuthState(prev => ({ ...prev, loading: false }))
       
       return { success: true, data: authData }
     } catch (error) {
@@ -237,8 +227,6 @@ export function useAuth() {
 
       // Get environment-aware redirect URL for OAuth callback
       const redirectUrl = getOAuthRedirectUrl('/api/auth/callback/google')
-      
-      console.log('🔗 OAuth redirect URL:', redirectUrl)
 
       // Use Supabase's native OAuth method with environment-aware redirect
       const { data, error } = await supabase.auth.signInWithOAuth({

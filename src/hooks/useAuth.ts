@@ -208,6 +208,19 @@ export function useAuth() {
         throw new Error(error.message)
       }
 
+      // Clear any PKCE-related localStorage entries to prevent conflicts
+      if (typeof window !== 'undefined') {
+        const keys = Object.keys(localStorage)
+        keys.forEach(key => {
+          if (key.includes('supabase.auth.token') || 
+              key.includes('pkce') || 
+              key.includes('code_verifier') ||
+              key.startsWith('sb-')) {
+            localStorage.removeItem(key)
+          }
+        })
+      }
+
       setAuthState({ user: null, loading: false, error: null })
       return { success: true }
     } catch (error) {

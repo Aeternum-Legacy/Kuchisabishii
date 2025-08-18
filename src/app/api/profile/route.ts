@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { data: profile, error } = await supabase
-      .from('user_profiles')
+      .from('profiles')
       .select(`
         *,
         taste_profiles (*),
@@ -114,7 +114,7 @@ export async function PUT(request: NextRequest) {
 
     // Update profile
     const { data: updatedProfile, error } = await supabase
-      .from('user_profiles')
+      .from('profiles')
       .update(updates)
       .eq('id', user.id)
       .select()

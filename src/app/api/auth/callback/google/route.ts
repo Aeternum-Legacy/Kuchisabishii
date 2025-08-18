@@ -27,7 +27,17 @@ export async function GET(request: NextRequest) {
     const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
     
     if (exchangeError) {
-      console.error('❌ Supabase OAuth exchange failed:', exchangeError)
+      console.error('❌ Supabase OAuth exchange failed:', {
+        error: exchangeError.message,
+        code: exchangeError.status,
+        details: exchangeError
+      })
+      
+      // Provide specific error feedback for PKCE issues
+      if (exchangeError.message.includes('code verifier') || exchangeError.message.includes('invalid_request')) {
+        return NextResponse.redirect(new URL(`/?error=auth_failed&message=${encodeURIComponent('OAuth exchange failed: invalid request: both auth code and code verifier should be non-empty')}`, requestUrl.origin))
+      }
+      
       throw new Error(`OAuth exchange failed: ${exchangeError.message}`)
     }
     

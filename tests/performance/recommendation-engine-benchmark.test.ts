@@ -7,7 +7,7 @@ import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 import { performance } from 'perf_hooks';
 
-const supabaseUrl = process.env.VITE_SUPABASE_URL || 'http://localhost:54321';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL || 'http://localhost:54321';
 const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || 'test-key';
 
 interface BenchmarkResult {

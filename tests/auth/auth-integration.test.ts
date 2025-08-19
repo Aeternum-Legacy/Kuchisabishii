@@ -6,9 +6,10 @@
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals'
 import { createClient } from '@supabase/supabase-js'
 
-// Mock environment variables for testing
+// Environment variables for testing
 const TEST_SUPABASE_URL = process.env.TEST_SUPABASE_URL || 'http://localhost:54321'
 const TEST_SUPABASE_ANON_KEY = process.env.TEST_SUPABASE_ANON_KEY || 'test-anon-key'
+const TEST_BASE_URL = process.env.TEST_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
 describe('Authentication System Integration Tests', () => {
   let supabase: any
@@ -43,7 +44,7 @@ describe('Authentication System Integration Tests', () => {
       }
 
       // Test registration API endpoint
-      const response = await fetch('http://localhost:3000/api/auth/register', {
+      const response = await fetch(`${TEST_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData)
@@ -68,7 +69,7 @@ describe('Authentication System Integration Tests', () => {
         lastName: 'User'
       }
 
-      const response = await fetch('http://localhost:3000/api/auth/register', {
+      const response = await fetch(`${TEST_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData)
@@ -89,7 +90,7 @@ describe('Authentication System Integration Tests', () => {
         lastName: 'User'
       }
 
-      const response = await fetch('http://localhost:3000/api/auth/register', {
+      const response = await fetch(`${TEST_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData)
@@ -136,7 +137,7 @@ describe('Authentication System Integration Tests', () => {
         password: 'TestPassword123!'
       }
 
-      const response = await fetch('http://localhost:3000/api/auth/login', {
+      const response = await fetch(`${TEST_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(loginData)
@@ -156,7 +157,7 @@ describe('Authentication System Integration Tests', () => {
         password: 'WrongPassword123!'
       }
 
-      const response = await fetch('http://localhost:3000/api/auth/login', {
+      const response = await fetch(`${TEST_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(loginData)
@@ -179,7 +180,7 @@ describe('Authentication System Integration Tests', () => {
         lastName: 'User'
       }
 
-      await fetch('http://localhost:3000/api/auth/register', {
+      await fetch(`${TEST_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData)
@@ -190,7 +191,7 @@ describe('Authentication System Integration Tests', () => {
         password: 'TestPassword123!'
       }
 
-      const response = await fetch('http://localhost:3000/api/auth/login', {
+      const response = await fetch(`${TEST_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(loginData)
@@ -213,7 +214,7 @@ describe('Authentication System Integration Tests', () => {
 
       // Make multiple failed login attempts
       const promises = Array(6).fill(null).map(() =>
-        fetch('http://localhost:3000/api/auth/login', {
+        fetch(`${TEST_BASE_URL}/api/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(loginData)
@@ -233,7 +234,7 @@ describe('Authentication System Integration Tests', () => {
 
     it('should enforce rate limits on registration attempts', async () => {
       const promises = Array(6).fill(null).map((_, index) =>
-        fetch('http://localhost:3000/api/auth/register', {
+        fetch(`${TEST_BASE_URL}/api/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -256,7 +257,7 @@ describe('Authentication System Integration Tests', () => {
 
   describe('Social Authentication', () => {
     it('should initiate Google OAuth flow', async () => {
-      const response = await fetch('http://localhost:3000/api/auth/social/google', {
+      const response = await fetch(`${TEST_BASE_URL}/api/auth/social/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({})
@@ -271,7 +272,7 @@ describe('Authentication System Integration Tests', () => {
     })
 
     it('should initiate Apple OAuth flow', async () => {
-      const response = await fetch('http://localhost:3000/api/auth/social/apple', {
+      const response = await fetch(`${TEST_BASE_URL}/api/auth/social/apple`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({})
@@ -288,7 +289,7 @@ describe('Authentication System Integration Tests', () => {
 
   describe('Email Management', () => {
     it('should resend confirmation email', async () => {
-      const response = await fetch('http://localhost:3000/api/auth/resend-confirmation', {
+      const response = await fetch(`${TEST_BASE_URL}/api/auth/resend-confirmation`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: testUserEmail })
@@ -303,7 +304,7 @@ describe('Authentication System Integration Tests', () => {
     it('should enforce rate limits on email resend', async () => {
       // Make multiple resend requests
       const promises = Array(4).fill(null).map(() =>
-        fetch('http://localhost:3000/api/auth/resend-confirmation', {
+        fetch(`${TEST_BASE_URL}/api/auth/resend-confirmation`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: testUserEmail })
@@ -320,7 +321,7 @@ describe('Authentication System Integration Tests', () => {
 
   describe('Security Headers', () => {
     it('should include proper security headers in responses', async () => {
-      const response = await fetch('http://localhost:3000/api/auth/login', {
+      const response = await fetch(`${TEST_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

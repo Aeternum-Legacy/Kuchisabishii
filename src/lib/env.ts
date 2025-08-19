@@ -40,9 +40,10 @@ export const REQUIRED_ENV_VARS = {
 
 /**
  * Get the base URL for the current environment
- * Priority: NEXT_PUBLIC_APP_URL > VERCEL_URL > window.origin > localhost fallback
+ * Priority: NEXTAUTH_URL > VERCEL_URL > window.origin > localhost fallback
  * 
  * CRITICAL: This function eliminates localhost hardcoding that causes OAuth failures
+ * Uses NEXTAUTH_URL as primary source for consistency with OAuth configuration
  */
 export function getBaseUrl(): string {
   // For client-side, always use the current origin (most reliable)
@@ -50,13 +51,13 @@ export function getBaseUrl(): string {
     return window.location.origin
   }
   
-  // Server-side environment detection with improved priority order
-  // Priority 1: Explicit app URL (production/staging override)
-  if (process.env.NEXT_PUBLIC_APP_URL && !process.env.NEXT_PUBLIC_APP_URL.includes('localhost')) {
-    return process.env.NEXT_PUBLIC_APP_URL
+  // Server-side environment detection with NEXTAUTH_URL priority
+  // Priority 1: NextAuth URL (primary OAuth configuration source)
+  if (process.env.NEXTAUTH_URL && !process.env.NEXTAUTH_URL.includes('localhost')) {
+    return process.env.NEXTAUTH_URL
   }
   
-  // Priority 2: Vercel deployment URL (most common for deployments)
+  // Priority 2: Vercel deployment URL (automatic deployment URL)
   if (process.env.VERCEL_URL) {
     // Ensure HTTPS for Vercel URLs
     const vercelUrl = process.env.VERCEL_URL.startsWith('https://') 
@@ -65,34 +66,25 @@ export function getBaseUrl(): string {
     return vercelUrl
   }
   
-  // Priority 3: Check if we're on Vercel (even without VERCEL_URL)
-  if (process.env.VERCEL === '1' || process.env.VERCEL_ENV) {
-    // For staging branch on Vercel
-    if (process.env.VERCEL_GIT_COMMIT_REF === 'staging') {
-      return 'https://kuchisabishii-app-git-staging-aeternum-legacys-projects.vercel.app'
-    }
-    // For production on Vercel
-    if (process.env.VERCEL_ENV === 'production') {
-      return 'https://kuchisabishii.io'
-    }
-    // For preview deployments, try to construct from Vercel project
-    if (process.env.VERCEL_PROJECT_NAME) {
-      return `https://${process.env.VERCEL_PROJECT_NAME}.vercel.app`
-    }
+  // Priority 3: Explicit app URL (manual override if needed)
+  if (process.env.NEXT_PUBLIC_APP_URL && !process.env.NEXT_PUBLIC_APP_URL.includes('localhost')) {
+    return process.env.NEXT_PUBLIC_APP_URL
   }
   
-  // Priority 4: NextAuth URL (only if not localhost)
-  if (process.env.NEXTAUTH_URL && !process.env.NEXTAUTH_URL.includes('localhost')) {
-    return process.env.NEXTAUTH_URL
-  }
-  
-  // Priority 5: Development environment detection
+  // Priority 4: Development environment
   if (process.env.NODE_ENV === 'development') {
     const port = process.env.PORT || '3000'
     return `http://localhost:${port}`
   }
   
-  // Fallback: This should NEVER happen in production
+  // Priority 5: Fallback for Vercel environments without proper config
+  if (process.env.VERCEL === '1' || process.env.VERCEL_ENV) {
+    if (process.env.VERCEL_PROJECT_NAME) {
+      return `https://${process.env.VERCEL_PROJECT_NAME}.vercel.app`
+    }
+  }
+  
+  // Final fallback: This should NEVER happen in production
   console.warn('⚠️ CRITICAL: No valid base URL found, falling back to localhost')
   const port = process.env.PORT || '3000'
   return `http://localhost:${port}`

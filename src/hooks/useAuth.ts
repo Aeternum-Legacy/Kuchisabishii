@@ -40,6 +40,29 @@ export function useAuth() {
     error: null
   })
 
+  // Load user profile from database - moved outside useEffect for accessibility
+  const loadUserProfile = async (userId: string, session: any) => {
+    try {
+      const data = await apiGet('/api/auth/me')
+      setAuthState({ user: data.user, loading: false, error: null })
+    } catch (error) {
+      // Fallback to session user data
+      setAuthState({
+          user: {
+            id: session.user.id,
+            email: session.user.email || '',
+            displayName: session.user.user_metadata?.display_name || session.user.user_metadata?.full_name,
+            firstName: session.user.user_metadata?.first_name || session.user.user_metadata?.given_name,
+            lastName: session.user.user_metadata?.last_name || session.user.user_metadata?.family_name,
+            profileImage: session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture,
+            onboardingCompleted: null
+          },
+          loading: false,
+          error: null
+      })
+    }
+  }
+
   useEffect(() => {
     // Skip if no Supabase client (SSR/build)
     if (!supabase) {
@@ -65,29 +88,6 @@ export function useAuth() {
         }
       } catch (error) {
         setAuthState({ user: null, loading: false, error: 'Failed to initialize authentication' })
-      }
-    }
-
-    // Load user profile from database
-    const loadUserProfile = async (userId: string, session: any) => {
-      try {
-        const data = await apiGet('/api/auth/me')
-        setAuthState({ user: data.user, loading: false, error: null })
-      } catch (error) {
-        // Fallback to session user data
-        setAuthState({
-            user: {
-              id: session.user.id,
-              email: session.user.email || '',
-              displayName: session.user.user_metadata?.display_name || session.user.user_metadata?.full_name,
-              firstName: session.user.user_metadata?.first_name || session.user.user_metadata?.given_name,
-              lastName: session.user.user_metadata?.last_name || session.user.user_metadata?.family_name,
-              profileImage: session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture,
-              onboardingCompleted: null
-            },
-            loading: false,
-            error: null
-        })
       }
     }
 

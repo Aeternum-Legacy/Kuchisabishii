@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase/client'
-import { getOAuthRedirectUrl } from '@/lib/env'
 import { apiGet, apiPost } from '@/lib/api-client'
 import type { User } from '@supabase/supabase-js'
 

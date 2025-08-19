@@ -15,6 +15,7 @@ interface LoginFormProps {
 export default function LoginForm({ onSuccess, onSwitchToRegister, onForgotPassword, onEmailNotVerified }: LoginFormProps) {
   const { signIn, loading, error } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -42,14 +43,22 @@ export default function LoginForm({ onSuccess, onSwitchToRegister, onForgotPassw
     e.preventDefault()
     
     if (!validateForm()) return
-
-    const result = await signIn(formData.email, formData.password)
     
-    if (result.success) {
-      onSuccess?.()
-    } else if (result.code === 'EMAIL_NOT_VERIFIED' && onEmailNotVerified) {
-      // Handle email not verified case
-      onEmailNotVerified(formData.email)
+    // Set local submitting state for immediate UI feedback
+    setIsSubmitting(true)
+
+    try {
+      const result = await signIn(formData.email, formData.password)
+      
+      if (result.success) {
+        onSuccess?.()
+      } else if (result.code === 'EMAIL_NOT_VERIFIED' && onEmailNotVerified) {
+        // Handle email not verified case
+        onEmailNotVerified(formData.email)
+      }
+    } finally {
+      // Always reset submitting state
+      setIsSubmitting(false)
     }
   }
 
@@ -144,10 +153,10 @@ export default function LoginForm({ onSuccess, onSwitchToRegister, onForgotPassw
         {/* Submit Button */}
         <button
           type="submit"
-          disabled={loading}
+          disabled={isSubmitting}
           className="w-full bg-orange-500 text-white py-3 rounded-lg font-semibold hover:bg-orange-600 hover:shadow-lg transition-all duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
         >
-          {loading ? 'Signing In...' : 'Sign In'}
+          {isSubmitting ? 'Signing In...' : 'Sign In'}
         </button>
 
         {/* Switch to Register */}

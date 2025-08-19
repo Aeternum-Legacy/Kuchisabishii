@@ -106,13 +106,13 @@ export function useAuth() {
       }
     )
 
-    // Cleanup timeout for loading state
+    // Cleanup timeout for loading state - shorter for better UX
     const loadingTimeout = setTimeout(() => {
       if (authState.loading) {
-        console.log('⏱️ Auth loading timeout reached after 10 seconds')
+        console.log('⏱️ Auth loading timeout reached after 5 seconds')
         setAuthState(prev => ({ ...prev, loading: false }))
       }
-    }, 10000) // Standard timeout for email authentication
+    }, 5000) // 5 seconds is plenty for auth checks
 
     return () => {
       subscription.unsubscribe()
@@ -178,8 +178,25 @@ export function useAuth() {
         throw new Error('Invalid credentials')
       }
 
-      // Auth state will be updated by onAuthStateChange listener
-      setAuthState(prev => ({ ...prev, loading: false }))
+      // Set user immediately for faster UI response
+      setAuthState({
+        user: {
+          id: authData.user.id,
+          email: authData.user.email || '',
+          displayName: authData.user.user_metadata?.display_name || authData.user.email?.split('@')[0],
+          firstName: authData.user.user_metadata?.first_name,
+          lastName: authData.user.user_metadata?.last_name,
+          profileImage: authData.user.user_metadata?.avatar_url,
+          onboardingCompleted: null
+        },
+        loading: false,
+        error: null
+      })
+      
+      // Load full profile in background (non-blocking)
+      loadUserProfile(authData.user.id, authData.session).catch(err => {
+        console.error('Profile loading error (non-blocking):', err)
+      })
       
       return { success: true, data: authData }
     } catch (error) {
@@ -198,34 +215,51 @@ export function useAuth() {
 
   const signOut = async () => {
     try {
+      // Immediately set loading state for instant UI feedback
+      setAuthState({ user: null, loading: true, error: null })
+      
       if (!supabase) {
         throw new Error('Supabase client not available')
       }
 
-      const { error } = await supabase.auth.signOut()
+      // Sign out from Supabase (don't await for faster UI)
+      const signOutPromise = supabase.auth.signOut()
       
-      if (error) {
-        throw new Error(error.message)
-      }
-
-      // Clear any PKCE-related localStorage entries to prevent conflicts
+      // Clear localStorage immediately for faster logout
       if (typeof window !== 'undefined') {
-        const keys = Object.keys(localStorage)
-        keys.forEach(key => {
-          if (key.includes('supabase.auth.token') || 
-              key.includes('pkce') || 
-              key.includes('code_verifier') ||
-              key.startsWith('sb-')) {
+        // More efficient: target specific keys instead of iterating all
+        const keysToRemove = [
+          'supabase.auth.token',
+          'sb-refresh-token',
+          'sb-access-token'
+        ]
+        
+        // Clear all storage starting with 'sb-'
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('sb-') || keysToRemove.includes(key)) {
             localStorage.removeItem(key)
           }
         })
+        
+        // Clear session storage too
+        sessionStorage.clear()
       }
 
+      // Reset state immediately for instant UI update
       setAuthState({ user: null, loading: false, error: null })
+      
+      // Wait for signout to complete in background
+      const { error } = await signOutPromise
+      
+      if (error) {
+        console.error('Signout error (non-blocking):', error)
+        // Don't show error to user since logout already appeared successful
+      }
+
       return { success: true }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Logout failed'
-      setAuthState(prev => ({ ...prev, error: errorMessage }))
+      setAuthState({ user: null, loading: false, error: errorMessage })
       return { success: false, error: errorMessage }
     }
   }

@@ -3,6 +3,8 @@
  * Branded email communications for better user experience
  */
 
+import { getBaseUrl } from '../env'
+
 export interface EmailTemplate {
   subject: string;
   html: string;
@@ -16,7 +18,9 @@ export const emailTemplates = {
    */
   verification: {
     subject: '🍜 Welcome to Kuchisabishii - Verify Your Email',
-    html: (confirmationUrl: string, userName?: string) => `
+    html: (confirmationUrl: string, userName?: string) => {
+      const baseUrl = getBaseUrl()
+      return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -42,7 +46,7 @@ export const emailTemplates = {
           <!-- Header with Logo -->
           <tr>
             <td align="center" style="padding: 40px 20px 20px; background: linear-gradient(135deg, #FB923C 0%, #EF4444 100%); border-radius: 16px 16px 0 0;">
-              <img src="https://kuchisabishii.io/images/kuchisabishii-logo.png" alt="Kuchisabishii" width="80" height="80" style="border-radius: 12px; background: white; padding: 8px;">
+              <img src="${baseUrl}/images/kuchisabishii-logo.png" alt="Kuchisabishii" width="80" height="80" style="border-radius: 12px; background: white; padding: 8px;">
               <h1 style="color: #ffffff; font-size: 28px; margin: 20px 0 10px; font-weight: 700;">Welcome to Kuchisabishii!</h1>
               <p style="color: #FED7AA; font-size: 16px; margin: 0;">When Your Mouth is Lonely</p>
             </td>
@@ -123,7 +127,7 @@ export const emailTemplates = {
                           <a href="https://twitter.com/kuchisabishii" style="color: #FB923C; text-decoration: none;">Twitter</a>
                         </td>
                         <td style="padding: 0 10px;">
-                          <a href="https://kuchisabishii.io" style="color: #FB923C; text-decoration: none;">Website</a>
+                          <a href="${baseUrl}" style="color: #FB923C; text-decoration: none;">Website</a>
                         </td>
                       </tr>
                     </table>
@@ -144,7 +148,8 @@ export const emailTemplates = {
   </table>
 </body>
 </html>
-    `,
+    `
+    },
     text: (confirmationUrl: string, userName?: string) => `
 Welcome to Kuchisabishii - When Your Mouth is Lonely!
 
@@ -176,7 +181,9 @@ The Kuchisabishii Team
    */
   passwordReset: {
     subject: '🔐 Reset Your Kuchisabishii Password',
-    html: (resetUrl: string, userName?: string) => `
+    html: (resetUrl: string, userName?: string) => {
+      const baseUrl = getBaseUrl()
+      return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -193,7 +200,7 @@ The Kuchisabishii Team
           <!-- Header -->
           <tr>
             <td align="center" style="padding: 40px 20px 20px; background: linear-gradient(135deg, #FB923C 0%, #EF4444 100%); border-radius: 16px 16px 0 0;">
-              <img src="https://kuchisabishii.io/images/kuchisabishii-logo.png" alt="Kuchisabishii" width="80" height="80" style="border-radius: 12px; background: white; padding: 8px;">
+              <img src="${baseUrl}/images/kuchisabishii-logo.png" alt="Kuchisabishii" width="80" height="80" style="border-radius: 12px; background: white; padding: 8px;">
               <h1 style="color: #ffffff; font-size: 28px; margin: 20px 0 10px; font-weight: 700;">Password Reset Request</h1>
             </td>
           </tr>
@@ -250,7 +257,8 @@ The Kuchisabishii Team
   </table>
 </body>
 </html>
-    `,
+    `
+    },
     text: (resetUrl: string, userName?: string) => `
 Password Reset Request
 
@@ -276,7 +284,9 @@ The Kuchisabishii Team
    */
   welcome: {
     subject: '🎉 You\'re All Set! Start Your Kuchisabishii Journey',
-    html: (userName?: string) => `
+    html: (userName?: string) => {
+      const baseUrl = getBaseUrl()
+      return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -293,7 +303,7 @@ The Kuchisabishii Team
           <!-- Header -->
           <tr>
             <td align="center" style="padding: 40px 20px 20px; background: linear-gradient(135deg, #FB923C 0%, #EF4444 100%); border-radius: 16px 16px 0 0;">
-              <img src="https://kuchisabishii.io/images/kuchisabishii-logo.png" alt="Kuchisabishii" width="80" height="80" style="border-radius: 12px; background: white; padding: 8px;">
+              <img src="${baseUrl}/images/kuchisabishii-logo.png" alt="Kuchisabishii" width="80" height="80" style="border-radius: 12px; background: white; padding: 8px;">
               <h1 style="color: #ffffff; font-size: 28px; margin: 20px 0 10px; font-weight: 700;">You're Ready to Go! 🚀</h1>
             </td>
           </tr>
@@ -326,7 +336,7 @@ The Kuchisabishii Team
                     <table role="presentation" cellspacing="0" cellpadding="0" border="0">
                       <tr>
                         <td style="border-radius: 12px; background: linear-gradient(135deg, #FB923C 0%, #EF4444 100%);">
-                          <a href="https://kuchisabishii.io/onboarding" target="_blank" style="display: inline-block; padding: 16px 40px; font-size: 16px; font-weight: 600; color: #ffffff; text-decoration: none; border-radius: 12px;">
+                          <a href="${baseUrl}/onboarding" target="_blank" style="display: inline-block; padding: 16px 40px; font-size: 16px; font-weight: 600; color: #ffffff; text-decoration: none; border-radius: 12px;">
                             Start Your Taste Journey
                           </a>
                         </td>
@@ -353,8 +363,11 @@ The Kuchisabishii Team
   </table>
 </body>
 </html>
-    `,
-    text: (userName?: string) => `
+    `
+    },
+    text: (userName?: string) => {
+      const baseUrl = getBaseUrl()
+      return `
 You're Ready to Go! 🚀
 
 ${userName ? `Welcome aboard, ${userName}!` : 'Welcome aboard!'}
@@ -367,13 +380,14 @@ Quick Start Guide:
 3. Get Recommendations: Discover dishes matched to your palate
 4. Connect with Friends: Share and discover together
 
-Start your taste journey at: https://kuchisabishii.io/onboarding
+Start your taste journey at: ${baseUrl}/onboarding
 
 Best regards,
 The Kuchisabishii Team
 
 © 2024 Kuchisabishii. All rights reserved.
     `
+    }
   }
 }
 

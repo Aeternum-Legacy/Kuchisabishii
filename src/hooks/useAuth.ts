@@ -239,6 +239,14 @@ export function useAuth() {
         throw new Error('Supabase client not available')
       }
 
+      // Defer non-critical operations to prevent blocking OAuth
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(() => {
+          // Any analytics or tracking can happen here
+          console.log('Google OAuth initiated')
+        }, { timeout: 100 })
+      }
+
       // Get environment-aware redirect URL for OAuth callback
       const redirectUrl = getOAuthRedirectUrl('/api/auth/callback/google')
 

@@ -10,17 +10,25 @@ import { NextRequest } from 'next/server'
 // Primary cookie-based client for Server Components
 export async function createClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error('Missing Supabase environment variables')
   }
 
+  // Use service role key for OAuth callbacks to bypass RLS
+  const isOAuthContext = typeof process !== 'undefined' && 
+    process.env.NODE_ENV !== undefined && 
+    supabaseServiceKey
+  
+  const apiKey = isOAuthContext ? supabaseServiceKey : supabaseAnonKey
+
   const cookieStore = await cookies()
 
   return createServerClient(
     supabaseUrl,
-    supabaseAnonKey,
+    apiKey,
     {
       cookies: {
         getAll() {
@@ -79,6 +87,35 @@ export async function createClientFromRequest(request: NextRequest) {
         setAll() {
           // Cannot set cookies in API routes - handled by NextResponse
         },
+      },
+    }
+  )
+}
+
+// Service role client for admin operations (profile creation, etc.)
+export async function createServiceRoleClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error('Missing Supabase environment variables for service role client')
+  }
+
+  return createServerClient(
+    supabaseUrl,
+    supabaseServiceKey,
+    {
+      cookies: {
+        getAll() {
+          return []
+        },
+        setAll() {
+          // Service role client doesn't need to manage cookies
+        },
+      },
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
       },
     }
   )

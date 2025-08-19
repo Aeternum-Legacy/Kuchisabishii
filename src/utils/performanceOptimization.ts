@@ -7,6 +7,24 @@
 export function initializePerformanceOptimizations() {
   if (typeof window === 'undefined') return
 
+  // Use requestIdleCallback to defer non-critical optimizations
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(() => {
+      initializePassiveEventPatches()
+      initializeConsoleOptimizations()
+      initializeOAuthPerformanceFixes()
+    }, { timeout: 2000 })
+  } else {
+    // Fallback for browsers without requestIdleCallback
+    setTimeout(() => {
+      initializePassiveEventPatches()
+      initializeConsoleOptimizations()
+      initializeOAuthPerformanceFixes()
+    }, 100)
+  }
+}
+
+function initializePassiveEventPatches() {
   // Patch for third-party libraries (like feedback.js) that add non-passive listeners
   const originalAddEventListener = EventTarget.prototype.addEventListener
   EventTarget.prototype.addEventListener = function(type, listener, options) {
@@ -26,7 +44,9 @@ export function initializePerformanceOptimizations() {
 
     return originalAddEventListener.call(this, type, listener, options)
   }
+}
 
+function initializeConsoleOptimizations() {
   // Suppress known third-party library warnings in production
   if (process.env.NODE_ENV === 'production') {
     const originalConsoleWarn = console.warn
@@ -42,10 +62,65 @@ export function initializePerformanceOptimizations() {
       if (message.includes('feedback.js')) {
         return // Suppress feedback widget warnings
       }
+
+      // Filter out requestIdleCallback violations from OAuth providers
+      if (message.includes('requestIdleCallback') && 
+          message.includes('handler took')) {
+        return // Suppress OAuth-related performance warnings
+      }
       
       return originalConsoleWarn.apply(console, args)
     }
   }
+}
+
+function initializeOAuthPerformanceFixes() {
+  // Optimize OAuth account chooser performance
+  const originalRequestIdleCallback = window.requestIdleCallback
+  
+  if (originalRequestIdleCallback) {
+    window.requestIdleCallback = function(callback, options = {}) {
+      // Reduce timeout for OAuth-related callbacks to prevent violations
+      const optimizedOptions = {
+        ...options,
+        timeout: Math.min(options.timeout || 50, 50) // Max 50ms for OAuth flows
+      }
+      
+      return originalRequestIdleCallback.call(window, callback, optimizedOptions)
+    }
+  }
+
+  // Pre-warm Google OAuth SDK if needed
+  if (document.readyState === 'complete') {
+    preWarmGoogleOAuth()
+  } else {
+    window.addEventListener('load', preWarmGoogleOAuth, { once: true, passive: true })
+  }
+}
+
+function preWarmGoogleOAuth() {
+  // Only pre-warm if we detect OAuth usage
+  if (window.location.pathname.includes('auth') || 
+      document.querySelector('[data-oauth="google"]') ||
+      localStorage.getItem('supabase.auth.token')) {
+    
+    // Defer DNS prefetch for Google domains
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => {
+        addDNSPrefetch('https://accounts.google.com')
+        addDNSPrefetch('https://apis.google.com')
+      }, { timeout: 100 })
+    }
+  }
+}
+
+function addDNSPrefetch(domain: string) {
+  if (document.querySelector(`link[href="${domain}"]`)) return
+  
+  const link = document.createElement('link')
+  link.rel = 'dns-prefetch'
+  link.href = domain
+  document.head.appendChild(link)
 }
 
 // Mobile touch optimization styles

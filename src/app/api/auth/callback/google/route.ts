@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 /**
- * Clean OAuth Callback Handler
+ * OAuth Callback Handler with RLS-Bypass Profile Creation
  * 
- * Uses unified Supabase client for OAuth code exchange and user profile management
+ * Uses admin client for profile operations to bypass RLS restrictions
  */
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
@@ -21,6 +22,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    // Use regular client for OAuth exchange
     const supabase = await createClient()
     
     // Use Supabase's native OAuth token exchange
@@ -45,38 +47,116 @@ export async function GET(request: NextRequest) {
       throw new Error('No session or user data received from OAuth')
     }
     
+    // Use admin client for profile operations (bypasses RLS)
+    const adminClient = createAdminClient()
     
-    // Create or update user profile with OAuth data
     console.log('📝 Creating/updating profile for user:', {
       userId: data.user.id,
       email: data.user.email,
       metadata: data.user.user_metadata
     })
     
-    const { error: profileError } = await supabase
+    // Check if profile exists using admin client
+    const { data: existingProfile } = await adminClient
       .from('profiles')
-      .upsert({
+      .select('id, onboarding_completed, email')
+      .eq('id', data.user.id)
+      .single()
+    
+    if (!existingProfile) {
+      // Create new profile using admin client with retry logic
+      console.log('🔨 Creating new profile with admin client...')
+      
+      const profileData = {
         id: data.user.id,
         email: data.user.email || '',
         display_name: data.user.user_metadata?.full_name || data.user.user_metadata?.name || data.user.email || '',
         first_name: data.user.user_metadata?.given_name || '',
         last_name: data.user.user_metadata?.family_name || '',
-        profile_image_url: data.user.user_metadata?.avatar_url || data.user.user_metadata?.picture,
+        profile_image_url: data.user.user_metadata?.avatar_url || data.user.user_metadata?.picture || null,
         email_verified: data.user.email_confirmed_at ? true : false,
         privacy_level: 'friends',
-        onboarding_completed: false, // Explicitly set to false for new users
+        onboarding_completed: false,
+        created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'id'
-      })
-    
-    if (profileError) {
-      console.error('❌ Profile creation/update failed:', profileError)
-      // Log but don't fail - the auth.users trigger should handle this
+      }
+      
+      // Retry logic for race conditions
+      let insertAttempts = 0
+      const maxAttempts = 3
+      let insertError: any = null
+      
+      while (insertAttempts < maxAttempts) {
+        insertAttempts++
+        
+        const { error } = await adminClient
+          .from('profiles')
+          .insert(profileData)
+        
+        if (!error) {
+          console.log('✅ Profile created successfully with admin client for user:', data.user.id)
+          insertError = null
+          break
+        }
+        
+        insertError = error
+        
+        // If it's a unique constraint violation, the profile might already exist
+        if (error.code === '23505') {
+          console.log('ℹ️ Profile already exists (race condition detected), continuing...')
+          insertError = null
+          break
+        }
+        
+        console.warn(`⚠️ Profile INSERT attempt ${insertAttempts} failed:`, {
+          error: error,
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        })
+        
+        // Wait briefly before retry
+        if (insertAttempts < maxAttempts) {
+          await new Promise(resolve => setTimeout(resolve, 100 * insertAttempts))
+        }
+      }
+      
+      if (insertError) {
+        console.error('❌ Profile INSERT failed after all attempts:', {
+          error: insertError,
+          code: insertError.code,
+          message: insertError.message,
+          details: insertError.details,
+          hint: insertError.hint,
+          attempts: insertAttempts
+        })
+        
+        // Critical: Profile creation must succeed for auth to work properly
+        throw new Error(`Profile creation failed after ${maxAttempts} attempts: ${insertError.message}`)
+      }
+    } else {
+      // Update existing profile using admin client
+      console.log('🔄 Updating existing profile...')
+      const { error: updateError } = await adminClient
+        .from('profiles')
+        .update({
+          email: data.user.email || existingProfile.email,
+          profile_image_url: data.user.user_metadata?.avatar_url || data.user.user_metadata?.picture,
+          email_verified: data.user.email_confirmed_at ? true : false,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', data.user.id)
+      
+      if (updateError) {
+        console.error('⚠️ Profile update failed (non-critical):', updateError)
+      } else {
+        console.log('✅ Profile updated successfully with admin client for user:', data.user.id)
+      }
     }
     
-    // Check onboarding status to determine redirect
-    const { data: profile } = await supabase
+    // Check onboarding status using admin client
+    const { data: profile } = await adminClient
       .from('profiles')
       .select('onboarding_completed')
       .eq('id', data.user.id)
@@ -84,11 +164,23 @@ export async function GET(request: NextRequest) {
     
     const redirectUrl = profile?.onboarding_completed ? '/app' : '/onboarding/intro'
     
+    console.log('📊 OAuth callback complete:', {
+      userId: data.user.id,
+      profileExists: !!profile,
+      onboardingCompleted: profile?.onboarding_completed,
+      redirectUrl
+    })
     
     // Supabase handles all session management automatically
     return NextResponse.redirect(new URL(redirectUrl, requestUrl.origin))
     
   } catch (error) {
+    console.error('🚨 OAuth callback critical error:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString()
+    })
+    
     return NextResponse.redirect(new URL(`/?error=auth_failed&message=${encodeURIComponent(error instanceof Error ? error.message : 'Authentication failed')}`, requestUrl.origin))
   }
 }

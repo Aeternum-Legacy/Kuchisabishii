@@ -1,7 +1,8 @@
 -- Row Level Security (RLS) Policies for Kuchisabishii
 
 -- Enable RLS on all tables
-ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.restaurants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.food_entries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
@@ -21,8 +22,28 @@ ALTER TABLE public.food_pairings ENABLE ROW LEVEL SECURITY;
 -- USERS TABLE POLICIES
 -- =============================================================================
 
+-- PROFILES TABLE POLICIES (OAuth-compatible)
+-- =============================================================================
+
+-- Service role can do everything (OAuth callback needs this)
+CREATE POLICY "Service role full access profiles" ON public.profiles
+    FOR ALL USING (auth.role() = 'service_role');
+
 -- Users can view their own profile and public profiles of others
-CREATE POLICY "Users can view public profiles" ON public.users
+CREATE POLICY "Users can view public profiles" ON public.profiles
+    FOR SELECT USING (
+        id = auth.uid() OR 
+        privacy_level = 'public' OR
+        (privacy_level = 'friends' AND EXISTS (
+            SELECT 1 FROM public.friendships f
+            WHERE (f.requester_id = auth.uid() AND f.addressee_id = profiles.id)
+               OR (f.addressee_id = auth.uid() AND f.requester_id = profiles.id)
+            AND f.status = 'accepted'
+        ))
+    );
+
+-- Users can view their own profile and public profiles of others (users table backup)
+CREATE POLICY "Users can view public user profiles" ON public.users
     FOR SELECT USING (
         id = auth.uid() OR 
         privacy_level = 'public' OR
@@ -35,11 +56,22 @@ CREATE POLICY "Users can view public profiles" ON public.users
     );
 
 -- Users can only update their own profile
-CREATE POLICY "Users can update own profile" ON public.users
+CREATE POLICY "Users can update own profile" ON public.profiles
     FOR UPDATE USING (id = auth.uid());
 
--- Users can insert their own profile
-CREATE POLICY "Users can insert own profile" ON public.users
+-- Users can insert their own profile (authenticated users only)
+CREATE POLICY "Users can insert own profile" ON public.profiles
+    FOR INSERT WITH CHECK (id = auth.uid());
+
+-- OAuth callback can insert profiles (service role)
+CREATE POLICY "OAuth can insert profiles" ON public.profiles
+    FOR INSERT WITH CHECK (auth.role() = 'service_role');
+
+-- Backup policies for users table
+CREATE POLICY "Users can update own user profile" ON public.users
+    FOR UPDATE USING (id = auth.uid());
+
+CREATE POLICY "Users can insert own user profile" ON public.users
     FOR INSERT WITH CHECK (id = auth.uid());
 
 -- =============================================================================

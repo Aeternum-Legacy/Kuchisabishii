@@ -30,12 +30,24 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Get user profile from database
+    // 🚨 SECURITY FIX: Explicitly filter by auth.uid() for user isolation
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
       .single()
+    
+    // Additional security check: verify user.id matches auth.uid()
+    if (profile && profile.id !== user.id) {
+      console.error('🚨 SECURITY BREACH: Profile ID mismatch', {
+        userId: user.id,
+        profileId: profile.id
+      })
+      return NextResponse.json(
+        { error: 'Security violation detected' },
+        { status: 403 }
+      )
+    }
 
     if (profileError) {
       // Return basic user data if profile fetch fails

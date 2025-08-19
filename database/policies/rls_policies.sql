@@ -29,18 +29,23 @@ ALTER TABLE public.food_pairings ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Service role full access profiles" ON public.profiles
     FOR ALL USING (auth.role() = 'service_role');
 
+-- 🚨 CRITICAL FIX: Ensure users can ONLY see their own profile
+CREATE POLICY "Users can ONLY view their own profile" ON public.profiles
+    FOR SELECT USING (id = auth.uid());
+
+-- 🚨 DISABLED FOR SECURITY: Public profiles viewing disabled until proper implementation
 -- Users can view their own profile and public profiles of others
-CREATE POLICY "Users can view public profiles" ON public.profiles
-    FOR SELECT USING (
-        id = auth.uid() OR 
-        privacy_level = 'public' OR
-        (privacy_level = 'friends' AND EXISTS (
-            SELECT 1 FROM public.friendships f
-            WHERE (f.requester_id = auth.uid() AND f.addressee_id = profiles.id)
-               OR (f.addressee_id = auth.uid() AND f.requester_id = profiles.id)
-            AND f.status = 'accepted'
-        ))
-    );
+-- CREATE POLICY "Users can view public profiles" ON public.profiles
+--     FOR SELECT USING (
+--         id = auth.uid() OR 
+--         privacy_level = 'public' OR
+--         (privacy_level = 'friends' AND EXISTS (
+--             SELECT 1 FROM public.friendships f
+--             WHERE (f.requester_id = auth.uid() AND f.addressee_id = profiles.id)
+--                OR (f.addressee_id = auth.uid() AND f.requester_id = profiles.id)
+--             AND f.status = 'accepted'
+--         ))
+--     );
 
 -- Users can view their own profile and public profiles of others (users table backup)
 CREATE POLICY "Users can view public user profiles" ON public.users
@@ -63,9 +68,10 @@ CREATE POLICY "Users can update own profile" ON public.profiles
 CREATE POLICY "Users can insert own profile" ON public.profiles
     FOR INSERT WITH CHECK (id = auth.uid());
 
+-- 🚨 DISABLED: OAuth removed for security
 -- OAuth callback can insert profiles (service role)
-CREATE POLICY "OAuth can insert profiles" ON public.profiles
-    FOR INSERT WITH CHECK (auth.role() = 'service_role');
+-- CREATE POLICY "OAuth can insert profiles" ON public.profiles
+--     FOR INSERT WITH CHECK (auth.role() = 'service_role');
 
 -- Backup policies for users table
 CREATE POLICY "Users can update own user profile" ON public.users

@@ -34,8 +34,8 @@ export interface ValidationResult {
  */
 export const REQUIRED_ENV_VARS = {
   development: ['NEXTAUTH_SECRET'],
-  staging: ['NEXTAUTH_SECRET', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'],
-  production: ['NEXTAUTH_SECRET', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'NEXT_PUBLIC_APP_URL']
+  staging: ['NEXTAUTH_SECRET'],
+  production: ['NEXTAUTH_SECRET', 'NEXT_PUBLIC_APP_URL']
 } as const
 
 /**
@@ -90,34 +90,6 @@ export function getBaseUrl(): string {
   return `http://localhost:${port}`
 }
 
-/**
- * Get environment-aware OAuth redirect URL
- */
-export function getOAuthRedirectUrl(path: string = '/app'): string {
-  const baseUrl = getBaseUrl()
-  const redirectUrl = `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`
-  
-  // Debug logging for OAuth URL generation
-  if (typeof window !== 'undefined') {
-    console.log('🔍 OAuth Redirect URL Debug:', {
-      path,
-      baseUrl,
-      redirectUrl,
-      windowOrigin: window.location.origin,
-      environment: getEnvironment()
-    })
-  }
-  
-  return redirectUrl
-}
-
-/**
- * Get environment-aware API callback URL
- */
-export function getOAuthCallbackUrl(provider: string): string {
-  const baseUrl = getBaseUrl()
-  return `${baseUrl}/api/auth/callback/${provider}`
-}
 
 /**
  * Get the current environment name
@@ -171,13 +143,6 @@ export function validateEnvironmentConfig(): ValidationResult {
   if (environment !== 'development') {
     if (!process.env.VERCEL_URL && !process.env.NEXT_PUBLIC_APP_URL) {
       warnings.push('No deployment URL configured (VERCEL_URL or NEXT_PUBLIC_APP_URL)')
-    }
-    
-    // Warn about OAuth URL consistency only if both are set
-    if (process.env.NEXTAUTH_URL && process.env.NEXT_PUBLIC_APP_URL) {
-      if (process.env.NEXTAUTH_URL !== process.env.NEXT_PUBLIC_APP_URL) {
-        warnings.push(`NEXTAUTH_URL (${process.env.NEXTAUTH_URL}) differs from NEXT_PUBLIC_APP_URL (${process.env.NEXT_PUBLIC_APP_URL})`)
-      }
     }
   }
   

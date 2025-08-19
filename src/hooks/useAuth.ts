@@ -230,49 +230,6 @@ export function useAuth() {
     }
   }
 
-  const signInWithGoogle = async () => {
-    try {
-      setAuthState(prev => ({ ...prev, loading: true, error: null }))
-      
-      if (!supabase) {
-        throw new Error('Supabase client not available')
-      }
-
-      // Defer non-critical operations to prevent blocking OAuth
-      if ('requestIdleCallback' in window) {
-        requestIdleCallback(() => {
-          // Any analytics or tracking can happen here
-          console.log('Google OAuth initiated')
-        }, { timeout: 100 })
-      }
-
-      // Get environment-aware redirect URL for OAuth callback
-      const redirectUrl = getOAuthRedirectUrl('/api/auth/callback/google')
-
-      // Use Supabase's native OAuth method with environment-aware redirect
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: redirectUrl,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent'
-          }
-        }
-      })
-
-      if (error) {
-        throw new Error(error.message)
-      }
-
-      // Supabase will handle the redirect automatically
-      return { success: true, data }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Google sign-in failed'
-      setAuthState(prev => ({ ...prev, loading: false, error: errorMessage }))
-      return { success: false, error: errorMessage }
-    }
-  }
 
   const resendConfirmation = async (email: string) => {
     try {
@@ -306,7 +263,6 @@ export function useAuth() {
     signUp,
     signIn,
     signOut,
-    signInWithGoogle,
     resendConfirmation
   }
 }

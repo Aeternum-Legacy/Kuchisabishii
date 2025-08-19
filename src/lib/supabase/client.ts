@@ -20,13 +20,12 @@ function getSupabaseClient() {
 
   return createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
-      // SPARC Architecture: Native OAuth Configuration
+      // Email authentication configuration
       autoRefreshToken: true,
       persistSession: true,
-      detectSessionInUrl: true,
-      flowType: 'implicit', // Changed from PKCE to implicit for staging testing
+      detectSessionInUrl: false, // OAuth removed
       storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-      debug: true // Enable debug for OAuth troubleshooting
+      debug: false // Production ready
     },
     global: {
       headers: {

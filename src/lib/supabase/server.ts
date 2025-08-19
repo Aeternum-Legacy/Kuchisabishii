@@ -8,21 +8,18 @@ import { NextRequest } from 'next/server'
  */
 
 // Primary cookie-based client for Server Components
+// SECURITY: Always uses anon key to respect RLS policies for user authentication
 export async function createClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error('Missing Supabase environment variables')
   }
 
-  // Use service role key for OAuth callbacks to bypass RLS
-  const isOAuthContext = typeof process !== 'undefined' && 
-    process.env.NODE_ENV !== undefined && 
-    supabaseServiceKey
-  
-  const apiKey = isOAuthContext ? supabaseServiceKey : supabaseAnonKey
+  // CRITICAL SECURITY FIX: Always use anon key to ensure RLS policies are respected
+  // This prevents users from seeing other users' profiles
+  const apiKey = supabaseAnonKey
 
   const cookieStore = await cookies()
 

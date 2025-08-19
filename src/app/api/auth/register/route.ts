@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { authRateLimit } from '@/lib/middleware/rateLimit'
@@ -95,10 +94,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create user profile using admin client (bypasses RLS like OAuth callback)
-    const adminClient = createAdminClient()
-    
-    const { error: profileError } = await adminClient
+    // Create user profile (RLS policies fixed at database level)
+    const { error: profileError } = await supabase
       .from('profiles')
       .insert({
         id: authData.user.id,
@@ -123,17 +120,8 @@ export async function POST(request: NextRequest) {
         userId: authData.user.id
       })
       
-      // Critical: Clean up orphaned auth user if profile creation fails
-      try {
-        const { error: deleteError } = await supabase.auth.admin.deleteUser(authData.user.id)
-        if (deleteError) {
-          console.error('Failed to cleanup orphaned user:', deleteError)
-        } else {
-          console.log('✅ Cleaned up orphaned auth user:', authData.user.id)
-        }
-      } catch (cleanupError) {
-        console.error('Cleanup operation failed:', cleanupError)
-      }
+      // Profile creation failed - this shouldn't happen with fixed RLS policies
+      console.error('Profile creation failed despite RLS policy fix - investigate:', authData.user.id)
       
       return NextResponse.json(
         { 

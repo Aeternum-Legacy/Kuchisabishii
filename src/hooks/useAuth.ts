@@ -106,13 +106,13 @@ export function useAuth() {
       }
     )
 
-    // Cleanup timeout for loading state - increased for OAuth flow
+    // Cleanup timeout for loading state
     const loadingTimeout = setTimeout(() => {
       if (authState.loading) {
-        console.log('⏱️ Auth loading timeout reached after 15 seconds')
+        console.log('⏱️ Auth loading timeout reached after 10 seconds')
         setAuthState(prev => ({ ...prev, loading: false }))
       }
-    }, 15000) // Increased from 8s to 15s for OAuth flow
+    }, 10000) // Standard timeout for email authentication
 
     return () => {
       subscription.unsubscribe()

@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { authRateLimit } from '@/lib/middleware/rateLimit'
@@ -94,8 +95,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create user profile in profiles table
-    const { error: profileError } = await supabase
+    // Create user profile using admin client (bypasses RLS like OAuth callback)
+    const adminClient = createAdminClient()
+    
+    const { error: profileError } = await adminClient
       .from('profiles')
       .insert({
         id: authData.user.id,
@@ -103,6 +106,8 @@ export async function POST(request: NextRequest) {
         display_name: validatedData.displayName,
         first_name: validatedData.firstName,
         last_name: validatedData.lastName,
+        email_verified: false, // Will be true after email verification
+        onboarding_completed: false, // User needs to complete onboarding
         privacy_level: 'friends', // Default privacy level
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -114,17 +119,29 @@ export async function POST(request: NextRequest) {
         code: profileError.code,
         message: profileError.message,
         details: profileError.details,
-        hint: profileError.hint
+        hint: profileError.hint,
+        userId: authData.user.id
       })
       
-      // If profile creation fails, we should actually fail the registration
-      // since the profile is essential for the app functionality
+      // Critical: Clean up orphaned auth user if profile creation fails
+      try {
+        const { error: deleteError } = await supabase.auth.admin.deleteUser(authData.user.id)
+        if (deleteError) {
+          console.error('Failed to cleanup orphaned user:', deleteError)
+        } else {
+          console.log('✅ Cleaned up orphaned auth user:', authData.user.id)
+        }
+      } catch (cleanupError) {
+        console.error('Cleanup operation failed:', cleanupError)
+      }
+      
       return NextResponse.json(
         { 
-          error: 'Failed to create user profile. Please try again.',
-          details: 'Profile creation failed after successful authentication'
+          error: 'Registration temporarily unavailable. Please try again in a few moments.',
+          errorCode: 'PROFILE_CREATION_FAILED',
+          retryable: true
         },
-        { status: 500 }
+        { status: 503 }
       )
     }
 

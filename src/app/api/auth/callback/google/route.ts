@@ -47,24 +47,32 @@ export async function GET(request: NextRequest) {
     
     
     // Create or update user profile with OAuth data
+    console.log('📝 Creating/updating profile for user:', {
+      userId: data.user.id,
+      email: data.user.email,
+      metadata: data.user.user_metadata
+    })
+    
     const { error: profileError } = await supabase
       .from('profiles')
       .upsert({
         id: data.user.id,
         email: data.user.email || '',
-        display_name: data.user.user_metadata?.full_name || data.user.user_metadata?.name || '',
+        display_name: data.user.user_metadata?.full_name || data.user.user_metadata?.name || data.user.email || '',
         first_name: data.user.user_metadata?.given_name || '',
         last_name: data.user.user_metadata?.family_name || '',
         profile_image_url: data.user.user_metadata?.avatar_url || data.user.user_metadata?.picture,
         email_verified: data.user.email_confirmed_at ? true : false,
         privacy_level: 'friends',
+        onboarding_completed: false, // Explicitly set to false for new users
         updated_at: new Date().toISOString()
       }, {
         onConflict: 'id'
       })
     
     if (profileError) {
-      // Don't fail the authentication for profile errors
+      console.error('❌ Profile creation/update failed:', profileError)
+      // Log but don't fail - the auth.users trigger should handle this
     }
     
     // Check onboarding status to determine redirect

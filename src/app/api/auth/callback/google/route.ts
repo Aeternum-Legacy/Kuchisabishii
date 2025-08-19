@@ -12,18 +12,30 @@ export async function GET(request: NextRequest) {
   const code = requestUrl.searchParams.get('code')
   const error = requestUrl.searchParams.get('error')
   
+  console.log('🔍 OAuth Callback Debug:', {
+    url: request.url,
+    hasCode: !!code,
+    codeLength: code?.length,
+    error: error,
+    origin: requestUrl.origin,
+    headers: Object.fromEntries(request.headers.entries())
+  })
+  
   if (error) {
     return NextResponse.redirect(new URL(`/?error=oauth_error&details=${encodeURIComponent(error)}`, requestUrl.origin))
   }
   
-  // For PKCE flow, we expect an authorization code
+  // For OAuth flow, we expect an authorization code
   if (!code) {
+    console.warn('⚠️ No authorization code in callback')
     return NextResponse.redirect(new URL('/app', requestUrl.origin))
   }
 
   try {
     // Use regular client for OAuth exchange
     const supabase = await createClient()
+    
+    console.log('🔄 Attempting OAuth token exchange with code:', code.substring(0, 10) + '...')
     
     // Use Supabase's native OAuth token exchange
     const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)

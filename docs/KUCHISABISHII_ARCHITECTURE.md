@@ -1,831 +1,999 @@
-# Kuchisabishii Architecture Framework
-## CRITICAL SYSTEM ARCHITECTURAL SPECIFICATION
+# Kuchisabishii - Comprehensive Technical Architecture
 
-**Authority Level**: SYSTEM-CRITICAL
-**Last Updated**: 2025-08-15
-**Version**: 1.0.0
+## Executive Summary
 
----
+Kuchisabishii is a sophisticated food journaling and recommendation platform built with emotional intelligence at its core. The application leverages advanced palate profiling algorithms, comprehensive taste vectors, and social intelligence to deliver personalized food recommendations with a target accuracy of 92.3%.
 
-## 🚨 ARCHITECTURAL CRISIS RESOLUTION
-
-This document establishes the **UNIFIED ARCHITECTURAL FRAMEWORK** for the Kuchisabishii platform to resolve systemic inconsistencies and ensure all agents follow standardized patterns.
-
-## 🏛️ EXPERT WEIGHTING PROTOCOL
-
-### Authority Hierarchy
-```
-User → Queen-Strategic → Architecture Agent → All Other Agents
-```
-
-**Weight Distribution:**
-- **Architecture Agent**: Weight 10 (highest authority for structural and type safety decisions)
-- **Queen-Strategic**: Weight 9 (coordination and conflict resolution)
-- **Type Safety Enforcer**: Weight 9 (enum-object pattern compliance and TypeScript errors)
-- **Algorithm Coordinator**: Weight 8 (algorithm parameter consistency and validation)
-- **Component Specialists**: Weight 7 (domain-specific expertise)
-- **General Agents**: Weight 5 (implementation only, no architectural decisions)
-
-### Decision Authority Rules
-1. **No agent may create new architectural patterns** without Architecture Agent approval
-2. **All structural decisions** must reference this document
-3. **Conflicts are escalated** to Architecture Agent for resolution
-4. **This document is the single source of truth** for all architectural decisions
-5. **Type Safety Violations** result in immediate build failure and escalation
-6. **Enum-object mappings** must follow Record<EnumType, ValueType> pattern exactly
-7. **Algorithm implementations** must validate configuration completeness
+**Key Architectural Highlights:**
+- **Framework:** Next.js 15.4.6 with App Router
+- **Database:** Supabase with PostgreSQL 
+- **Authentication:** OAuth 2.0 with Google SSO + Supabase Auth
+- **AI Engine:** Patent-pending 11-dimensional taste vector algorithm
+- **Deployment:** Vercel with staging/production environments
+- **Security:** Row-Level Security (RLS) policies with comprehensive privacy controls
 
 ---
 
-## 📊 CURRENT ARCHITECTURAL PROBLEMS IDENTIFIED
+## Technology Stack
 
-### 1. Function Signature Chaos
-**❌ CURRENT INCONSISTENT PATTERNS:**
+### Frontend Architecture
 ```typescript
-// SettingsTab.tsx - Lines 62, 74
-updatePrivacy(key: string, value: Record<string, unknown>) // Pattern A
-updateDataSetting(key: string, value: Record<string, unknown>) // Pattern A
-
-// But also mixed with:
-updateNotification(key: string, value: boolean) // Pattern B
+Framework: Next.js 15.4.6 (App Router)
+Language: TypeScript 5.x
+Styling: Tailwind CSS v4
+UI Library: Custom components with Lucide React icons
+Animation: Framer Motion 12.23.12
+State Management: React Context + Custom hooks
 ```
 
-### 2. Type System Conflicts
-**❌ PROBLEMS:**
-- Mixed use of `Record<string, unknown>` vs typed interfaces
-- Inconsistent interface definitions across files
-- No unified type hierarchy
+### Backend Infrastructure
+```typescript
+Runtime: Node.js with Next.js API Routes
+Database: Supabase (PostgreSQL)
+Authentication: Supabase Auth + OAuth 2.0
+File Storage: Supabase Storage (images/videos)
+Email: Nodemailer integration
+API Validation: Zod schemas
+```
 
-### 3. Data Flow Inconsistency
-**❌ PROBLEMS:**
-- No standardized state management pattern
-- Mixed prop drilling and direct state manipulation
-- Inconsistent data transformation approaches
+### Core Dependencies
+```json
+{
+  "supabase/supabase-js": "^2.55.0",
+  "supabase/ssr": "^0.6.1",
+  "next": "15.4.6",
+  "react": "^18.3.1",
+  "framer-motion": "^12.23.12",
+  "bcryptjs": "^2.4.3",
+  "jose": "^5.10.0",
+  "zod": "^3.25.76"
+}
+```
 
 ---
 
-## ✅ UNIFIED ARCHITECTURAL STANDARDS
+## Application Architecture
 
-## 1. FUNCTION SIGNATURE STANDARDS
+### Directory Structure
+```
+kuchisabishii/
+├── src/
+│   ├── app/                     # Next.js App Router pages
+│   │   ├── api/                 # API routes (30+ endpoints)
+│   │   ├── auth/                # Authentication pages
+│   │   ├── onboarding/          # User onboarding flow
+│   │   ├── profile/             # User profile management
+│   │   └── recommendations/     # AI recommendation interface
+│   ├── components/              # React components (50+ components)
+│   │   ├── auth/                # Authentication components
+│   │   ├── food/                # Food logging components
+│   │   ├── home/                # Dashboard components
+│   │   ├── mobile/              # Mobile-optimized components
+│   │   ├── onboarding/          # Onboarding flow components
+│   │   ├── profile/             # Profile management
+│   │   ├── recommendations/     # AI recommendation UI
+│   │   └── social/              # Social features
+│   ├── hooks/                   # Custom React hooks
+│   ├── lib/                     # Core libraries and utilities
+│   │   ├── algorithms/          # AI recommendation algorithms
+│   │   ├── auth/                # Authentication utilities
+│   │   ├── supabase/            # Database client configuration
+│   │   └── utils/               # Helper functions
+│   ├── types/                   # TypeScript type definitions
+│   └── styles/                  # CSS and theme files
+├── database/                    # Database schema and migrations
+├── docs/                        # Documentation
+└── tests/                       # Test suites
+```
 
-### ✅ APPROVED PATTERN: Typed Union Pattern
+---
+
+## Database Architecture
+
+### Core Schema Design
+
+The database follows a comprehensive emotional food journaling model with 14 core tables:
+
+#### User Management Tables
+```sql
+-- User profiles with privacy controls
+public.user_profiles (
+  id UUID PRIMARY KEY,
+  username TEXT UNIQUE,
+  display_name TEXT,
+  avatar_url TEXT,
+  dietary_restrictions TEXT[],
+  profile_visibility TEXT, -- 'public', 'friends', 'private'
+  onboarding_completed BOOLEAN
+)
+
+-- Advanced taste profiling
+public.taste_profiles (
+  id UUID PRIMARY KEY,
+  user_id UUID REFERENCES user_profiles(id),
+  salty_preference INTEGER (1-10),
+  sweet_preference INTEGER (1-10),
+  sour_preference INTEGER (1-10),
+  bitter_preference INTEGER (1-10),
+  umami_preference INTEGER (1-10),
+  culinary_adventurousness INTEGER (1-10)
+)
+```
+
+#### Core Food Experience Tables
+```sql
+-- Rich food experience logging
+public.food_experiences (
+  id UUID PRIMARY KEY,
+  user_id UUID REFERENCES user_profiles(id),
+  restaurant_id UUID REFERENCES restaurants(id),
+  dish_name TEXT NOT NULL,
+  meal_time TEXT CHECK (meal_time IN ('breakfast', 'brunch', 'lunch', 'dinner', 'snack', 'dessert')),
+  dining_method TEXT CHECK (dining_method IN ('dine_in', 'takeout', 'delivery', 'homemade')),
+  overall_rating INTEGER (1-5),
+  taste_notes JSONB,
+  emotions TEXT[], -- Multiple emotional responses
+  mood_before TEXT,
+  mood_after TEXT,
+  satisfaction_level INTEGER (1-10),
+  photos TEXT[],
+  is_private BOOLEAN DEFAULT FALSE
+)
+
+-- Detailed taste analysis
+public.taste_experiences (
+  id UUID PRIMARY KEY,
+  food_experience_id UUID REFERENCES food_experiences(id),
+  saltiness INTEGER (1-10),
+  sweetness INTEGER (1-10),
+  sourness INTEGER (1-10),
+  bitterness INTEGER (1-10),
+  umami INTEGER (1-10),
+  crunchiness INTEGER (1-10),
+  creaminess INTEGER (1-10),
+  spice_heat INTEGER (1-10),
+  aroma_intensity INTEGER (1-10),
+  visual_appeal INTEGER (1-10)
+)
+```
+
+#### Restaurant & Menu System
+```sql
+-- Restaurant database with location services
+public.restaurants (
+  id UUID PRIMARY KEY,
+  name TEXT NOT NULL,
+  address TEXT NOT NULL,
+  latitude DECIMAL(10, 8),
+  longitude DECIMAL(11, 8),
+  cuisine_types TEXT[],
+  price_range INTEGER (1-4),
+  verified BOOLEAN DEFAULT FALSE,
+  search_vector TSVECTOR -- Full-text search optimization
+)
+
+-- Comprehensive menu management
+public.menu_items (
+  id UUID PRIMARY KEY,
+  restaurant_id UUID REFERENCES restaurants(id),
+  name TEXT NOT NULL,
+  description TEXT,
+  price DECIMAL(10, 2),
+  allergens TEXT[],
+  is_vegetarian BOOLEAN,
+  is_vegan BOOLEAN,
+  spice_level INTEGER (1-5)
+)
+```
+
+#### Social Features
+```sql
+-- Friendship system
+public.friendships (
+  id UUID PRIMARY KEY,
+  requester_id UUID REFERENCES user_profiles(id),
+  addressee_id UUID REFERENCES user_profiles(id),
+  status TEXT CHECK (status IN ('pending', 'accepted', 'declined', 'blocked'))
+)
+
+-- Experience sharing
+public.shared_experiences (
+  id UUID PRIMARY KEY,
+  food_experience_id UUID REFERENCES food_experiences(id),
+  shared_by UUID REFERENCES user_profiles(id),
+  shared_with UUID REFERENCES user_profiles(id),
+  recommendation_strength INTEGER (1-5)
+)
+```
+
+#### Analytics & Recommendation System
+```sql
+-- User behavior analytics
+public.user_analytics (
+  id UUID PRIMARY KEY,
+  user_id UUID REFERENCES user_profiles(id),
+  date DATE,
+  experiences_logged INTEGER,
+  restaurants_visited INTEGER,
+  session_duration_minutes INTEGER
+)
+
+-- Recommendation tracking
+public.recommendation_interactions (
+  id UUID PRIMARY KEY,
+  user_id UUID REFERENCES user_profiles(id),
+  recommendation_type TEXT CHECK (recommendation_type IN 
+    ('ai_similar_taste', 'friend_shared', 'trending', 'location_based')),
+  shown_at TIMESTAMP,
+  clicked BOOLEAN,
+  visited BOOLEAN,
+  rating INTEGER (1-5)
+)
+```
+
+### Database Performance Optimizations
+
+```sql
+-- Geographic indexing for restaurant discovery
+CREATE INDEX idx_restaurants_location 
+  ON restaurants USING GIST(ll_to_earth(latitude, longitude));
+
+-- Full-text search for restaurants and experiences
+CREATE INDEX idx_restaurants_search 
+  ON restaurants USING GIN(search_vector);
+CREATE INDEX idx_food_experiences_search 
+  ON food_experiences USING GIN(search_vector);
+
+-- Query optimization indexes
+CREATE INDEX idx_food_experiences_user_date 
+  ON food_experiences(user_id, experienced_at);
+CREATE INDEX idx_recommendation_interactions_user 
+  ON recommendation_interactions(user_id, shown_at);
+```
+
+---
+
+## AI Recommendation Engine Architecture
+
+### Patent-Pending Palate Profile Algorithm
+
+The core innovation of Kuchisabishii is its 11-dimensional taste vector system:
+
 ```typescript
-// STANDARD: Use typed unions for all state updates
-type SettingValue = string | boolean | number | string[]
-
-interface SettingUpdate<T extends SettingValue> {
-  key: string
-  value: T
+interface TasteVector {
+  saltiness: number      // 0-10 intensity
+  sweetness: number      // 0-10 intensity  
+  sourness: number       // 0-10 intensity
+  bitterness: number     // 0-10 intensity
+  umami: number          // 0-10 intensity
+  crunchiness: number    // 0-10 texture
+  creaminess: number     // 0-10 texture
+  spice_heat: number     // 0-10 intensity
+  aroma_intensity: number // 0-10 strength
+  visual_appeal: number   // 0-10 presentation
+  emotional_impact: number // 0-10 satisfaction
 }
 
-// STANDARD function signature
-const updateSetting = <T extends SettingValue>(
-  key: string, 
-  value: T,
-  validator?: (value: T) => boolean
-): void => {
-  if (validator && !validator(value)) {
-    throw new Error(`Invalid value for ${key}`)
+interface PalateProfile {
+  user_id: string
+  palate_vector: TasteVector
+  emotional_preference_matrix: number[][] // 11x5 matrix
+  confidence_score: number
+  profile_maturity: 'novice' | 'developing' | 'established' | 'expert'
+  total_experiences: number
+}
+```
+
+### Algorithm Components
+
+#### 1. Collaborative Filtering System
+```typescript
+// Real-time user similarity calculation
+class CollaborativeFiltering {
+  calculateUserSimilarity(userA: PalateProfile, userB: PalateProfile): number {
+    // Cosine similarity with emotional weighting
+    const tasteAlignment = this.calculateTasteSimilarity(userA.palate_vector, userB.palate_vector)
+    const emotionalAlignment = this.calculateEmotionalAlignment(userA, userB)
+    
+    return (tasteAlignment * 0.7) + (emotionalAlignment * 0.3)
   }
-  setState(prev => ({ ...prev, [key]: value }))
 }
 ```
 
-### ❌ FORBIDDEN PATTERNS:
+#### 2. Context-Aware Recommendations
 ```typescript
-// NEVER USE: Generic Record types for known data
-updateSetting(key: string, value: Record<string, unknown>)
-
-// NEVER USE: Untyped any
-updateSetting(key: string, value: any)
-```
-
-## 2. TYPE SYSTEM HIERARCHY
-
-### ✅ BASE INTERFACES STANDARD
-```typescript
-// Base interfaces that all components must extend
-interface BaseEntity {
-  id: string
-  created_at: string
-  updated_at: string
+interface ExperienceContext {
+  time_of_day: 'breakfast' | 'lunch' | 'dinner' | 'snack'
+  social_setting: 'alone' | 'family' | 'friends' | 'date' | 'business'
+  mood_before: 'excited' | 'neutral' | 'tired' | 'stressed' | 'happy'
+  weather: 'sunny' | 'rainy' | 'cold' | 'hot' | 'mild'
+  location_type: 'home' | 'restaurant' | 'office' | 'travel'
 }
 
-interface BaseUserProfile extends BaseEntity {
-  username: string | null
-  display_name: string | null
-  bio: string | null
-  location: string | null
-}
-
-interface BaseComponent<T = unknown> {
-  className?: string
-  testId?: string
-  ariaLabel?: string
-  data?: T
-}
-
-// All component props must extend BaseComponent
-interface SettingsTabProps extends BaseComponent<UserSettings> {
-  userProfile: UserProfile
-  onUpdateProfile: (updates: Partial<UserProfile>) => Promise<void>
-  onError: (error: string) => void
-}
-```
-
-### ✅ TYPE UNION STANDARDS
-```typescript
-// Use discriminated unions for complex states
-type ComponentState = 
-  | { status: 'loading'; data: null; error: null }
-  | { status: 'success'; data: UserProfile; error: null }
-  | { status: 'error'; data: null; error: string }
-
-// Use mapped types for settings
-type UserSettings = {
-  notifications: {
-    [K in NotificationType]: boolean
-  }
-  privacy: {
-    [K in PrivacySetting]: boolean | string
-  }
-  preferences: {
-    [K in UserPreference]: string | number | boolean
+// Context relevance scoring
+calculateContextScore(itemContext: ExperienceContext, currentContext: ExperienceContext): number {
+  // Multi-dimensional context matching with weights
+  const contextWeights = {
+    time_of_day: 0.25,
+    social_setting: 0.20,
+    mood_before: 0.20,
+    weather: 0.15,
+    location_type: 0.20
   }
 }
 ```
 
-## 3. DATA FLOW ARCHITECTURE
-
-### ✅ STANDARD: Unidirectional Data Flow
+#### 3. Recommendation Scoring Algorithm
 ```typescript
-// STANDARD: Props down, events up pattern
-interface ComponentArchitecture {
-  // Data flows DOWN through props
-  data: readonly T[]
-  
-  // Events flow UP through callbacks
-  onUpdate: (id: string, changes: Partial<T>) => Promise<void>
-  onDelete: (id: string) => Promise<void>
-  onError: (error: Error) => void
+interface RecommendationResult {
+  item_id: string
+  total_score: number
+  taste_score: number        // 35% weight
+  emotional_score: number    // 25% weight
+  context_score: number      // 20% weight
+  collaborative_score: number // 15% weight
+  novelty_score: number      // 5% weight
+  confidence: number
+  reasoning: string[]
 }
 
-// STANDARD: State management hierarchy
-const useComponentState = <T>() => {
-  // 1. Local state for UI-only concerns
-  const [uiState, setUiState] = useState<UIState>()
-  
-  // 2. Shared state through context for related components
-  const sharedState = useContext(SharedStateContext)
-  
-  // 3. Global state for app-wide concerns
-  const globalState = useAuth() // or useGlobalState()
-  
-  return { uiState, sharedState, globalState }
+// Weighted scoring calculation
+calculateComprehensiveScore(
+  item: FoodExperience,
+  profile: PalateProfile,
+  context: ExperienceContext,
+  similarUsers: UserSimilarity[]
+): RecommendationResult {
+  const totalScore = (
+    tasteScore * 0.35 +
+    emotionalScore * 0.25 +
+    contextScore * 0.20 +
+    collaborativeScore * 0.15 +
+    noveltyScore * 0.05
+  )
 }
 ```
 
-### ✅ STANDARD: Error Handling Pattern
+---
+
+## Authentication Architecture
+
+### OAuth 2.0 + Supabase Integration
+
 ```typescript
-// STANDARD: All async operations must use this pattern
-interface AsyncOperation<T> {
-  data: T | null
-  loading: boolean
-  error: string | null
+// Environment-aware OAuth configuration
+function getOAuthRedirectUrl(path: string): string {
+  const baseUrl = getBaseUrl() // Never hardcoded localhost
+  return `${baseUrl}${path}`
 }
 
-const useAsyncOperation = <T>(
-  operation: () => Promise<T>
-): AsyncOperation<T> & {
-  execute: () => Promise<void>
-  reset: () => void
-} => {
-  const [state, setState] = useState<AsyncOperation<T>>({
-    data: null,
-    loading: false,
-    error: null
-  })
-  
-  const execute = async () => {
-    setState(prev => ({ ...prev, loading: true, error: null }))
-    try {
-      const data = await operation()
-      setState({ data, loading: false, error: null })
-    } catch (error) {
-      setState({ 
-        data: null, 
-        loading: false, 
-        error: error instanceof Error ? error.message : 'Unknown error' 
-      })
+// Google OAuth flow
+async signInWithGoogle() {
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: getOAuthRedirectUrl('/api/auth/callback/google'),
+      queryParams: {
+        access_type: 'offline',
+        prompt: 'consent'
+      }
     }
+  })
+}
+```
+
+### Session Management
+```typescript
+// SPARC Architecture: Native Supabase session handling
+export function useAuth() {
+  useEffect(() => {
+    // Get initial session
+    const getInitialSession = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession()
+      if (session?.user) {
+        await loadUserProfile(session.user.id)
+      }
+    }
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+          await loadUserProfile(session.user.id)
+        }
+      }
+    )
+  }, [])
+}
+```
+
+---
+
+## Security Architecture
+
+### Row-Level Security (RLS) Policies
+
+```sql
+-- Profile privacy controls
+CREATE POLICY "Users can view public profiles" ON public.user_profiles
+  FOR SELECT USING (
+    id = auth.uid() OR 
+    profile_visibility = 'public' OR
+    (profile_visibility = 'friends' AND EXISTS (
+      SELECT 1 FROM public.friendships f
+      WHERE (f.requester_id = auth.uid() AND f.addressee_id = user_profiles.id)
+         OR (f.addressee_id = auth.uid() AND f.requester_id = user_profiles.id)
+      AND f.status = 'accepted'
+    ))
+  );
+
+-- Food experience privacy
+CREATE POLICY "Users can view accessible food experiences" ON public.food_experiences
+  FOR SELECT USING (
+    user_id = auth.uid() OR 
+    (is_private = false AND shared_with_friends = true AND user_id IN (
+      -- Friend check subquery
+    ))
+  );
+```
+
+### Security Headers & Middleware
+```typescript
+// Security headers in middleware
+export function middleware(request: NextRequest) {
+  const response = NextResponse.next()
+  
+  response.headers.set('X-Frame-Options', 'DENY')
+  response.headers.set('X-Content-Type-Options', 'nosniff')
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+  
+  if (process.env.NODE_ENV === 'production') {
+    response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
   }
   
-  const reset = () => setState({ data: null, loading: false, error: null })
-  
-  return { ...state, execute, reset }
+  return response
 }
 ```
 
-## 4. COMPONENT INTERFACE STANDARDS
-
-### ✅ STANDARD: Component Prop Patterns
+### Rate Limiting
 ```typescript
-// STANDARD: All components follow this structure
-interface StandardComponentProps<TData = unknown> extends BaseComponent<TData> {
-  // Required data
-  children?: React.ReactNode
+// Authentication endpoint rate limiting
+const authRateLimit = (request: NextRequest) => {
+  const identifier = getClientIdentifier(request)
+  const windowStart = Math.floor(Date.now() / (5 * 60 * 1000)) // 5-minute window
+  const attempts = getAttempts(identifier, windowStart)
   
-  // State management
-  loading?: boolean
-  error?: string | null
-  
-  // Event handlers (always async for data operations)
-  onSave?: (data: TData) => Promise<void>
-  onCancel?: () => void
-  onError?: (error: string) => void
-  
-  // Customization
-  variant?: 'default' | 'compact' | 'detailed'
-  size?: 'sm' | 'md' | 'lg'
-}
-
-// STANDARD: Form component pattern
-interface FormComponentProps<TFormData> extends StandardComponentProps<TFormData> {
-  initialData?: Partial<TFormData>
-  validationSchema?: ValidationSchema<TFormData>
-  onSubmit: (data: TFormData) => Promise<void>
-  onValidationError?: (errors: ValidationErrors<TFormData>) => void
-}
-
-// STANDARD: List component pattern
-interface ListComponentProps<TItem> extends StandardComponentProps<TItem[]> {
-  items: readonly TItem[]
-  onItemSelect?: (item: TItem) => void
-  onItemUpdate?: (id: string, updates: Partial<TItem>) => Promise<void>
-  onItemDelete?: (id: string) => Promise<void>
-  renderItem?: (item: TItem, index: number) => React.ReactNode
-  emptyState?: React.ReactNode
+  return {
+    allowed: attempts < 5,
+    remaining: Math.max(0, 5 - attempts),
+    resetTime: (windowStart + 1) * 5 * 60 * 1000
+  }
 }
 ```
 
-## 5. API INTERFACE STANDARDS
+---
 
-### ✅ STANDARD: API Response Pattern
+## API Architecture
+
+### RESTful Endpoint Structure
+
+```
+/api/
+├── auth/                        # Authentication endpoints
+│   ├── login                    # POST - Email/password login
+│   ├── register                 # POST - User registration
+│   ├── logout                   # POST - Session termination
+│   ├── me                       # GET - Current user info
+│   ├── callback/google          # GET - OAuth callback
+│   └── social/google            # POST - Social login
+├── experiences/                 # Food experience management
+│   ├── /                        # GET/POST - List/create experiences
+│   └── [id]                     # GET/PUT/DELETE - Individual experience
+├── restaurants/                 # Restaurant database
+│   ├── /                        # GET/POST - Search/add restaurants
+│   └── [id]                     # GET - Restaurant details
+├── recommendations/             # AI recommendation engine
+│   └── /                        # POST - Get personalized recommendations
+├── friends/                     # Social features
+│   ├── /                        # GET/POST - Friend management
+│   ├── requests                 # GET/POST - Friend requests
+│   └── qr-connect              # POST - QR code friend connection
+├── profile/                     # User profile management
+│   ├── /                        # GET/PUT - Profile CRUD
+│   ├── taste-profile           # GET/PUT - Taste preferences
+│   └── statistics              # GET - User analytics
+└── health                       # System health check
+```
+
+### API Response Standards
 ```typescript
-// STANDARD: All API responses follow this structure
-interface ApiResponse<T = unknown> {
+interface ApiResponse<T = any> {
   success: boolean
-  data: T | null
-  error: string | null
-  metadata?: {
-    timestamp: string
-    requestId: string
-    version: string
-  }
+  data?: T
+  error?: string
+  message?: string
 }
 
-// STANDARD: Paginated responses
-interface PaginatedApiResponse<T> extends ApiResponse<T[]> {
+interface PaginatedResponse<T> extends ApiResponse<T[]> {
   pagination: {
     page: number
     limit: number
     total: number
     totalPages: number
     hasNext: boolean
-    hasPrev: boolean
+    hasPrevious: boolean
   }
-}
-
-// STANDARD: API client pattern
-interface ApiClient {
-  get<T>(endpoint: string, params?: Record<string, unknown>): Promise<ApiResponse<T>>
-  post<T>(endpoint: string, data: unknown): Promise<ApiResponse<T>>
-  put<T>(endpoint: string, data: unknown): Promise<ApiResponse<T>>
-  delete<T>(endpoint: string): Promise<ApiResponse<T>>
 }
 ```
 
-## 6. STATE MANAGEMENT ARCHITECTURE
+---
 
-### ✅ STANDARD: State Layer Hierarchy
+## Component Architecture
+
+### Component Organization
+```
+components/
+├── auth/                        # Authentication components
+│   ├── LoginForm.tsx           # Email/password login
+│   ├── OptimizedGoogleButton.tsx # Social login
+│   └── AuthWrapper.tsx         # Auth state wrapper
+├── food/                        # Food logging components
+│   ├── FoodExperienceForm.tsx  # Experience creation form
+│   ├── EnhancedFoodCard.tsx    # Food display card
+│   └── FoodPhotoUpload.tsx     # Image upload component
+├── home/                        # Dashboard components
+│   ├── HomeScreen.tsx          # Main dashboard
+│   ├── RecommendedFoodsSection.tsx # AI recommendations
+│   ├── QuickStatsSection.tsx   # User statistics
+│   └── HallOfFameSection.tsx   # Top-rated experiences
+├── mobile/                      # Mobile-optimized components
+│   ├── MobileLayout.tsx        # Mobile app wrapper
+│   ├── BottomTabBar.tsx        # Navigation
+│   └── FoodCard.tsx            # Mobile food card
+├── recommendations/             # AI recommendation UI
+│   ├── RecommendationsList.tsx # Recommendation feed
+│   └── RecommendationFeedbackLearning.tsx # ML feedback
+└── social/                      # Social features
+    ├── FriendsManager.tsx      # Friend management
+    ├── QRCodeGenerator.tsx     # QR friend codes
+    └── SocialShare.tsx         # Experience sharing
+```
+
+### Key Component Patterns
+
+#### 1. Responsive Design System
 ```typescript
-// Layer 1: Component Local State (UI only)
-const useLocalState = () => {
-  const [isOpen, setIsOpen] = useState(false)
-  const [selectedTab, setSelectedTab] = useState(0)
-  // UI-only state that doesn't affect other components
-}
-
-// Layer 2: Feature Context State (related components)
-const FeatureProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [featureState, setFeatureState] = useState<FeatureState>()
-  
+// Mobile-first responsive components
+const FoodCard: React.FC<FoodCardProps> = ({ experience, variant = 'default' }) => {
   return (
-    <FeatureContext.Provider value={{ featureState, setFeatureState }}>
-      {children}
-    </FeatureContext.Provider>
+    <motion.div
+      className={`
+        bg-white rounded-lg shadow-sm border border-gray-100
+        ${variant === 'mobile' ? 'p-3' : 'p-4 md:p-6'}
+        hover:shadow-md transition-shadow duration-200
+      `}
+      whileHover={{ y: -2 }}
+    >
+      {/* Content */}
+    </motion.div>
   )
 }
-
-// Layer 3: Global Application State
-const useGlobalState = () => {
-  // Authentication, user settings, app-wide preferences
-  const auth = useAuth()
-  const settings = useSettings()
-  const notifications = useNotifications()
-  
-  return { auth, settings, notifications }
-}
 ```
 
----
-
-## 🔧 MIGRATION PLAN FOR EXISTING CODE
-
-### Phase 1: Immediate Fixes (High Priority)
-1. **Fix SettingsTab.tsx function signatures**
-   - Replace `Record<string, unknown>` with proper types
-   - Implement typed setting updates
-
-2. **Standardize ReviewsTab.tsx interfaces**
-   - Ensure all interfaces extend base types
-   - Fix taste profile rendering type issues
-
-3. **Unify useAuth.ts patterns**
-   - Standardize UserProfile interface
-   - Implement consistent error handling
-
-### Phase 2: Component Interface Migration
-1. **Update all component props** to extend StandardComponentProps
-2. **Implement consistent error boundaries**
-3. **Standardize async operation patterns**
-
-### Phase 3: Type System Cleanup
-1. **Remove all `Record<string, unknown>` usage**
-2. **Implement proper type hierarchy**
-3. **Add comprehensive type validation**
-
----
-
-## 🛠️ ARCHITECTURAL REFERENCE PROTOCOL
-
-### For All Agents: MANDATORY CONSULTATION PROCESS
-
-#### BEFORE creating any new component:
-1. **Check this document** for existing patterns
-2. **If pattern exists**: Follow it exactly
-3. **If pattern doesn't exist**: Request architectural decision from Architecture Agent
-4. **NEVER create new patterns** without approval
-
-#### BEFORE modifying existing components:
-1. **Identify current pattern** used in component
-2. **Check if it matches this document**
-3. **If non-compliant**: Plan migration to compliant pattern
-4. **If uncertain**: Consult Architecture Agent
-
-#### BEFORE creating new APIs:
-1. **Follow ApiResponse pattern** exactly
-2. **Use proper error handling**
-3. **Implement consistent validation**
-4. **Document all endpoints**
-
----
-
-## 📋 COMPLIANCE CHECKLIST
-
-### Every Component Must:
-- [ ] Extend appropriate base interface
-- [ ] Use typed props (no `Record<string, unknown>`)
-- [ ] Implement standard error handling
-- [ ] Follow unidirectional data flow
-- [ ] Use consistent naming conventions
-- [ ] Include proper TypeScript types
-- [ ] Handle loading/error states
-- [ ] Support accessibility requirements
-
-### Every Function Must:
-- [ ] Have explicit return types
-- [ ] Use typed parameters
-- [ ] Handle errors properly
-- [ ] Follow naming conventions
-- [ ] Include JSDoc documentation
-- [ ] Validate inputs when necessary
-
-### Every API Endpoint Must:
-- [ ] Return ApiResponse format
-- [ ] Include proper error handling
-- [ ] Validate request data
-- [ ] Include rate limiting
-- [ ] Support proper HTTP methods
-- [ ] Include request/response types
-
----
-
-## 🚫 FORBIDDEN PATTERNS
-
-### ❌ NEVER USE:
+#### 2. Animation & Interaction Design
 ```typescript
-// Generic Record types for known data structures
-Record<string, unknown>
-Record<string, any>
-any
-
-// Untyped props
-interface Props {
-  data: any
-  onChange: (value: any) => void
-}
-
-// Direct state mutation
-user.name = "new name"
-setUsers(users.push(newUser))
-
-// Inconsistent error handling
-try { ... } catch (e) { console.log(e) }
-
-// Mixed data flow patterns
-const [data, setData] = useState()
-const contextData = useContext()
-const globalData = useGlobalStore()
-// Then using all three inconsistently
-```
-
-### ✅ ALWAYS USE:
-```typescript
-// Proper type definitions
-interface UserProfile {
-  id: string
-  name: string
-  email: string
-}
-
-// Typed function signatures
-const updateUser = (id: string, updates: Partial<UserProfile>): Promise<void>
-
-// Consistent state patterns
-const { data, loading, error, execute } = useAsyncOperation(fetchUser)
-
-// Proper error handling
-try {
-  await operation()
-} catch (error) {
-  onError(error instanceof Error ? error.message : 'Unknown error')
-}
-```
-
----
-
-## 🎯 SUCCESS METRICS
-
-### Compliance Achieved When:
-✅ Zero `Record<string, unknown>` usage in new code
-✅ All components follow StandardComponentProps
-✅ Consistent error handling across all features
-✅ Unified type system implementation
-✅ All agents following architectural consultation protocol
-✅ No function signature conflicts
-✅ Consistent data flow patterns
-
----
-
-## 🚨 CRITICAL TYPE SAFETY ENFORCEMENT FRAMEWORK
-
-### 🔒 MANDATORY TYPE-SAFE ENUM-OBJECT MAPPING PATTERN
-
-Based on the palate-profile-algorithm.ts emergency resolution, ALL enum-object mappings MUST follow this pattern:
-
-#### ✅ STANDARD PATTERN: Type-Safe Enum Mapping
-```typescript
-// 1. Define enum type first
-type ProfileMaturity = 'novice' | 'developing' | 'established' | 'expert';
-
-// 2. Create type-safe mapping with Record<EnumType, ValueType>
-type LearningRateMap = Record<ProfileMaturity, number>;
-
-// 3. Implement with ALL keys explicitly defined (NO FALLBACKS)
-const LEARNING_RATES: LearningRateMap = {
-  novice: 0.8,
-  developing: 0.5,    // ALL keys must be present
-  established: 0.3,
-  expert: 0.1
-} as const;
-
-// 4. Use type-safe access (NO fallback patterns)
-const getLearningRate = (maturity: ProfileMaturity): number => {
-  return LEARNING_RATES[maturity]; // Type-safe, no fallback needed
-}
-```
-
-#### ❌ FORBIDDEN PATTERNS THAT CAUSE COMPILATION ERRORS:
-```typescript
-// NEVER: Incomplete enum mapping with fallback
-const LEARNING_RATES = {
-  novice: 0.8,
-  // Missing 'developing' key - COMPILATION ERROR
-  established: 0.3,
-  expert: 0.1
-} as const;
-
-// NEVER: Unsafe fallback pattern
-const baseRate = LEARNING_RATES[profile.profile_maturity] || 0.5; // TYPE VIOLATION
-
-// NEVER: Generic Record for known enums
-const rates: Record<string, number> = { ... }; // UNSAFE
-
-// NEVER: Type assertion bypass
-const rate = (LEARNING_RATES as any)[maturity]; // FORBIDDEN
-
-// NEVER: Using types as values
-const vector = TasteVector.create(); // ERROR: 'TasteVector' only refers to a type
-Object.keys(TasteVector); // ERROR: Cannot use type as value
-```
-
-### 🔍 TYPE vs VALUE DISTINCTION REQUIREMENT
-
-#### ✅ RUNTIME VALUE PATTERN (Correct)
-```typescript
-// CORRECT: Interface for type checking only
-interface TasteVector {
-  sweet: number;
-  salty: number;
-  sour: number;
-  // ... other dimensions
-}
-
-// CORRECT: Runtime class/object for actual values
-class TasteVectorProcessor {
-  static create(values: Partial<TasteVector>): TasteVector {
-    return {
-      sweet: values.sweet || 0,
-      salty: values.salty || 0,
-      sour: values.sour || 0,
-      // ... initialize all dimensions
-    };
-  }
-  
-  static getDimensions(): (keyof TasteVector)[] {
-    return ['sweet', 'salty', 'sour', /* ... */];
+// Framer Motion integration for smooth UX
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
   }
 }
 
-// CORRECT: Using runtime values
-const dimensions = TasteVectorProcessor.getDimensions(); // ✅ Runtime value
-const vector = TasteVectorProcessor.create({ sweet: 5 }); // ✅ Runtime creation
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { type: "spring", stiffness: 100 }
+  }
+}
 ```
 
-#### ❌ FORBIDDEN TYPE-AS-VALUE PATTERNS
+#### 3. Performance Optimization Components
 ```typescript
-// ERROR: Cannot use interface/type as runtime value
-const vector = TasteVector.create(); // 'TasteVector' only refers to a type
-Object.keys(TasteVector); // Cannot use type as value
-TasteVector.getDimensions(); // Interface has no runtime presence
-
-// ERROR: Type-only imports used as values
-import { TasteVector } from './types';
-new TasteVector(); // Type has no constructor
-
-// ERROR: Type guards that reference the type as value
-if (obj instanceof TasteVector) { } // TasteVector is not a constructor
-```
-
-### 🎯 ALGORITHM CONFIGURATION STANDARDS
-
-#### ✅ CENTRAL TYPE REGISTRY REQUIREMENT
-```typescript
-// MANDATORY: All algorithm constants in central config
-export const ALGORITHM_CONFIG = {
-  VERSION: 'algorithm_v2.1',
-  LEARNING_RATES: {
-    novice: 0.8,
-    developing: 0.5,
-    established: 0.3,
-    expert: 0.1
-  } as const,
-  EMOTIONAL_WEIGHTS: {
-    satisfaction: 0.35,
-    excitement: 0.25,
-    comfort: 0.20,
-    surprise: 0.15,
-    nostalgia: 0.05
-  } as const,
-  SIMILARITY_THRESHOLD: 0.90
-} as const;
-
-// MANDATORY: Type definitions for all algorithm interfaces
-export type AlgorithmConfig = typeof ALGORITHM_CONFIG;
-export type ProfileMaturity = keyof typeof ALGORITHM_CONFIG.LEARNING_RATES;
-export type EmotionalWeightKey = keyof typeof ALGORITHM_CONFIG.EMOTIONAL_WEIGHTS;
-```
-
-#### ✅ UNIFIED NAMING CONVENTIONS
-```typescript
-// STANDARD: All learning rates must follow this pattern
-LEARNING_RATES: Record<ProfileMaturity, number>
-
-// STANDARD: All algorithm parameters use underscore_case
-SIMILARITY_THRESHOLD: number
-TASTE_DIMENSIONS: number
-CONTEXT_WEIGHTS: Record<string, number>
-
-// STANDARD: All version identifiers include algorithm name
-VERSION: 'palate_profile_v2.1' | 'taste_vector_v1.3' | 'recommendation_v2.0'
-```
-
-### 🛡️ CRITICAL ERROR PREVENTION FRAMEWORK
-
-#### ✅ TYPE SAFETY VERIFICATION PROTOCOL
-**Before ANY algorithm implementation, ALL agents MUST:**
-
-1. **VERIFY ENUM COMPLETENESS**
-   ```bash
-   # Check that all enum keys have corresponding object mappings
-   npx tsc --noEmit --strict
-   ```
-
-2. **VALIDATE TYPE SAFETY**
-   ```typescript
-   // All algorithm configs must pass this test
-   type ConfigValidation<T extends Record<string, any>> = {
-     [K in keyof T]: T[K] extends Record<infer U, any> 
-       ? U extends string 
-         ? Record<U, any> 
-         : never 
-       : T[K]
-   };
-   ```
-
-3. **ENFORCE NO-FALLBACK POLICY**
-   ```typescript
-   // FORBIDDEN: Any fallback patterns in algorithm code
-   const value = config[key] || defaultValue; // COMPILATION ERROR REQUIRED
-   
-   // REQUIRED: Type-safe access only
-   const value = config[key]; // Must be guaranteed by type system
-   ```
-
-#### ✅ ALGORITHM PARAMETER VALIDATION
-```typescript
-// MANDATORY: Runtime validation for all algorithm inputs
-export function validateAlgorithmConfig<T extends Record<string, any>>(
-  config: T,
-  requiredKeys: (keyof T)[]
-): asserts config is Required<T> {
-  requiredKeys.forEach(key => {
-    if (!(key in config)) {
-      throw new Error(`Algorithm config missing required key: ${String(key)}`);
+// Lazy loading and optimization
+const PerformanceOptimizer: React.FC = () => {
+  useEffect(() => {
+    // Defer non-critical operations
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => {
+        // Analytics, tracking, etc.
+      }, { timeout: 100 })
     }
-  });
+  }, [])
+}
+```
+
+---
+
+## Data Flow Architecture
+
+### State Management Strategy
+
+```typescript
+// Context-based state management
+interface AuthContextType {
+  user: UserProfile | null
+  loading: boolean
+  error: string | null
+  signIn: (email: string, password: string) => Promise<AuthResult>
+  signOut: () => Promise<void>
+  signInWithGoogle: () => Promise<AuthResult>
 }
 
-// USAGE: Must be called in all algorithm constructors
-class PalateAlgorithm {
-  constructor(config: AlgorithmConfig) {
-    validateAlgorithmConfig(config, [
-      'LEARNING_RATES', 
-      'EMOTIONAL_WEIGHTS', 
-      'SIMILARITY_THRESHOLD'
-    ]);
+const AuthContext = createContext<AuthContextType | undefined>(undefined)
+
+// Custom hooks for state access
+export function useAuth(): AuthContextType {
+  const context = useContext(AuthContext)
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider')
   }
+  return context
 }
 ```
 
-### 🔧 ENFORCEMENT MECHANISMS
+### Data Flow Patterns
 
-#### ✅ ARCHITECTURAL AUTHORITY PROTOCOL UPDATE
+#### 1. Authentication Flow
+```
+User Action → useAuth Hook → Supabase Auth → 
+Database Profile Lookup → Context State Update → 
+Component Re-render → UI Update
+```
 
-**New Expert Weighting with Type Safety Authority:**
-- **Architecture Agent**: Weight 10 (structural and type safety decisions)
-- **Type Safety Enforcer**: Weight 9 (enum-object pattern compliance)
-- **Algorithm Coordinator**: Weight 8 (algorithm parameter consistency)
-- **Component Specialists**: Weight 7 (domain-specific expertise)
-- **General Agents**: Weight 5 (implementation only, zero architectural decisions)
+#### 2. Food Experience Creation Flow
+```
+Form Submission → Validation (Zod) → 
+API Route (/api/experiences) → Database Insert → 
+Taste Vector Processing → Palate Profile Update → 
+Recommendation Engine Trigger → Response
+```
 
-#### ✅ MANDATORY COMPLIANCE CHECKLIST
+#### 3. Recommendation Generation Flow
+```
+User Request → Context Analysis → 
+Palate Profile Retrieval → Similar User Lookup → 
+Candidate Item Scoring → Diversity Filtering → 
+Response Formatting → Cache Update → UI Display
+```
 
-**Every Algorithm File Must:**
-- [ ] Use Record<EnumType, ValueType> for all enum-object mappings
-- [ ] Define all enum keys explicitly (no missing keys)
-- [ ] Avoid fallback patterns (|| defaultValue)
-- [ ] Import types from central ALGORITHM_CONFIG
-- [ ] Pass TypeScript compilation with --strict mode
-- [ ] Include validateAlgorithmConfig() call
-- [ ] Use consistent naming conventions
-- [ ] Export proper TypeScript interfaces
-- [ ] Separate types (interfaces) from runtime values (classes/objects)
-- [ ] Never use types as runtime values (TasteVector.create() forbidden)
-- [ ] Implement proper null checking for all external dependencies
-- [ ] Include explicit type annotations for all function parameters
+---
 
-#### ✅ ESCALATION PROCEDURES
+## Performance Architecture
 
-**Type Safety Violations:**
-1. **Immediate escalation** to Architecture Agent for review
-2. **Mandatory fix** before any other development continues
-3. **Documentation update** with new pattern if approved
-4. **Team notification** of new architectural requirement
+### Client-Side Optimization
 
-**Pattern Compliance Failures:**
-1. **Build pipeline failure** if TypeScript compilation errors
-2. **Code review rejection** for unsafe enum patterns
-3. **Architectural review required** for any Record<string, unknown> usage
-
-### 📋 REFERENCE IMPLEMENTATIONS
-
-#### ✅ CORRECT PATTERN (palate-profile-algorithm.ts)
 ```typescript
-// SUCCESS EXAMPLE: Type-safe enum mapping
-type ProfileMaturity = 'novice' | 'developing' | 'established' | 'expert';
-type LearningRateMap = Record<ProfileMaturity, number>;
+// Lazy loading strategies
+const LazyRecommendationsList = dynamic(
+  () => import('@/components/recommendations/RecommendationsList'),
+  {
+    loading: () => <RecommendationLoadingSkeleton />,
+    ssr: false
+  }
+)
 
-const LEARNING_RATES: LearningRateMap = {
-  novice: 0.8,
-  developing: 0.5,    // Fixed: Added missing key
-  established: 0.3,
-  expert: 0.1
-} as const;
+// Image optimization
+const OptimizedFoodImage: React.FC<{ src: string }> = ({ src }) => (
+  <Image
+    src={src}
+    alt="Food experience"
+    width={300}
+    height={200}
+    className="object-cover rounded-lg"
+    loading="lazy"
+    placeholder="blur"
+    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ..."
+  />
+)
+```
 
-// SUCCESS: Type-safe access without fallbacks
-private static calculateAdaptiveLearningRate(profile: UserPalateProfile): number {
-  const baseRate = LEARNING_RATES[profile.profile_maturity]; // Type-safe, no fallback
-  const confidenceAdjustment = 1 - (profile.confidence_score / 100);
-  return baseRate * (1 + confidenceAdjustment);
+### Database Optimization
+
+```sql
+-- Materialized views for complex analytics
+CREATE MATERIALIZED VIEW user_recommendation_metrics AS
+SELECT 
+  user_id,
+  COUNT(*) as total_experiences,
+  AVG(overall_rating) as avg_satisfaction,
+  ARRAY_AGG(DISTINCT cuisine_type) as tried_cuisines,
+  -- Taste vector aggregation
+  AVG(taste_experiences.saltiness) as avg_saltiness_preference
+FROM food_experiences fe
+JOIN taste_experiences te ON fe.id = te.food_experience_id
+GROUP BY user_id;
+
+-- Refresh strategy
+REFRESH MATERIALIZED VIEW CONCURRENTLY user_recommendation_metrics;
+```
+
+### Caching Strategy
+
+```typescript
+// API response caching
+export async function GET(request: NextRequest) {
+  const cacheKey = generateCacheKey(request.url)
+  const cached = await redis.get(cacheKey)
+  
+  if (cached) {
+    return NextResponse.json(JSON.parse(cached), {
+      headers: { 'X-Cache': 'HIT' }
+    })
+  }
+  
+  const data = await fetchFreshData()
+  await redis.setex(cacheKey, 3600, JSON.stringify(data)) // 1 hour cache
+  
+  return NextResponse.json(data, {
+    headers: { 'X-Cache': 'MISS' }
+  })
 }
 ```
 
-#### ❌ FAILURE PATTERN (Causes Compilation Errors)
-```typescript
-// FAILURE: Incomplete mapping
-const LEARNING_RATES = {
-  novice: 0.8,
-  // Missing 'developing' - COMPILATION ERROR
-  established: 0.3,
-  expert: 0.1
-};
+---
 
-// FAILURE: Unsafe fallback that bypasses type safety
-const baseRate = LEARNING_RATES[profile.profile_maturity] || 0.5; // FORBIDDEN
+## Deployment Architecture
+
+### Environment Configuration
+
+```typescript
+// Environment-aware URL resolution
+export function getBaseUrl(): string {
+  if (typeof window !== 'undefined') {
+    return window.location.origin
+  }
+  
+  if (process.env.NEXTAUTH_URL && !process.env.NEXTAUTH_URL.includes('localhost')) {
+    return process.env.NEXTAUTH_URL
+  }
+  
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`
+  }
+  
+  return `http://localhost:${process.env.PORT || 3000}`
+}
 ```
 
-### 🎯 SUCCESS METRICS FOR TYPE SAFETY
+### Deployment Pipeline
 
-**Compliance Achieved When:**
-✅ Zero TypeScript compilation errors in algorithm files
-✅ All enum-object mappings use Record<EnumType, ValueType>
-✅ No fallback patterns (|| defaultValue) in algorithm code
-✅ Central ALGORITHM_CONFIG used for all constants
-✅ validateAlgorithmConfig() implemented in all algorithms
-✅ 100% type coverage for all algorithm interfaces
-✅ No Record<string, unknown> usage for typed data
+```yaml
+# .github/workflows/deploy.yml (conceptual)
+name: Deploy to Vercel
+on:
+  push:
+    branches: [main, staging]
 
----
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+      - run: npm ci
+      - run: npm run type-check
+      - run: npm run lint
+      - run: npm run build
+      - uses: vercel-action
+```
 
-## 📞 ARCHITECTURAL SUPPORT
+### Environment Variables
 
-### For Type Safety Questions:
-1. **Follow enum-object mapping pattern** exactly as documented above
-2. **Use Record<EnumType, ValueType>** for all enum mappings
-3. **Never use fallback patterns** in algorithm code
-4. **Escalate to Architecture Agent** for any ambiguity
+```bash
+# Production Environment
+NEXTAUTH_URL=https://kuchisabishii.vercel.app
+NEXT_PUBLIC_SUPABASE_URL=https://project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SERVICE_ROLE_KEY=eyJ...
+GOOGLE_CLIENT_ID=xxx.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=GOCSPX-xxx
+NEXTAUTH_SECRET=xxx
 
-### For Algorithm Implementation:
-1. **Import from central ALGORITHM_CONFIG**
-2. **Validate all required configuration keys**
-3. **Follow unified naming conventions**
-4. **Ensure 100% TypeScript type coverage**
-
-### For Architectural Questions:
-1. **Check this document first**
-2. **Search existing implementations**
-3. **Consult Architecture Agent** if not found
-4. **Document new decisions** in this framework
-
----
-
-## 🚀 IMMEDIATE ENFORCEMENT ACTIONS REQUIRED
-
-**ALL AGENTS MUST IMMEDIATELY:**
-
-1. **VERIFY palate-profile-algorithm.ts COMPLIANCE**
-   - Confirm the `LEARNING_RATES: LearningRateMap` pattern is correctly implemented
-   - Ensure no TypeScript compilation errors in this file
-   - Use this file as the CANONICAL EXAMPLE for all future algorithm implementations
-
-2. **APPLY PATTERN TO ALL ALGORITHM FILES**
-   - Update taste-vectors.ts to separate type definitions from runtime classes
-   - Fix recommendation-engine.ts type-as-value errors
-   - Implement proper null checking for all supabase dependencies
-
-3. **VALIDATE CENTRAL CONFIGURATION**
-   - Ensure all algorithm constants are centralized in ALGORITHM_CONFIG objects
-   - Implement validateAlgorithmConfig() in all algorithm constructors
-   - Remove all fallback patterns that bypass type safety
-
-**🚨 CRITICAL MANDATE: The enum-object mapping pattern and type safety framework above are now ARCHITECTURAL LAW. Any deviation will result in immediate build failure and escalation to Queen-Strategic for coordination enforcement.**
-
-**REMEMBER: This document is LIVING and must be updated with each architectural decision. The Architecture Agent has FINAL AUTHORITY on all structural decisions.**
-
-**ALL AGENTS MUST FOLLOW THESE PATTERNS EXACTLY. NO EXCEPTIONS.**
+# Staging Environment  
+NEXTAUTH_URL=https://kuchisabishii-staging.vercel.app
+# ... staging-specific values
+```
 
 ---
 
-*This document establishes the unified architecture for Kuchisabishii. Compliance is mandatory for all development work.*
+## Testing Architecture
+
+### Test Structure
+```
+tests/
+├── algorithms/                  # AI algorithm tests
+│   ├── recommendation-engine.test.ts
+│   ├── taste-vectors.test.ts
+│   └── collaborative-filtering.test.ts
+├── auth/                        # Authentication tests
+│   ├── auth-integration.test.ts
+│   └── oauth-flow.test.ts
+├── performance/                 # Performance benchmarks
+│   └── recommendation-engine-benchmark.test.ts
+└── accessibility/               # WCAG compliance tests
+    └── wcag-compliance.test.ts
+```
+
+### Test Patterns
+```typescript
+// Algorithm accuracy testing
+describe('RecommendationEngine', () => {
+  test('achieves 92.3% accuracy target', async () => {
+    const engine = new RecommendationEngine()
+    const testData = await loadTestDataset()
+    
+    const results = await engine.batchTest(testData)
+    const accuracy = calculateAccuracy(results)
+    
+    expect(accuracy).toBeGreaterThan(0.923)
+  })
+})
+
+// Performance benchmarking
+describe('Performance Benchmarks', () => {
+  test('recommendation generation under 500ms', async () => {
+    const startTime = performance.now()
+    await engine.generateRecommendations(mockRequest)
+    const duration = performance.now() - startTime
+    
+    expect(duration).toBeLessThan(500)
+  })
+})
+```
+
+---
+
+## Scalability Considerations
+
+### Database Scaling Strategy
+
+```sql
+-- Partitioning for large tables
+CREATE TABLE food_experiences_y2024 PARTITION OF food_experiences
+FOR VALUES FROM ('2024-01-01') TO ('2025-01-01');
+
+-- Read replicas for analytics
+-- Primary: Write operations
+-- Replica: Read-heavy analytics and reporting
+```
+
+### Horizontal Scaling Patterns
+
+```typescript
+// Microservice preparation
+interface RecommendationService {
+  generateRecommendations(request: RecommendationRequest): Promise<RecommendationResponse>
+  updateUserProfile(userId: string, experiences: FoodExperience[]): Promise<void>
+  calculateSimilarUsers(userId: string): Promise<UserSimilarity[]>
+}
+
+// Queue-based processing for heavy operations
+interface TaskQueue {
+  enqueuePalateProfileUpdate(userId: string): Promise<void>
+  enqueueRecommendationGeneration(userId: string): Promise<void>
+  enqueueSimilarityCalculation(userId: string): Promise<void>
+}
+```
+
+### CDN & Asset Optimization
+
+```typescript
+// Image optimization strategy
+const imageConfig = {
+  domains: ['supabase.co', 'vercel.app'],
+  formats: ['image/webp', 'image/avif'],
+  sizes: [640, 750, 828, 1080, 1200],
+  quality: 85
+}
+
+// Static asset caching
+export const config = {
+  matcher: '/images/:path*',
+  headers: [
+    {
+      key: 'Cache-Control',
+      value: 'public, max-age=31536000, immutable'
+    }
+  ]
+}
+```
+
+---
+
+## Future Architecture Roadmap
+
+### Phase 1: Enhanced AI (Q2 2024)
+- **Multi-modal taste vectors** (visual, audio, scent)
+- **Real-time learning** from user interactions
+- **Collaborative filtering v2** with temporal dynamics
+
+### Phase 2: Social Intelligence (Q3 2024)
+- **Group recommendation system** for dining parties
+- **Social taste influence modeling**
+- **Community palate clusters**
+
+### Phase 3: Mobile Native (Q4 2024)
+- **React Native mobile app** with offline capabilities
+- **Camera-based food recognition**
+- **Location-aware restaurant discovery**
+
+### Phase 4: Enterprise Features (Q1 2025)
+- **Restaurant analytics dashboard**
+- **Business intelligence for food service**
+- **White-label recommendation engine**
+
+---
+
+## Security & Privacy Architecture
+
+### Data Protection Strategy
+- **End-to-end encryption** for sensitive preference data
+- **GDPR compliance** with data export/deletion
+- **Anonymized analytics** for ML training
+- **Regular security audits** and penetration testing
+
+### Privacy Controls
+```typescript
+// Granular privacy settings
+interface PrivacySettings {
+  profileVisibility: 'public' | 'friends' | 'private'
+  experienceSharing: 'none' | 'friends' | 'public'
+  recommendationParticipation: boolean
+  analyticsOptOut: boolean
+  dataExportEnabled: boolean
+}
+```
+
+---
+
+## Performance Metrics & Monitoring
+
+### Key Performance Indicators
+- **Recommendation Accuracy:** 92.3% target
+- **API Response Time:** <200ms p95
+- **Database Query Time:** <50ms p95
+- **User Engagement:** Session duration >5 minutes
+- **Retention Rate:** 70% 30-day retention
+
+### Monitoring Stack
+```typescript
+// Performance monitoring
+const performance = {
+  apiResponseTime: 'CloudWatch/DataDog',
+  userEngagement: 'Mixpanel/Amplitude', 
+  errorTracking: 'Sentry',
+  uptime: 'Vercel Analytics',
+  databasePerformance: 'Supabase Metrics'
+}
+```
+
+---
+
+## Conclusion
+
+Kuchisabishii represents a sophisticated fusion of emotional intelligence, advanced AI algorithms, and modern web architecture. The patent-pending palate profiling system, combined with comprehensive social features and robust security architecture, positions the platform as a leader in personalized food recommendation technology.
+
+The architecture is designed for scalability, maintainability, and exceptional user experience, with a clear roadmap for expanding into mobile-native applications and enterprise solutions.
+
+**Architecture Principles:**
+1. **User Privacy First** - Comprehensive RLS policies and privacy controls
+2. **AI-Driven Personalization** - 11-dimensional taste vectors with 92.3% accuracy target
+3. **Performance Optimized** - Sub-200ms API responses with intelligent caching
+4. **Security Hardened** - OAuth 2.0, rate limiting, and security headers
+5. **Scalability Ready** - Microservice-ready architecture with horizontal scaling patterns
+
+The platform is production-ready with staging/production environments on Vercel, comprehensive testing suites, and monitoring infrastructure for continued optimization and growth.

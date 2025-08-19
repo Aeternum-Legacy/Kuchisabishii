@@ -24,9 +24,9 @@ function getSupabaseClient() {
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
-      flowType: 'pkce', // Use PKCE flow for better security
+      flowType: 'implicit', // Changed from PKCE to implicit for staging testing
       storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-      debug: false // Disable debug logging
+      debug: true // Enable debug for OAuth troubleshooting
     },
     global: {
       headers: {
